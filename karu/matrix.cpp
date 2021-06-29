@@ -205,10 +205,8 @@ const void matrix::set(i32 i, i32 j, f32 val) const {
 	this->_data[this->index_of(i,j)] = val;
 }
 
-matrix matrix::transposed() {
-	matrix C = *this;
-	C._is_transposed = true;
-	return C;
+void matrix::transpose() {
+	this->_is_transposed = true;
 }
 
 matrix matrix::operator*(const matrix& B) {

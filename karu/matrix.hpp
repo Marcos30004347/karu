@@ -91,13 +91,17 @@ public:
 
 	const void set(i32 i, i32 j, f32 val) const;
 
+	// Return a pointer to the matrix storage
 	f32* data() const;
 
+	// Return the number of lines of the matrix
 	const i32 lines() const;
 
+	// Return the number of columns of the matrix
 	const i32 columns() const;
 
-	matrix transposed();
+	// this will tranpose the current matrix
+	void transpose();
 
 	matrix operator*(const matrix& B);
 	matrix operator+(const matrix& B);
