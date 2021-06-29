@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cstdio>
+#include <string.h>
+#include <assert.h>
 
 #include "matrix.hpp"
 #include "types.hpp"
