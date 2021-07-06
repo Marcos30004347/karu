@@ -1,11 +1,11 @@
 #include <assert.h>
 #include <iostream>
 
+#include "algebra/core/types.hpp"
 #include "algebra/core/compute/ComputeContext.hpp"
 #include "algebra/core/compute/ComputeStorage.hpp"
 #include "algebra/core/compute/ComputeKernel.hpp"
 #include "algebra/core/compute/ComputeProgram.hpp"
-#include "algebra/core/types.hpp"
 
 const char* test_kernel_src =
 "__kernel void test_kernel(float alpha, __global float *A, __global float *B, __global float *C) { 	\n"
