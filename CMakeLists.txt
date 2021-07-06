@@ -4,11 +4,21 @@ project(karu)
 
 set (CMAKE_CXX_STANDARD 11)
 
+find_package(OpenCL REQUIRED)
+
+include_directories(src)
+include_directories(${OpenCL_INCLUDE_DIRS})
+
 add_library(
     karu
-    karu/compute.cpp
-    karu/matrix.cpp
+    src/algebra/core/compute/ComputeContext.cpp
+    src/algebra/core/compute/ComputeStorage.cpp
+    src/algebra/core/compute/ComputeKernel.cpp
+    src/algebra/core/compute/ComputeProgram.cpp
 )
+    
+target_include_directories(karu PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
+target_link_libraries(karu OpenCL::OpenCL)
 
-target_include_directories(karu PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-
+enable_testing()
+add_subdirectory(tests)
