@@ -2,7 +2,7 @@
 
 #include "algebra/core/types.hpp"
 #include "algebra/core/compute/OpenCL.hpp"
-#include "algebra/core/compute/ComputeStorage.hpp"
+#include "algebra/core/compute/ComputeBuffer.hpp"
 
 namespace karu {
 namespace algebra {

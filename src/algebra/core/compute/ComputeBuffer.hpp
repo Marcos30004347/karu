@@ -7,7 +7,9 @@ namespace karu {
 namespace algebra { 
 namespace compute {
 
-class Storage {
+#define BUFFER_ARG_SIZE sizeof(cl_mem)
+
+class Buffer {
 	public:
 	enum type {
 		READ_ONLY = 0,
@@ -19,10 +21,10 @@ class Storage {
 		MEM_GPU,
 	};
 
-	Storage(i8* data, u64 size, type kind = type::READ_WRITE, bool copy = false);
-	Storage(u64 size, type kind, state state);
+	Buffer(i8* data, u64 size, type kind = type::READ_WRITE, bool copy = false);
+	Buffer(u64 size, type kind, state state);
 
-	~Storage();
+	~Buffer();
 
 	void* data();
 
@@ -32,8 +34,6 @@ class Storage {
 	void toLogicUnit(bool free_gpu_data = false);
 
 	private:
-
-
 	bool s_is_logic_unit_allocated;
 	bool s_is_compute_unit_allocated;
 

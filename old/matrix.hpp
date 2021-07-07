@@ -29,7 +29,7 @@ using 2x2 blocks will be stored as:
 */
 
 class matrix {
-	// storage pointer
+	// Buffer pointer
 	f32* _data;
 
 	// matrix lines
@@ -91,7 +91,7 @@ public:
 
 	const void set(i32 i, i32 j, f32 val) const;
 
-	// Return a pointer to the matrix storage
+	// Return a pointer to the matrix Buffer
 	f32* data() const;
 
 	// Return the number of lines of the matrix

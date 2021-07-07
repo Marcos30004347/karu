@@ -1,7 +1,8 @@
-#include "algebra/core/compute/ComputeStorage.hpp"
+#include "algebra/core/compute/ComputeBuffer.hpp"
 #include "algebra/core/compute/ComputeContext.hpp"
 
 #include <string.h>
+#include <iostream>
 
 using namespace karu;
 using namespace algebra;
@@ -10,7 +11,7 @@ using namespace compute;
 
 extern Context* karu_core_global_ctx;
 
-Storage::Storage(u64 size, type kind, state state)
+Buffer::Buffer(u64 size, type kind, state state)
 {
 	this->s_kind = kind;
 	this->s_size = size;
@@ -18,22 +19,25 @@ Storage::Storage(u64 size, type kind, state state)
 
 	if(state == state::MEM_GPU)
 	{
+		cl_int err;
 		switch (this->s_kind)
 		{
 		case type::READ_WRITE:
-			this->s_compute_unit_ref = clCreateBuffer(karu_core_global_ctx->getComputeContext(), CL_MEM_READ_WRITE, this->s_size, NULL, NULL);
+			this->s_compute_unit_ref = clCreateBuffer(karu_core_global_ctx->getComputeContext(), CL_MEM_READ_WRITE, this->s_size, NULL, &err);
 			break;
 		case type::READ_ONLY:
-			this->s_compute_unit_ref = clCreateBuffer(karu_core_global_ctx->getComputeContext(), CL_MEM_READ_ONLY, this->s_size, NULL, NULL);
+			this->s_compute_unit_ref = clCreateBuffer(karu_core_global_ctx->getComputeContext(), CL_MEM_READ_ONLY, this->s_size, NULL, &err);
 			break;
 		case type::WRITE_ONLY:
-			this->s_compute_unit_ref = clCreateBuffer(karu_core_global_ctx->getComputeContext(), CL_MEM_WRITE_ONLY, this->s_size, NULL, NULL);
+			this->s_compute_unit_ref = clCreateBuffer(karu_core_global_ctx->getComputeContext(), CL_MEM_WRITE_ONLY, this->s_size, NULL, &err);
 			break;
 		default:
-			this->s_compute_unit_ref = clCreateBuffer(karu_core_global_ctx->getComputeContext(), CL_MEM_READ_WRITE, this->s_size, NULL, NULL);
+			this->s_compute_unit_ref = clCreateBuffer(karu_core_global_ctx->getComputeContext(), CL_MEM_READ_WRITE, this->s_size, NULL, &err);
 			break;
 		}
 		
+		clHandleError(err);
+	
 		this->s_is_compute_unit_allocated = true;
 		this->s_is_logic_unit_allocated = false;
 	}
@@ -46,7 +50,7 @@ Storage::Storage(u64 size, type kind, state state)
 	}
 }
 
-Storage::Storage(i8* data, u64 size, type kind, bool copy)
+Buffer::Buffer(i8* data, u64 size, type kind, bool copy)
 {
 		this->s_kind = kind;
 		this->s_is_logic_unit_allocated = true;
@@ -66,19 +70,26 @@ Storage::Storage(i8* data, u64 size, type kind, bool copy)
 		}
 }
 
-Storage::~Storage()
+Buffer::~Buffer()
 {
 		if(this->s_is_logic_unit_allocated)
+		{
 			free(this->s_logic_unit_ref);
+		}
+	
 		if(this->s_is_compute_unit_allocated)
-			clReleaseMemObject(this->s_compute_unit_ref);
+		{
+			cl_int err;
+			err = clReleaseMemObject(this->s_compute_unit_ref);
+			clHandleError(err);
+		}
 }
 
-void* Storage::data()
+void* Buffer::data()
 {
 		if(this->s_state == state::MEM_GPU)
 		{
-			clEnqueueReadBuffer(
+			cl_int err = clEnqueueReadBuffer(
 				karu_core_global_ctx->getComputeQueue(),
 				this->s_compute_unit_ref, 
 				CL_TRUE,
@@ -89,31 +100,36 @@ void* Storage::data()
 				NULL,
 				NULL
 			);
+
+			clHandleError(err);
 		}
 	
 		return this->s_logic_unit_ref;
 }
 
-void Storage::toComputeUnit(bool free_cpu_data)
+void Buffer::toComputeUnit(bool free_cpu_data)
 {
 	if(!s_is_compute_unit_allocated)
 	{
+		cl_int err;
 		switch (this->s_kind)
 		{
 		case type::READ_WRITE:
-			this->s_compute_unit_ref = clCreateBuffer(karu_core_global_ctx->getComputeContext(), CL_MEM_READ_WRITE, this->s_size, NULL, NULL);
+			this->s_compute_unit_ref = clCreateBuffer(karu_core_global_ctx->getComputeContext(), CL_MEM_READ_WRITE, this->s_size, NULL, &err);
 			break;
 		case type::READ_ONLY:
-			this->s_compute_unit_ref = clCreateBuffer(karu_core_global_ctx->getComputeContext(), CL_MEM_READ_ONLY, this->s_size, NULL, NULL);
+			this->s_compute_unit_ref = clCreateBuffer(karu_core_global_ctx->getComputeContext(), CL_MEM_READ_ONLY, this->s_size, NULL, &err);
 			break;
 		case type::WRITE_ONLY:
-			this->s_compute_unit_ref = clCreateBuffer(karu_core_global_ctx->getComputeContext(), CL_MEM_WRITE_ONLY, this->s_size, NULL, NULL);
+			this->s_compute_unit_ref = clCreateBuffer(karu_core_global_ctx->getComputeContext(), CL_MEM_WRITE_ONLY, this->s_size, NULL, &err);
 			break;
 		default:
-			this->s_compute_unit_ref = clCreateBuffer(karu_core_global_ctx->getComputeContext(), CL_MEM_READ_WRITE, this->s_size, NULL, NULL);
+			this->s_compute_unit_ref = clCreateBuffer(karu_core_global_ctx->getComputeContext(), CL_MEM_READ_WRITE, this->s_size, NULL, &err);
 			break;
 		}
-		
+	
+		clHandleError(err);
+	
 		this->s_is_compute_unit_allocated = true;
 	}
 
@@ -126,7 +142,7 @@ void Storage::toComputeUnit(bool free_cpu_data)
 	}
 }
 
-void Storage::toLogicUnit(bool free_gpu_data)
+void Buffer::toLogicUnit(bool free_gpu_data)
 {
 	if(!s_is_logic_unit_allocated)
 	{
@@ -135,15 +151,20 @@ void Storage::toLogicUnit(bool free_gpu_data)
 	}
 
 	cl_int err = clEnqueueReadBuffer(karu_core_global_ctx->getComputeQueue(), this->s_compute_unit_ref, CL_TRUE, 0, this->s_size, this->s_logic_unit_ref, 0, NULL, NULL);
+	
+	clHandleError(err);
 
 	if(free_gpu_data)
 	{
-		clReleaseMemObject(this->s_compute_unit_ref);
+		cl_int err = clReleaseMemObject(this->s_compute_unit_ref);
+		
+		clHandleError(err);
+		
 		this->s_is_compute_unit_allocated = false;
 	}
 }
 
-void* Storage::ref()
+void* Buffer::ref()
 {
 	if(this->s_is_compute_unit_allocated)
 	{

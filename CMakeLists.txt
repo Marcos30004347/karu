@@ -11,8 +11,9 @@ include_directories(${OpenCL_INCLUDE_DIRS})
 
 add_library(
     karu
+    src/algebra/core/compute/OpenCL.cpp
     src/algebra/core/compute/ComputeContext.cpp
-    src/algebra/core/compute/ComputeStorage.cpp
+    src/algebra/core/compute/ComputeBuffer.cpp
     src/algebra/core/compute/ComputeKernel.cpp
     src/algebra/core/compute/ComputeProgram.cpp
 )

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "algebra/core/types.hpp"
 #include "algebra/core/compute/OpenCL.hpp"
 
@@ -8,8 +10,17 @@ namespace algebra {
 namespace compute {
 
 class Context {
-	cl_command_queue queue;
-	cl_context context;
+	std::vector<cl_command_queue> gpus_queue;
+	std::vector<cl_command_queue> cpus_queue;
+	
+	std::vector<std::vector<cl_device_id>> gpus;
+	std::vector<std::vector<cl_device_id>> cpus;
+
+	std::vector<cl_context> gpus_contexts;
+	std::vector<cl_context> cpus_contexts;
+
+	std::vector<cl_platform_id> cpu_platforms;
+	std::vector<cl_platform_id> gpu_platforms;
 
 	public:
 
@@ -20,6 +31,7 @@ class Context {
 	cl_command_queue getComputeQueue();
 
 	static Context* initContext();
+	static void stopContext();
 };
 
 }

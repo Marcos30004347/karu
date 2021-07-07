@@ -4,7 +4,7 @@
 
 #include "algebra/core/types.hpp"
 #include "algebra/core/compute/OpenCL.hpp"
-#include "algebra/core/compute/ComputeStorage.hpp"
+#include "algebra/core/compute/ComputeBuffer.hpp"
 #include "algebra/core/compute/ComputeProgram.hpp"
 
 namespace karu {
@@ -29,7 +29,9 @@ class Kernel {
 	~Kernel();
 
 	void setKernelArgument(u32 id, u32 size, void* ptr);
+	
 	void enqueue(std::vector<u64> global_work_size, std::vector<u64> local_work_size, std::vector<Event> wait_list, Event* event);
+	void enqueue(std::vector<u64> global_work_size, std::vector<u64> local_work_size);
 
 	private:
 	cl_kernel ck_kernel;

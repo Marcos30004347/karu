@@ -12,12 +12,18 @@ Program::Program(const char* src)
 	cl_int err;
 	this->cp_src = src;
 	this->cp_program = clCreateProgramWithSource(karu_core_global_ctx->getComputeContext(), 1, (const char **)&src, NULL, &err);
+
+	clHandleError(err);
+
 	err = clBuildProgram(this->cp_program, 0, NULL, NULL, NULL, NULL);
+
+	clHandleError(err);
 }
 
 Program::~Program()
 {
-	clReleaseProgram(this->cp_program);
+	cl_int err = clReleaseProgram(this->cp_program);
+	clHandleError(err);
 }
 
 cl_program Program::getProgram()
