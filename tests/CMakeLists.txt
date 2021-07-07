@@ -2,7 +2,18 @@ cmake_minimum_required(VERSION 3.10)
 
 include(CTest)
 
-project(AlbebraComputeTests)
-add_executable(AlbebraComputeTests algebra/core/compute.cpp)
-target_link_libraries(AlbebraComputeTests karu)
-add_test(NAME AlbebraComputeTests COMMAND AlbebraComputeTests)
+project(AlgebraComputeTests)
+add_executable(AlgebraComputeTests algebra/core/compute.cpp)
+target_link_libraries(AlgebraComputeTests karu)
+add_test(NAME AlgebraComputeTests COMMAND AlgebraComputeTests)
+
+project(AlgebraMatrixDataTests)
+add_executable(AlgebraMatrixDataTests algebra/matrix/MatrixData.cpp)
+target_link_libraries(AlgebraMatrixDataTests karu)
+add_test(NAME AlgebraMatrixDataTests COMMAND AlgebraMatrixDataTests)
+
+
+project(AlgebraMatrixMultiplayerTests)
+add_executable(AlgebraMatrixMultiplayerTests algebra/matrix/MatrixMultiplayer.cpp)
+target_link_libraries(AlgebraMatrixMultiplayerTests karu)
+add_test(NAME AlgebraMatrixMultiplayerTests COMMAND AlgebraMatrixMultiplayerTests)

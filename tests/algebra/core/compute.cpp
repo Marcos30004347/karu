@@ -5,15 +5,15 @@
 #include "algebra/core/compute/Compute.hpp"
 
 const char* test_kernel_src =
-"__kernel void test_kernel(											\n"
-"	float alpha,																	\n"
-"	__global float *A,														\n"
-"	__global float *B,														\n"
-"	__global float *C															\n"
-") { 																						\n"
-"    int index = get_global_id(0);          		\n"
-"    C[index] = alpha * A[index] + B[index];		\n"
-"}                                          		\n";
+"__kernel void test_kernel(\n"
+"	float alpha,\n"
+"	__global float *A,\n"
+"	__global float *B,\n"
+"	__global float *C\n"
+") {\n"
+"    int index = get_global_id(0);\n"
+"    C[index] = alpha * A[index] + B[index];\n"
+"}\n";
 
 using namespace karu;
 using namespace algebra;
@@ -71,4 +71,6 @@ int main()
 	}
 
 	compute::Context::stopContext();
+	
+	return 0;
 }

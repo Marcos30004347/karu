@@ -16,8 +16,12 @@ add_library(
     src/algebra/core/compute/ComputeBuffer.cpp
     src/algebra/core/compute/ComputeKernel.cpp
     src/algebra/core/compute/ComputeProgram.cpp
+    src/algebra/matrix/MatrixData.cpp
+    src/algebra/matrix/MatrixMultiplayer.cpp
+    src/algebra/matrix/MatrixAdder.cpp
+    src/algebra/matrix/MatrixSubtractor.cpp
 )
-    
+
 target_include_directories(karu PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
 target_link_libraries(karu OpenCL::OpenCL)
 

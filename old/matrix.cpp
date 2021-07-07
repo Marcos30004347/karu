@@ -125,7 +125,7 @@ matrix::matrix(
 	_is_transposed(transposed)
 {
 	/*
-	* Matrix is stored in a block major fashior for optimizing 
+	* MatrixData is stored in a block major fashior for optimizing 
 	* cache locality on operations. So the content of the data
 	* will be stored as continuously small matrix of size (block_height, block_width)
 
