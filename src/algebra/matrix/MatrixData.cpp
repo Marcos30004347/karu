@@ -36,26 +36,9 @@ MatrixData::MatrixData(u32 lines, u32 columns, u32 block_width, u32 block_heigth
 	this->m_data = new f32[lines*columns];
 }
 
-u32 MatrixData::getBlockStartIndex(u32 i, u32 j, u32 columns, u32 block_height, u32 block_width) {
-	u32 block_line = i/block_height;
-	u32 block_column = j/block_width;
-	return block_line*(columns/block_width)*(block_height * block_width) + block_column * (block_height * block_width);
-}
-
-u32 MatrixData::getIndex(u32 i, u32 j, u32 columns, u32 block_height, u32 block_width) {
-	u32 y = i%block_height;
-	u32 x = j%block_width;
-	return getBlockStartIndex(i,j, columns, block_height, block_width) + (y*block_width + x);
-}
-
-const void MatrixData::set(i32 i, i32 j, f32 val) const
+MatrixData::~MatrixData()
 {
-	this->m_data[MatrixData::getIndex(i,j, this->columns(), this->blockHeight(),  this->blockWidth())] = val;
-}
-
-f32 MatrixData::get(i32 i, i32 j) const
-{
-	return this->m_data[this->getIndex(i, j, this->columns(), this->blockHeight(), this->blockWidth())];
+	delete this->m_data;
 }
 
 const u32 MatrixData::lines() const
