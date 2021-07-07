@@ -25,7 +25,11 @@ MatrixData MatrixAdder::add(MatrixData* A, MatrixData* B, bool A_T, bool B_T)
 					i32 Ci = (A->blockHeight()*i) % A->lines() + y;
 					i32 Cj = (B->blockWidth()*j) % B->columns() + x;
 
-					C.set(Ci, Cj, A->get((1 - A_T) * Ci + A_T * Cj, (1 - A_T) * Cj + A_T * Ci) + B->get((1 - B_T) * Ci + B_T * Ci, (1 - B_T) * Cj + B_T * Ci));
+					C.set(
+						Ci, Cj,
+						A->get((1 - A_T) * Ci + A_T * Cj, (1 - A_T) * Cj + A_T * Ci) +
+						B->get((1 - B_T) * Ci + B_T * Cj, (1 - B_T) * Cj + B_T * Ci)
+					);
 				}
 			}
 		}
