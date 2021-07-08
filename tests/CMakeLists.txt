@@ -12,8 +12,12 @@ add_executable(AlgebraMatrixDataTests algebra/matrix/MatrixData.cpp)
 target_link_libraries(AlgebraMatrixDataTests karu)
 add_test(NAME AlgebraMatrixDataTests COMMAND AlgebraMatrixDataTests)
 
-
 project(AlgebraMatrixMultiplayerTests)
 add_executable(AlgebraMatrixMultiplayerTests algebra/matrix/MatrixMultiplayer.cpp)
 target_link_libraries(AlgebraMatrixMultiplayerTests karu)
 add_test(NAME AlgebraMatrixMultiplayerTests COMMAND AlgebraMatrixMultiplayerTests)
+
+project(AlgebraBlockSparseMatrixDataTests)
+add_executable(AlgebraBlockSparseMatrixDataTests algebra/matrix/BlockSparseMatrixData.cpp)
+target_link_libraries(AlgebraBlockSparseMatrixDataTests karu)
+add_test(NAME AlgebraBlockSparseMatrixDataTests COMMAND AlgebraBlockSparseMatrixDataTests)

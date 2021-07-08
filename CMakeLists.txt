@@ -20,6 +20,7 @@ add_library(
     src/algebra/matrix/MatrixMultiplayer.cpp
     src/algebra/matrix/MatrixAdder.cpp
     src/algebra/matrix/MatrixSubtractor.cpp
+    src/algebra/matrix/BlockSparseMatrixData.cpp
 )
 
 target_include_directories(karu PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
