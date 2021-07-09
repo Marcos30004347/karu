@@ -14,7 +14,6 @@ Buffer::Buffer(u64 size, type kind, state state)
 {
 	this->s_kind = kind;
 	this->s_size = size;
-	this->s_state = state;
 
 	if(state == state::MEM_GPU)
 	{
@@ -67,35 +66,27 @@ Buffer::Buffer(u64 size, type kind, state state)
 
 	if(state == state::MEM_CPU)
 	{
-		this->s_logic_unit_ref = (i8*)malloc(this->s_size);
+		this->s_logic_unit_ref = malloc(this->s_size);
 		this->s_is_logic_unit_allocated = true;
+		this->s_should_cleanup = true;
 		this->s_is_compute_unit_allocated = false;
 	}
 }
 
-Buffer::Buffer(void* data, u64 size, type kind, bool copy)
+Buffer::Buffer(void* data, u64 size, type kind, bool cleanup)
 {
 		this->s_kind = kind;
 		this->s_is_logic_unit_allocated = true;
 		this->s_is_compute_unit_allocated = false;
 		this->s_size = size;
-	
-		this->s_state = state::MEM_CPU;
-	
-		if(!copy)
-		{
-			this->s_logic_unit_ref = data;
-		}
-		else
-		{
-			this->s_logic_unit_ref = (i8*)malloc(size);
-			memcpy(this->s_logic_unit_ref, data, size);
-		}
+
+		this->s_should_cleanup = cleanup;
+		this->s_logic_unit_ref = data;
 }
 
 Buffer::~Buffer()
 {
-		if(this->s_is_logic_unit_allocated)
+		if(this->s_should_cleanup && this->s_is_logic_unit_allocated)
 		{
 			free(this->s_logic_unit_ref);
 		}
@@ -108,29 +99,13 @@ Buffer::~Buffer()
 		}
 }
 
-void* Buffer::data()
+void* Buffer::logicUnitRef()
 {
-		if(this->s_state == state::MEM_GPU)
-		{
-			cl_int err = clEnqueueReadBuffer(
-				karu_core_global_ctx->getComputeQueue(),
-				this->s_compute_unit_ref, 
-				CL_TRUE,
-				0,
-				this->s_size,
-				(void*)this->s_logic_unit_ref,
-				0,
-				NULL,
-				NULL
-			);
-
-			clHandleError(err);
-		}
-	
-		return this->s_logic_unit_ref;
+	this->toLogicUnit();
+	return this->s_logic_unit_ref;
 }
 
-void Buffer::toComputeUnit(bool free_cpu_data)
+void Buffer::toComputeUnit()
 {
 	if(!s_is_compute_unit_allocated)
 	{
@@ -176,8 +151,6 @@ void Buffer::toComputeUnit(bool free_cpu_data)
 		}
 	
 		clHandleError(err);
-	
-		this->s_is_compute_unit_allocated = true;
 	}
 
 	clEnqueueWriteBuffer(
@@ -192,55 +165,51 @@ void Buffer::toComputeUnit(bool free_cpu_data)
 		NULL
 	);
 
-	if(free_cpu_data)
+	if(this->s_should_cleanup && this->s_is_logic_unit_allocated)
 	{
 		free(this->s_logic_unit_ref);
-		this->s_is_logic_unit_allocated = false;
 	}
+
+	this->s_is_logic_unit_allocated = false;
+	this->s_is_compute_unit_allocated = true;
 }
 
-void Buffer::toLogicUnit(bool free_gpu_data)
+void Buffer::toLogicUnit()
 {
-	if(!s_is_logic_unit_allocated)
+	if(this->s_is_compute_unit_allocated)
 	{
-		this->s_logic_unit_ref = (i8*)malloc(this->s_size);
-		this->s_is_logic_unit_allocated = true;
-	}
+		if(!s_is_logic_unit_allocated)
+			this->s_logic_unit_ref = malloc(this->s_size);
 
-	cl_int err = clEnqueueReadBuffer(
-		karu_core_global_ctx->getComputeQueue(),
-		this->s_compute_unit_ref,
-		CL_TRUE,
-		0,
-		this->s_size,
-		this->s_logic_unit_ref,
-		0,
-		NULL,
-		NULL
-	);
-	
-	clHandleError(err);
-
-	if(free_gpu_data)
-	{
-		cl_int err = clReleaseMemObject(this->s_compute_unit_ref);
+		cl_int err = clEnqueueReadBuffer(
+			karu_core_global_ctx->getComputeQueue(),
+			this->s_compute_unit_ref,
+			CL_TRUE,
+			0,
+			this->s_size,
+			this->s_logic_unit_ref,
+			0,
+			NULL,
+			NULL
+		);
 		
 		clHandleError(err);
+
+		err = clReleaseMemObject(this->s_compute_unit_ref);
 		
+		clHandleError(err);
+	
+		this->s_is_logic_unit_allocated = true;
 		this->s_is_compute_unit_allocated = false;
 	}
 }
 
-void* Buffer::ref()
+void* Buffer::computeUnitRef()
 {
-	if(this->s_is_compute_unit_allocated)
+	if(!this->s_is_compute_unit_allocated)
 	{
-		return (void*)&this->s_compute_unit_ref;
-	}
-	else if(this->s_is_logic_unit_allocated)
-	{
-		return (void*)&this->s_logic_unit_ref;
+		this->toComputeUnit();
 	}
 
-	return nullptr;
+	return (void*)&this->s_compute_unit_ref;
 }

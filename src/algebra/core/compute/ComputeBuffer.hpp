@@ -22,23 +22,23 @@ class Buffer {
 		MEM_GPU,
 	};
 
-	Buffer(void* data, u64 size, type kind = type::READ_WRITE, bool copy = false);
+	Buffer(void* buffer, u64 size, type kind, bool cleanup);
 	Buffer(u64 size, type kind, state state);
 
 	~Buffer();
 
-	void* data();
+	void* logicUnitRef();
+	void* computeUnitRef();
 
-	void* ref();
-
-	void toComputeUnit(bool free_cpu_data = false);
-	void toLogicUnit(bool free_gpu_data = false);
+	void toComputeUnit();
+	void toLogicUnit();
 
 	private:
 	bool s_is_logic_unit_allocated;
 	bool s_is_compute_unit_allocated;
-
-	state   		s_state;
+	
+	bool s_should_cleanup;
+	
 	cl_mem  s_compute_unit_ref;
 	void*     		s_logic_unit_ref;
 	u64     		s_size;

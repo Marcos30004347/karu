@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "algebra/core/types.hpp"
+#include "algebra/core/compute/ComputeBuffer.hpp"
 
 namespace karu {
 namespace algebra {
@@ -11,7 +12,7 @@ class BlockSparseMatrixData {
 	BlockSparseMatrixData(
 		u64 block_width, u64 block_heigth,
 		u64 lines, u64 columns,
-	
+		
 		std::vector<u64> row_ptr,
 		std::vector<u64> col_idx,
 		std::vector<f32> data

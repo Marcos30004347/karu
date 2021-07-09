@@ -61,7 +61,6 @@ int main()
 	assert(y.get(4, 0) == 1205.f);
 	assert(y.get(5, 0) == 1244.f);
 
-
 	algebra::BlockSparseMatrixData A = algebra::BlockSparseMatrixData(
 		2, 2, // blocks will have 3 elements width, 2 elements heigth
 		6, 6, // 6 lines and 9 columns
@@ -91,8 +90,6 @@ int main()
 		{0, 0, 0}, // col_idx
 		{ 0.f, 0.f, 0.f, 0.f, 0.f, 0.f}
 	);
-
-
 
 	algebra::BlockSparseMatrixMultiplayer::sparseMVMultiplyThreaded(&A, &z, &w);
 
@@ -137,7 +134,6 @@ int main()
 		{ 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f }
 	);
 
-
 	for(u64 i=0; i<9; i++)
 	{
 		for(u64 j=0; j<9; j++)
@@ -161,17 +157,16 @@ int main()
 
 	algebra::BlockSparseMatrixMultiplayer::sparseMVMultiplyGPU(&B, &o, &u);
 
-	// std::cout << std::endl;
-	// for(u64 i=0; i<9; i++)
-	// {
-	// 	for(u64 j=0; j<1; j++)
-	// 	{
-	// 		std::cout << u.get(i, j) << " ";
-	// 	}
-	// 	std::cout << std::endl;
-	// }
-
-
+	std::cout << std::endl;
+	for(u64 i=0; i<9; i++)
+	{
+		for(u64 j=0; j<1; j++)
+		{
+			std::cout << u.get(i, j) << " ";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
 
 	algebra::BlockSparseMatrixData C = algebra::BlockSparseMatrixData(
 		3, 3, // blocks will have 3 elements width, 2 elements heigth
@@ -225,6 +220,17 @@ int main()
 	std::cout << std::endl;
 
 	algebra::BlockSparseMatrixMultiplayer::sparseMVMultiplyGPU(&C, &q, &t);
+
+	for(u64 i=0; i<9; i++)
+	{
+		for(u64 j=0; j<1; j++)
+		{
+			std::cout << t.get(i, j) << " ";
+		}
+		std::cout << std::endl;
+	}
+
+	std::cout << std::endl;
 
 	algebra::compute::Context::stopContext();
 	return 0;

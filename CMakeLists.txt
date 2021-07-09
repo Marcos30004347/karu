@@ -24,7 +24,6 @@ macro(set_kernel_var filename variable)
     set(${variable} ${TMP2})
 endmacro()
 
-
 set_kernel_var("${MATRIX_KERNELS_PATH}/bsMV_kernel.cl" BSMAT_VEC_MULT_CL_KERNEL_SRC)
 
 configure_file(src/algebra/matrix/kernels/kernels.template.in src/algebra/matrix/kernels/kernels.cpp)
@@ -48,6 +47,8 @@ add_library(
 target_include_directories(karu PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
 target_link_libraries(karu OpenCL::OpenCL)
 target_link_libraries(karu ${CMAKE_THREAD_LIBS_INIT})
+
+target_compile_definitions(karu PRIVATE DEBUG=1)
 
 enable_testing()
 add_subdirectory(tests)

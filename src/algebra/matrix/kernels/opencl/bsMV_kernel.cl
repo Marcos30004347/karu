@@ -15,18 +15,18 @@ __kernel void bsMV_kernel(
 	const unsigned long int block_width,
 	const unsigned long int x_block_heigth,
 	const unsigned long int x_block_width,
-	__global unsigned long int *col_ids,
-	__global unsigned long int *row_ptr,
-	__global float *A,
-	__global float *x,
+	const __global unsigned long int *col_ids,
+	const __global unsigned long int *row_ptr,
+	const __global float *A,
+	const __global float *x,
 	__global float *y,
   __local float* shared_x
 ) {
   const unsigned int t_block_idx = get_group_id(0);
   const unsigned int t_block_dim = get_local_size(0);
-  const unsigned int t_idx = get_local_id(0);
+  const unsigned int t_idx      = get_local_id(0);
 
-  const idx = t_block_idx * t_block_dim + t_idx;
+  // const idx = t_block_idx * t_block_dim + t_idx;
 
   const unsigned long int bs =  block_heigth;
 
