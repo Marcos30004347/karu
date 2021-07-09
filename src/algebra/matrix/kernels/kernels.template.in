@@ -1,0 +1,18 @@
+#include "algebra/matrix/kernels/kernels.hpp"
+
+karu::algebra::compute::Program* bsMV_program = nullptr;
+karu::algebra::compute::Kernel* bsMV_kernel = nullptr;
+
+void create_sparse_matrix_kernels()
+{
+    const char* bsMV_cl_src = ${BSMAT_VEC_MULT_CL_KERNEL_SRC};
+    bsMV_program = new karu::algebra::compute::Program(bsMV_cl_src);
+    bsMV_kernel = new karu::algebra::compute::Kernel(bsMV_program, "bsMV_kernel");
+}
+
+void destroy_sparse_matrix_kernels()
+{
+    delete bsMV_kernel;
+    delete bsMV_program;
+}
+

@@ -18,9 +18,9 @@ using namespace karu;
 
 void mul_matrix(f32* A, f32* B, f32* C, i32 block_width, i32 block_heigth, i32 lines, i32 columns, i32 A_columns, i32 B_lines) {
 	std::ifstream ifs("src/kernels/matrix_mul.cl");
-  	std::string content((std::istreambuf_iterator<char>(ifs)),(std::istreambuf_iterator<char>()    ) );
+	std::string content((std::istreambuf_iterator<char>(ifs)),(std::istreambuf_iterator<char>()));
 
-	const char *KernelSource =content.c_str();
+	const char *KernelSource = content.c_str();
 
 	cl_int err;
 	cl_context context = clCreateContextFromType(NULL, CL_DEVICE_TYPE_ALL, NULL, NULL, &err);

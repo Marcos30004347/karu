@@ -1,21 +1,25 @@
 #include "algebra/matrix/BlockSparseMatrixData.hpp"
-
 using namespace karu;
 using namespace algebra;
 
 BlockSparseMatrixData::BlockSparseMatrixData(
+	u64 block_width, u64 block_heigth,
 	u64 lines, u64 columns,
 	std::vector<u64> row_ptr,
 	std::vector<u64> col_idx,
 	std::vector<f32> data
 )
 {
+	this->bcsr_block_width = block_width;
+	this->bcsr_block_heigth = block_heigth;
 	this->bcsr_row_ptr = row_ptr;
 	this->bcsr_col_idx = col_idx;
 	this->bcsr_data = data;
 
 	this->bcsr_lines = lines;
 	this->bcsr_columns = columns;
+
+
 }
 
 f32 BlockSparseMatrixData::get(u64 l, u64 c)
@@ -46,5 +50,5 @@ f32 BlockSparseMatrixData::get(u64 l, u64 c)
 
 	u64 bs = this->bcsr_block_heigth * this->bcsr_block_width;
 
-	return this->bcsr_data[b*bs + bl*this->bcsr_block_width + bc];
+	return this->bcsr_data[b*bs + bc*this->bcsr_block_heigth + bl];
 }

@@ -51,7 +51,6 @@ void Kernel::enqueue(std::vector<u64> global_work_size, std::vector<u64> local_w
 void Kernel::enqueue(std::vector<u64> global_work_size, std::vector<u64> local_work_size)
 {
 	assert(global_work_size.size() == local_work_size.size());
-
 	cl_int err;
 	err = clEnqueueNDRangeKernel(karu_core_global_ctx->getComputeQueue(), this->ck_kernel, global_work_size.size(), NULL, global_work_size.data(), local_work_size.data(), 0, nullptr, nullptr);
 	clHandleError(err);

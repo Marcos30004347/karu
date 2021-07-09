@@ -1,4 +1,7 @@
 #include "algebra/core/compute/ComputeContext.hpp"
+#include "algebra/matrix/kernels/kernels.hpp"
+
+
 #include <iostream>
 #include <string.h>
 using namespace karu;
@@ -10,11 +13,13 @@ Context* karu_core_global_ctx = nullptr;
 Context* Context::initContext()
 {
 	karu_core_global_ctx = new Context();
+	create_sparse_matrix_kernels();
 	return karu_core_global_ctx;
 }
 
 void Context::stopContext()
 {
+	destroy_sparse_matrix_kernels();
 	delete karu_core_global_ctx;
 }
 

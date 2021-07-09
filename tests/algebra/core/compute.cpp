@@ -39,8 +39,8 @@ int main()
 		C[i] = 0;
 	}
 
-	compute::Buffer A_Buffer = compute::Buffer((i8*)A, sizeof(f32)*VECTOR_SIZE, compute::Buffer::READ_ONLY);
-	compute::Buffer B_Buffer = compute::Buffer((i8*)B, sizeof(f32)*VECTOR_SIZE, compute::Buffer::READ_ONLY);
+	compute::Buffer A_Buffer = compute::Buffer(A, sizeof(f32)*VECTOR_SIZE, compute::Buffer::READ_ONLY);
+	compute::Buffer B_Buffer = compute::Buffer(B, sizeof(f32)*VECTOR_SIZE, compute::Buffer::READ_ONLY);
 	
 	// Created directly at the Compute Unit
 	compute::Buffer C_Buffer = compute::Buffer(sizeof(f32)*VECTOR_SIZE, compute::Buffer::WRITE_ONLY, compute::Buffer::MEM_GPU);
@@ -52,7 +52,7 @@ int main()
 	B_Buffer.toComputeUnit();
 
 	compute::Kernel kernel = compute::Kernel(&prog, "test_kernel");
-	
+
 	kernel.setKernelArgument(0, sizeof(f32), &alpha);
 	kernel.setKernelArgument(1, BUFFER_ARG_SIZE, A_Buffer.ref());
 	kernel.setKernelArgument(2, BUFFER_ARG_SIZE, B_Buffer.ref());

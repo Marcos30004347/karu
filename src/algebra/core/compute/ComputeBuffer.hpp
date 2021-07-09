@@ -16,12 +16,13 @@ class Buffer {
 		WRITE_ONLY,
 		READ_WRITE,
 	};
+
 	enum state {
 		MEM_CPU = 0,
 		MEM_GPU,
 	};
 
-	Buffer(i8* data, u64 size, type kind = type::READ_WRITE, bool copy = false);
+	Buffer(void* data, u64 size, type kind = type::READ_WRITE, bool copy = false);
 	Buffer(u64 size, type kind, state state);
 
 	~Buffer();
@@ -39,7 +40,7 @@ class Buffer {
 
 	state   		s_state;
 	cl_mem  s_compute_unit_ref;
-	i8*     		s_logic_unit_ref;
+	void*     		s_logic_unit_ref;
 	u64     		s_size;
 	type    		s_kind;
 

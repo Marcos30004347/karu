@@ -14,15 +14,8 @@ int main()
 		data.push_back(i+1);
 	}
 	
-	// M =
-	// 1   2   3   0   0   0  7    8   9
-	// 4   5   6   0   0   0  10  11  12
-	// 0  13  14  15   0  19  20  21   0
-	// 0  16  17  18   0  22  23  24   0
-	// 0   0   0  25  26  27  31  32  33
-	// 0   0   0  28  29  30  34  35  36
-	
 	algebra::BlockSparseMatrixData M = algebra::BlockSparseMatrixData(
+		3, 2, // blocks will have 3 elements width, 2 elements heigth
 		6, 9, // 6 lines and 9 columns
 		{0, 2, 4, 6}, // row_ptr
 		{0, 6, 1, 5, 3, 6}, // col_idx
@@ -35,43 +28,52 @@ int main()
 		}
 	);
 
+	// for(u64 i=0; i<6; i++)
+	// {
+	// 	for(u64 j=0; j<9; j++)
+	// 	{
+	// 		std::cout << M.get(i, j) << " ";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
+
 	assert(M.get(0,0) == 1.f);
-	assert(M.get(0,1) == 2.f);
-	assert(M.get(0,2) == 3.f);
+	assert(M.get(0,1) == 3.f);
+	assert(M.get(0,2) == 5.f);
 	assert(M.get(0,3) == 0.f);
 	assert(M.get(0,4) == 0.f);
 	assert(M.get(0,5) == 0.f);
 	assert(M.get(0,6) == 7.f);
-	assert(M.get(0,7) == 8.f);
-	assert(M.get(0,8) == 9.f);
+	assert(M.get(0,7) == 9.f);
+	assert(M.get(0,8) == 11.f);
 
-	assert(M.get(1,0) == 4.f);
-	assert(M.get(1,1) == 5.f);
+	assert(M.get(1,0) == 2.f);
+	assert(M.get(1,1) == 4.f);
 	assert(M.get(1,2) == 6.f);
 	assert(M.get(1,3) == 0.f);
 	assert(M.get(1,4) == 0.f);
 	assert(M.get(1,5) == 0.f);
-	assert(M.get(1,6) == 10.f);
-	assert(M.get(1,7) == 11.f);
+	assert(M.get(1,6) == 8.f);
+	assert(M.get(1,7) == 10.f);
 	assert(M.get(1,8) == 12.f);
 
 	assert(M.get(2,0) == 0.f);
 	assert(M.get(2,1) == 13.f);
-	assert(M.get(2,2) == 14.f);
-	assert(M.get(2,3) == 15.f);
+	assert(M.get(2,2) == 15.f);
+	assert(M.get(2,3) == 17.f);
 	assert(M.get(2,4) == 0.f);
 	assert(M.get(2,5) == 19.f);
-	assert(M.get(2,6) == 20.f);
-	assert(M.get(2,7) == 21.f);
+	assert(M.get(2,6) == 21.f);
+	assert(M.get(2,7) == 23.f);
 	assert(M.get(2,8) == 0.f);
 
 	assert(M.get(3,0) == 0.f);
-	assert(M.get(3,1) == 16.f);
-	assert(M.get(3,2) == 17.f);
+	assert(M.get(3,1) == 14.f);
+	assert(M.get(3,2) == 16.f);
 	assert(M.get(3,3) == 18.f);
 	assert(M.get(3,4) == 0.f);
-	assert(M.get(3,5) == 22.f);
-	assert(M.get(3,6) == 23.f);
+	assert(M.get(3,5) == 20.f);
+	assert(M.get(3,6) == 22.f);
 	assert(M.get(3,7) == 24.f);
 	assert(M.get(3,8) == 0.f);
 
@@ -79,20 +81,20 @@ int main()
 	assert(M.get(4,1) == 0.f);
 	assert(M.get(4,2) == 0.f);
 	assert(M.get(4,3) == 25.f);
-	assert(M.get(4,4) == 26.f);
-	assert(M.get(4,5) == 27.f);
+	assert(M.get(4,4) == 27.f);
+	assert(M.get(4,5) == 29.f);
 	assert(M.get(4,6) == 31.f);
-	assert(M.get(4,7) == 32.f);
-	assert(M.get(4,8) == 33.f);
+	assert(M.get(4,7) == 33.f);
+	assert(M.get(4,8) == 35.f);
 
 	assert(M.get(5,0) == 0.f);
 	assert(M.get(5,1) == 0.f);
 	assert(M.get(5,2) == 0.f);
-	assert(M.get(5,3) == 28.f);
-	assert(M.get(5,4) == 29.f);
+	assert(M.get(5,3) == 26.f);
+	assert(M.get(5,4) == 28.f);
 	assert(M.get(5,5) == 30.f);
-	assert(M.get(5,6) == 34.f);
-	assert(M.get(5,7) == 35.f);
+	assert(M.get(5,6) == 32.f);
+	assert(M.get(5,7) == 34.f);
 	assert(M.get(5,8) == 36.f);
 
 	return 0;
