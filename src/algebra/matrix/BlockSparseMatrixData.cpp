@@ -25,6 +25,7 @@ BlockSparseMatrixData::BlockSparseMatrixData(
 f32 BlockSparseMatrixData::get(u64 l, u64 c)
 {
 	u64 i = l/this->bcsr_block_heigth;
+
 	u64 first_block = this->bcsr_row_ptr[i]; 
 	u64 last_block = this->bcsr_row_ptr[i+1];
 
@@ -36,10 +37,10 @@ f32 BlockSparseMatrixData::get(u64 l, u64 c)
 	u64 j = c;
 	
 	while(
-		j > this->bcsr_col_idx[first_block + t] + this->bcsr_block_width - 1 &&
+		j > this->bcsr_col_idx[first_block + t] + this->bcsr_block_heigth - 1 &&
 		t < last_block - first_block
 	) t++;
-
+	
 	if(j < this->bcsr_col_idx[first_block + t] || j > this->bcsr_col_idx[first_block + t] + this->bcsr_block_width - 1)
 		return 0;
 

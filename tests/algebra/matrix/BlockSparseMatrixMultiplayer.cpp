@@ -134,39 +134,39 @@ int main()
 		{ 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f }
 	);
 
-	for(u64 i=0; i<9; i++)
-	{
-		for(u64 j=0; j<9; j++)
-		{
-			std::cout << B.get(i, j) << " ";
-		}
-		std::cout << std::endl;
-	}
+	// for(u64 i=0; i<9; i++)
+	// {
+	// 	for(u64 j=0; j<9; j++)
+	// 	{
+	// 		std::cout << B.get(i, j) << " ";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
 
-	std::cout << std::endl;
-	for(u64 i=0; i<9; i++)
-	{
-		for(u64 j=0; j<1; j++)
-		{
-			std::cout << o.get(i, j) << " ";
-		}
-		std::cout << std::endl;
-	}
+	// std::cout << std::endl;
+	// for(u64 i=0; i<9; i++)
+	// {
+	// 	for(u64 j=0; j<1; j++)
+	// 	{
+	// 		std::cout << o.get(i, j) << " ";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
 
-	std::cout << std::endl;
+	// std::cout << std::endl;
 
 	algebra::BlockSparseMatrixMultiplayer::sparseMVMultiplyGPU(&B, &o, &u);
 
-	std::cout << std::endl;
-	for(u64 i=0; i<9; i++)
-	{
-		for(u64 j=0; j<1; j++)
-		{
-			std::cout << u.get(i, j) << " ";
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
+	// std::cout << std::endl;
+	// for(u64 i=0; i<9; i++)
+	// {
+	// 	for(u64 j=0; j<1; j++)
+	// 	{
+	// 		std::cout << u.get(i, j) << " ";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
+	// std::cout << std::endl;
 
 	algebra::BlockSparseMatrixData C = algebra::BlockSparseMatrixData(
 		3, 3, // blocks will have 3 elements width, 2 elements heigth
@@ -198,39 +198,112 @@ int main()
 		{ 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f }
 	);
 
+	// for(u64 i=0; i<9; i++)
+	// {
+	// 	for(u64 j=0; j<9; j++)
+	// 	{
+	// 		std::cout << C.get(i, j) << " ";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
+
+	// std::cout << std::endl;
+	// for(u64 i=0; i<9; i++)
+	// {
+	// 	for(u64 j=0; j<1; j++)
+	// 	{
+	// 		std::cout << q.get(i, j) << " ";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
+
+	// std::cout << std::endl;
+
+	algebra::BlockSparseMatrixData R = algebra::BlockSparseMatrixData(
+		3, 3, // blocks will have 3 elements width, 2 elements heigth
+		9, 9, // 6 lines and 9 columns
+		{0, 3, 6, 9 }, // row_ptr
+		{0, 3, 6, 0, 3, 6, 0, 3, 6}, // col_idx
+		{
+			0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+			0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+			0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+			0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+			0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+			0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+			0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+			0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+			0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 
+		}
+	);
+
+
+	algebra::BlockSparseMatrixMultiplayer::sparseMVMultiplyGPU(&C, &q, &t);
+
+	algebra::BlockSparseMatrixMultiplayer::sparseMMMultiplyGPU(&B, &B, &R);
+
+	// for(u64 i=0; i<9; i++)
+	// {
+	// 	for(u64 j=0; j<1; j++)
+	// 	{
+	// 		std::cout << t.get(i, j) << " ";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
+
+	// std::cout << std::endl;
+
+
+	algebra::BlockSparseMatrixData A0 = algebra::BlockSparseMatrixData(
+		3, 3, // blocks will have 3 elements width, 2 elements heigth
+		9, 9, // 6 lines and 9 columns
+		{0, 2, 3, 5 }, // row_ptr
+		{0, 6, 3, 0, 6}, // col_idx
+		{
+			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+		}
+	);
+
+	algebra::BlockSparseMatrixData B0 = algebra::BlockSparseMatrixData(
+		3, 3, // blocks will have 3 elements width, 2 elements heigth
+		9, 6, // 6 lines and 9 columns
+		{ 0, 1, 2, 3 }, // row_ptr
+		{ 0, 3, 0}, // col_idx
+		{
+			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+		}
+	);
+
 	for(u64 i=0; i<9; i++)
 	{
 		for(u64 j=0; j<9; j++)
 		{
-			std::cout << C.get(i, j) << " ";
+			std::cout << A0.get(i, j) << " ";
 		}
 		std::cout << std::endl;
 	}
-
-	std::cout << std::endl;
-	for(u64 i=0; i<9; i++)
-	{
-		for(u64 j=0; j<1; j++)
-		{
-			std::cout << q.get(i, j) << " ";
-		}
-		std::cout << std::endl;
-	}
-
 	std::cout << std::endl;
 
-	algebra::BlockSparseMatrixMultiplayer::sparseMVMultiplyGPU(&C, &q, &t);
+	// for(u64 i=0; i<9; i++)
+	// {
+	// 	for(u64 j=0; j<6; j++)
+	// 	{
+	// 		std::cout << B0.get(i, j) << " ";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
+	// std::cout << std::endl;
 
-	for(u64 i=0; i<9; i++)
-	{
-		for(u64 j=0; j<1; j++)
-		{
-			std::cout << t.get(i, j) << " ";
-		}
-		std::cout << std::endl;
-	}
-
+	algebra::BlockSparseMatrixMultiplayer::sparseMMMultiplyGPU(&A0, &A0, &R);
 	std::cout << std::endl;
+	algebra::BlockSparseMatrixMultiplayer::sparseMMMultiplyGPU(&A0, &B0, &R);
+
 
 	algebra::compute::Context::stopContext();
 	return 0;

@@ -1,15 +1,3 @@
-
-unsigned long round_up_to_power_of_two(unsigned long v) {
-  v--;
-  v |= v >> 1;
-  v |= v >> 2;
-  v |= v >> 4;
-  v |= v >> 8;
-  v |= v >> 16;
-  v++;
-  return v;
-}
-
 __kernel void bsMV_kernel(
 	const unsigned long int block_heigth,
 	const unsigned long int block_width,
@@ -25,8 +13,6 @@ __kernel void bsMV_kernel(
   const unsigned int t_block_idx = get_group_id(0);
   const unsigned int t_block_dim = get_local_size(0);
   const unsigned int t_idx      = get_local_id(0);
-
-  // const idx = t_block_idx * t_block_dim + t_idx;
 
   const unsigned long int bs =  block_heigth;
 

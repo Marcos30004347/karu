@@ -25,6 +25,7 @@ macro(set_kernel_var filename variable)
 endmacro()
 
 set_kernel_var("${MATRIX_KERNELS_PATH}/bsMV_kernel.cl" BSMAT_VEC_MULT_CL_KERNEL_SRC)
+set_kernel_var("${MATRIX_KERNELS_PATH}/bsMM_kernel.cl" BSMAT_MAT_MULT_CL_KERNEL_SRC)
 
 configure_file(src/algebra/matrix/kernels/kernels.template.in src/algebra/matrix/kernels/kernels.cpp)
 

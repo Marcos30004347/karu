@@ -10,6 +10,8 @@ class BlockSparseMatrixMultiplayer {
 	static void sparseMVMultiplyThreaded(BlockSparseMatrixData* A, BlockSparseMatrixData* x, BlockSparseMatrixData* y);
 	static void sparseMVMultiplyGPU(BlockSparseMatrixData* A, BlockSparseMatrixData* x, BlockSparseMatrixData* y);
 
+	static void sparseMMMultiplyGPU(BlockSparseMatrixData* A, BlockSparseMatrixData* B, BlockSparseMatrixData* C);
+
 	private:
 	static void sparseMVMultiplyThreadHandler(void* data);
 };
