@@ -42,7 +42,6 @@ HashMap::HashMap(u32 size)
 
 	this->_pow  = pow;
 	this->_capacity = size;
-
 }
 
 HashMap::~HashMap()
@@ -113,8 +112,8 @@ bool HashMap::insert(i32 key, f32 val)
 		node = this->_next[node];
 	}
 
+	// If no node found in Linked List, add a new one as head
 	node = this->_begg[hash].load();
-
 	spot = this->_size.load();
 
 	while(!this->_size.compare_exchange_weak(spot, spot+1))
