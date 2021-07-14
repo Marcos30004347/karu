@@ -110,7 +110,6 @@ Context::~Context()
 {
 	cl_int err;
 
-	
 	for(int i=0; i<this->gpu_platforms.size(); i++)
 	{
 		for(cl_device_id gpu: this->gpus[i])

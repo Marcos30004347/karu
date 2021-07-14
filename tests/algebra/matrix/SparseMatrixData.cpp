@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <iostream>
 
-#include "algebra/matrix/BlockSparseMatrixData.hpp"
+#include "algebra/matrix/SparseMatrixData.hpp"
 
 using namespace karu;
 
@@ -14,7 +14,7 @@ int main()
 		data.push_back(i+1);
 	}
 	
-	algebra::BlockSparseMatrixData M = algebra::BlockSparseMatrixData(
+	algebra::SparseMatrixData M = algebra::SparseMatrixData(
 		3, 2, // blocks will have 3 elements width, 2 elements heigth
 		6, 9, // 6 lines and 9 columns
 		{0, 2, 4, 6}, // row_ptr

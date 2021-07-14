@@ -12,7 +12,7 @@ __kernel void bsMV_kernel(
 ) {
   const unsigned int t_block_idx = get_group_id(0);
   const unsigned int t_block_dim = get_local_size(0);
-  const unsigned int t_idx      = get_local_id(0);
+  const unsigned int t_idx       = get_local_id(0);
 
   const unsigned long int bs =  block_heigth;
 

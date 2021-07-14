@@ -10,5 +10,9 @@ class MatrixAdder {
 	static MatrixData add(MatrixData* A, MatrixData* B, bool A_T, bool B_T);
 };
 
+// convulação
+// recude
+
+
 }
 }

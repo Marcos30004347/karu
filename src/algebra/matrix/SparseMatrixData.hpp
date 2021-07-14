@@ -7,9 +7,9 @@
 namespace karu {
 namespace algebra {
 
-class BlockSparseMatrixData {
+class SparseMatrixData {
 	public:
-	BlockSparseMatrixData(
+	SparseMatrixData(
 		u64 block_width, u64 block_heigth,
 		u64 lines, u64 columns,
 		
@@ -19,7 +19,8 @@ class BlockSparseMatrixData {
 	);
 
 	f32 get(u64 l, u64 c);
-	
+
+	void print();
 
 	inline u64 lines()
 	{
@@ -55,7 +56,7 @@ class BlockSparseMatrixData {
 	// data is stored in column major
 	std::vector<f32> bcsr_data;
 
-	friend class BlockSparseMatrixMultiplayer;
+	friend class SparseMatrixMultiplayer;
 };
 
 }

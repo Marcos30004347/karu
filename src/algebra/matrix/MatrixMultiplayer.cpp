@@ -30,7 +30,7 @@ MatrixData MatrixMultiplayer::multiply(MatrixData* A, MatrixData* B, bool A_T, b
 
 							i32 Bi = (B->blockHeight()*k) % B->lines() + (x+q) % A->blockWidth();
 							i32 Bj = (A->blockWidth()*j) % B->columns() + x;
-							
+
 							i32 Ci = (B->blockHeight()*i) % A->lines() + y;
 							i32 Cj = (A->blockWidth()*j) % B->columns() + x;
 
@@ -45,6 +45,6 @@ MatrixData MatrixMultiplayer::multiply(MatrixData* A, MatrixData* B, bool A_T, b
 				}
 			}
 		}
-	}	
+	}
 	return C;
 }

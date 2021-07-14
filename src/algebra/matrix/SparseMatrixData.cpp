@@ -1,8 +1,11 @@
-#include "algebra/matrix/BlockSparseMatrixData.hpp"
+#include <iostream>
+
+#include "algebra/matrix/SparseMatrixData.hpp"
+
 using namespace karu;
 using namespace algebra;
 
-BlockSparseMatrixData::BlockSparseMatrixData(
+SparseMatrixData::SparseMatrixData(
 	u64 block_width, u64 block_heigth,
 	u64 lines, u64 columns,
 	std::vector<u64> row_ptr,
@@ -22,7 +25,7 @@ BlockSparseMatrixData::BlockSparseMatrixData(
 
 }
 
-f32 BlockSparseMatrixData::get(u64 l, u64 c)
+f32 SparseMatrixData::get(u64 l, u64 c)
 {
 	u64 i = l/this->bcsr_block_heigth;
 
@@ -52,4 +55,50 @@ f32 BlockSparseMatrixData::get(u64 l, u64 c)
 	u64 bs = this->bcsr_block_heigth * this->bcsr_block_width;
 
 	return this->bcsr_data[b*bs + bc*this->bcsr_block_heigth + bl];
+}
+
+void SparseMatrixData::print()
+{
+	for(u32 l = 0; l < this->lines()/this->bcsr_block_heigth; l++)
+	{
+		for(u32 bl = 0; bl < this->bcsr_block_heigth; bl++)
+		{
+			if(this->bcsr_row_ptr[l+1] - this->bcsr_row_ptr[l] == 0)
+			{
+				for(u32 c = 0; c < this->columns(); c++)
+				{
+					std::cout << "0 ";
+				}
+			}
+			else
+			{
+				u32 col = 0;
+				for(u32 b = this->bcsr_row_ptr[l]; b < this->bcsr_row_ptr[l+1]; b++)
+				{
+
+					while(col < this->bcsr_col_idx[b])
+					{
+						std::cout << "0 ";
+						col++;
+					}
+
+					for(i32 c = 0; c<this->bcsr_block_width; c++)
+					{
+						std::cout << this->bcsr_data[
+							b*this->bcsr_block_heigth*bcsr_block_width +
+							c*bcsr_block_heigth + bl
+						] << " ";
+						col++;
+					}
+				
+				}
+				while(col < this->columns())
+				{
+					std::cout << "0 ";
+					col++;
+				}
+			}
+			std::cout << std::endl;
+		}
+	}
 }

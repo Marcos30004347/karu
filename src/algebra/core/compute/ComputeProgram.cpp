@@ -1,6 +1,8 @@
 #include "algebra/core/compute/ComputeProgram.hpp"
 #include "algebra/core/compute/ComputeContext.hpp"
 
+#include <iostream>
+
 using namespace karu;
 using namespace algebra;
 using namespace compute;
@@ -11,6 +13,7 @@ Program::Program(const char* src)
 {
 	cl_int err;
 	this->cp_src = src;
+
 	this->cp_program = clCreateProgramWithSource(karu_core_global_ctx->getComputeContext(), 1, (const char **)&src, NULL, &err);
 
 	clHandleError(err);
