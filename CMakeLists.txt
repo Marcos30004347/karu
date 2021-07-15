@@ -10,6 +10,7 @@ include_directories(src)
 include_directories(${OpenCL_INCLUDE_DIRS})
 
 set(MATRIX_KERNELS_PATH "src/algebra/matrix/kernels/opencl")
+set(LIB_KERNELS_PATH "src/algebra/lib/kernels/opencl")
 
 macro(set_kernel_var filename variable)
     file(STRINGS ${filename} TMP)
@@ -24,9 +25,14 @@ macro(set_kernel_var filename variable)
     set(${variable} ${TMP2})
 endmacro()
 
+set_kernel_var("${LIB_KERNELS_PATH}/radix_sort.cl" RADIX_SORT_CL_KERNEL_SRC)
 set_kernel_var("${MATRIX_KERNELS_PATH}/bsMV_kernel.cl" BSMAT_VEC_MULT_CL_KERNEL_SRC)
 set_kernel_var("${MATRIX_KERNELS_PATH}/bsMM_kernel.cl" BSMAT_MAT_MULT_CL_KERNEL_SRC)
 
+# Config LIb kernels
+configure_file(src/algebra/lib/kernels/kernels.template.in src/algebra/lib/kernels/kernels.cpp)
+
+# Config Matrix kernels
 configure_file(src/algebra/matrix/kernels/kernels.template.in src/algebra/matrix/kernels/kernels.cpp)
 
 add_library(
@@ -36,6 +42,8 @@ add_library(
     src/algebra/core/compute/ComputeBuffer.cpp
     src/algebra/core/compute/ComputeKernel.cpp
     src/algebra/core/compute/ComputeProgram.cpp
+    src/algebra/lib/Sort.cpp
+    src/algebra/lib/kernels/kernels.cpp
     src/algebra/matrix/MatrixData.cpp
     src/algebra/matrix/MatrixMultiplayer.cpp
     src/algebra/matrix/MatrixAdder.cpp

@@ -7,6 +7,11 @@ add_executable(AlgebraComputeTests algebra/core/compute.cpp)
 target_link_libraries(AlgebraComputeTests karu)
 add_test(NAME AlgebraComputeTests COMMAND AlgebraComputeTests)
 
+project(AlgebraLibSortTests)
+add_executable(AlgebraLibSortTests algebra/lib/Sort.cpp)
+target_link_libraries(AlgebraLibSortTests karu)
+add_test(NAME AlgebraLibSortTests COMMAND AlgebraLibSortTests)
+
 project(AlgebraMatrixDataTests)
 add_executable(AlgebraMatrixDataTests algebra/matrix/MatrixData.cpp)
 target_link_libraries(AlgebraMatrixDataTests karu)
@@ -26,3 +31,4 @@ project(AlgebraSparseMatrixMultiplayerTests)
 add_executable(AlgebraSparseMatrixMultiplayerTests algebra/matrix/SparseMatrixMultiplayer.cpp)
 target_link_libraries(AlgebraSparseMatrixMultiplayerTests karu)
 add_test(NAME AlgebraSparseMatrixMultiplayerTests COMMAND AlgebraSparseMatrixMultiplayerTests)
+

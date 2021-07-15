@@ -1,0 +1,30 @@
+#include "algebra/lib/kernels/kernels.hpp"
+
+karu::algebra::compute::Program* radix_sort_program = nullptr;
+
+karu::algebra::compute::Kernel* radix_sort_int_to_int_prefix_sum_kernel = nullptr;
+karu::algebra::compute::Kernel* radix_move_int_to_int_elements_kernel = nullptr;
+karu::algebra::compute::Kernel* radix_scan_kernel = nullptr;
+
+void create_algebra_lib_kernels()
+{
+    const char* radix_sort_cl_src = ${RADIX_SORT_CL_KERNEL_SRC};
+
+    radix_sort_program = new karu::algebra::compute::Program(radix_sort_cl_src);
+    radix_sort_int_to_int_prefix_sum_kernel = new karu::algebra::compute::Kernel(radix_sort_program, "int_to_int_four_way_prefix_sum_shuffle");
+    radix_move_int_to_int_elements_kernel = new karu::algebra::compute::Kernel(radix_sort_program, "move_int_to_int_elements");
+    radix_scan_kernel = new karu::algebra::compute::Kernel(radix_sort_program, "stream_scan_kernel");
+}
+
+void destroy_algebra_lib_kernels()
+{
+		if(radix_scan_kernel)
+        delete radix_scan_kernel;
+    if(radix_move_int_to_int_elements_kernel)
+        delete radix_move_int_to_int_elements_kernel;
+    if(radix_sort_int_to_int_prefix_sum_kernel)
+        delete radix_sort_int_to_int_prefix_sum_kernel;
+    if(radix_sort_program)
+        delete radix_sort_program;
+}
+

@@ -33,6 +33,8 @@ class Kernel {
 	void enqueue(std::vector<u64> global_work_size, std::vector<u64> local_work_size, std::vector<Event> wait_list, Event* event);
 	void enqueue(std::vector<u64> global_work_size, std::vector<u64> local_work_size);
 
+	size_t getWorkGroupSize();
+
 	private:
 	cl_kernel ck_kernel;
 };

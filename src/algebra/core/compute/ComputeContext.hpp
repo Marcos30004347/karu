@@ -27,6 +27,7 @@ class Context {
 	Context();
 	~Context();
 
+	cl_device_id getGpuDevice(unsigned int platform=0, unsigned int device=0);
 	cl_context getComputeContext();
 	cl_command_queue getComputeQueue();
 

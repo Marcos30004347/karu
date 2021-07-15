@@ -55,3 +55,10 @@ void Kernel::enqueue(std::vector<u64> global_work_size, std::vector<u64> local_w
 	err = clEnqueueNDRangeKernel(karu_core_global_ctx->getComputeQueue(), this->ck_kernel, global_work_size.size(), NULL, global_work_size.data(), local_work_size.data(), 0, nullptr, nullptr);
 	clHandleError(err);
 }
+
+size_t Kernel::getWorkGroupSize()
+{
+	size_t max_available_local_wg_size;
+	clGetKernelWorkGroupInfo(this->ck_kernel, karu_core_global_ctx->getGpuDevice(), CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &max_available_local_wg_size, nullptr);
+	return max_available_local_wg_size;
+}

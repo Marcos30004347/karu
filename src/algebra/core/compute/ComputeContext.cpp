@@ -1,5 +1,6 @@
 #include "algebra/core/compute/ComputeContext.hpp"
 #include "algebra/matrix/kernels/kernels.hpp"
+#include "algebra/lib/kernels/kernels.hpp"
 
 
 #include <iostream>
@@ -13,12 +14,14 @@ Context* karu_core_global_ctx = nullptr;
 Context* Context::initContext()
 {
 	karu_core_global_ctx = new Context();
+	create_algebra_lib_kernels();
 	create_sparse_matrix_kernels();
 	return karu_core_global_ctx;
 }
 
 void Context::stopContext()
 {
+	destroy_algebra_lib_kernels();
 	destroy_sparse_matrix_kernels();
 	delete karu_core_global_ctx;
 }
@@ -162,3 +165,7 @@ cl_context Context::getComputeContext()
 }
 
 
+cl_device_id Context::getGpuDevice(unsigned int platform, unsigned int device)
+{
+	return this->gpus[platform][device];
+}

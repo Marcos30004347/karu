@@ -15,10 +15,19 @@ Program::Program(const char* src)
 	this->cp_src = src;
 
 	this->cp_program = clCreateProgramWithSource(karu_core_global_ctx->getComputeContext(), 1, (const char **)&src, NULL, &err);
-
+	
 	clHandleError(err);
 
 	err = clBuildProgram(this->cp_program, 0, NULL, NULL, NULL, NULL);
+	if(err != CL_SUCCESS)
+	{
+		size_t len;
+		err = clGetProgramBuildInfo(this->cp_program, karu_core_global_ctx->getGpuDevice(), CL_PROGRAM_BUILD_LOG, 0, NULL, &len);
+		char *buffer = (char*)malloc(len*sizeof(char));
+		err = clGetProgramBuildInfo(this->cp_program, karu_core_global_ctx->getGpuDevice(), CL_PROGRAM_BUILD_LOG, len, buffer, NULL);
+		std::cout << buffer << std::endl;
+		abort();
+	}
 
 	clHandleError(err);
 }
