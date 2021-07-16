@@ -25,7 +25,8 @@ macro(set_kernel_var filename variable)
     set(${variable} ${TMP2})
 endmacro()
 
-set_kernel_var("${LIB_KERNELS_PATH}/radix_sort.cl" RADIX_SORT_CL_KERNEL_SRC)
+set_kernel_var("${LIB_KERNELS_PATH}/scan_kernel.cl" SCAN_CL_KERNEL_SRC)
+set_kernel_var("${LIB_KERNELS_PATH}/radix_sort_kernel.cl" RADIX_SORT_CL_KERNEL_SRC)
 set_kernel_var("${MATRIX_KERNELS_PATH}/bsMV_kernel.cl" BSMAT_VEC_MULT_CL_KERNEL_SRC)
 set_kernel_var("${MATRIX_KERNELS_PATH}/bsMM_kernel.cl" BSMAT_MAT_MULT_CL_KERNEL_SRC)
 
@@ -43,6 +44,7 @@ add_library(
     src/algebra/core/compute/ComputeKernel.cpp
     src/algebra/core/compute/ComputeProgram.cpp
     src/algebra/lib/Sort.cpp
+    src/algebra/lib/Scan.cpp
     src/algebra/lib/kernels/kernels.cpp
     src/algebra/matrix/MatrixData.cpp
     src/algebra/matrix/MatrixMultiplayer.cpp

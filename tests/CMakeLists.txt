@@ -7,6 +7,13 @@ add_executable(AlgebraComputeTests algebra/core/compute.cpp)
 target_link_libraries(AlgebraComputeTests karu)
 add_test(NAME AlgebraComputeTests COMMAND AlgebraComputeTests)
 
+
+project(AlgebraLibScanTests)
+add_executable(AlgebraLibScanTests algebra/lib/Scan.cpp)
+target_link_libraries(AlgebraLibScanTests karu)
+add_test(NAME AlgebraLibScanTests COMMAND AlgebraLibScanTests)
+
+
 project(AlgebraLibSortTests)
 add_executable(AlgebraLibSortTests algebra/lib/Sort.cpp)
 target_link_libraries(AlgebraLibSortTests karu)

@@ -1,24 +1,13 @@
 #include <cmath>
 #include <iostream>
 
+#include "algebra/lib/Commom.hpp"
 #include "algebra/lib/kernels/kernels.hpp"
 #include "algebra/core/compute/ComputeBuffer.hpp"
 
 namespace karu {
 
-unsigned int roundToPowerOfTwo(
-  unsigned int v
-)
-{
-    v--;
-    v |= v >> 1;
-    v |= v >> 2;
-    v |= v >> 4;
-    v |= v >> 8;
-    v |= v >> 16;
-    v++;
-    return v;
-}
+
 
 void sort(
 	int* keys,
@@ -102,24 +91,24 @@ void sort(
 		}
 		std::cout << std::endl;
 
-		int wgSize = std::min(
-			radix_scan_kernel->getWorkGroupSize(),
-			(size_t)closesMultile
-		);
+		// int wgSize = std::min(
+		// 	radix_scan_kernel->getWorkGroupSize(),
+		// 	(size_t)closesMultile
+		// );
 
-		int localSize = std::min(wgSize, closesMultile);
+		// int localSize = std::min(wgSize, closesMultile);
 		
 		// radix_scan_kernel->setKernelArgument(2, BUFFER_ARG_SIZE, intermediate.computeUnitRef());
-		radix_scan_kernel->setKernelArgument(0, BUFFER_ARG_SIZE, prefi_sum.computeUnitRef());
-		radix_scan_kernel->setKernelArgument(1, BUFFER_ARG_SIZE, block_sum.computeUnitRef());
-		// radix_scan_kernel->setKernelArgument(2, BUFFER_ARG_SIZE, intermediate.computeUnitRef());
-		radix_scan_kernel->setKernelArgument(2, (closesMultile)*sizeof(int), nullptr);
-		radix_scan_kernel->setKernelArgument(3, sizeof(int), &size);
-		radix_scan_kernel->setKernelArgument(4, sizeof(int), &next_multiple_of_two);
+		// radix_scan_kernel->setKernelArgument(0, BUFFER_ARG_SIZE, prefi_sum.computeUnitRef());
+		// radix_scan_kernel->setKernelArgument(1, BUFFER_ARG_SIZE, block_sum.computeUnitRef());
+		// // radix_scan_kernel->setKernelArgument(2, BUFFER_ARG_SIZE, intermediate.computeUnitRef());
+		// radix_scan_kernel->setKernelArgument(2, (closesMultile)*sizeof(int), nullptr);
+		// radix_scan_kernel->setKernelArgument(3, sizeof(int), &size);
+		// radix_scan_kernel->setKernelArgument(4, sizeof(int), &next_multiple_of_two);
 		// radix_scan_kernel->setKernelArgument(4, sizeof(int), &closesMultile);
 	
 		// radix_scan_kernel->enqueue({(unsigned long)((size+1)/2)}, {1});
-		radix_scan_kernel->enqueue({(unsigned long)(size)}, {1});
+		// radix_scan_kernel->enqueue({(unsigned long)(size)}, {1});
 		
 		std::cout << "prefix sum: ";
 		int* pref_ptr = (int*)prefi_sum.logicUnitRef();
