@@ -33,12 +33,6 @@ Kernel::~Kernel()
 	clHandleError(err);
 }
 
-void Kernel::setKernelArgument(u32 id, u32 size, void* ptr)
-{
-	cl_int err = clSetKernelArg(this->ck_kernel, id, size, ptr);
-	clHandleError(err);
-}
-
 void Kernel::enqueue(std::vector<u64> global_work_size, std::vector<u64> local_work_size, std::vector<Event> wait_list, Event* event)
 {
 	assert(global_work_size.size() == local_work_size.size());
@@ -63,12 +57,12 @@ size_t Kernel::getWorkGroupSize()
 	return max_available_local_wg_size;
 }
 
-template<typename T>
-void Kernel::setKernelArgument(u32 id, T& value)
-{
-	cl_int err = clSetKernelArg(this->ck_kernel, id, sizeof(T), &value);
-	clHandleError(err);
-}
+// template<typename T>
+// void Kernel::setKernelArgument(u32 id, T& value)
+// {
+// 	cl_int err = clSetKernelArg(this->ck_kernel, id, sizeof(T), &value);
+// 	clHandleError(err);
+// }
 
 // template<typename T>
 // void Kernel::setKernelArgument(u32 id, T&& value)
@@ -78,10 +72,16 @@ void Kernel::setKernelArgument(u32 id, T& value)
 // 	clHandleError(err);
 // }
 
-template<typename T>
-void Kernel::setKernelArgument(u32 id, T* value)
+// template<typename T>
+// void Kernel::setKernelArgument(u32 id, T* value)
+// {
+// 	cl_int err = clSetKernelArg(this->ck_kernel, id, sizeof(T), value);
+// 	clHandleError(err);
+// }
+
+void Kernel::setKernelArgument(u32 id, u32 size, void* ptr)
 {
-	cl_int err = clSetKernelArg(this->ck_kernel, id, sizeof(T), value);
+	cl_int err = clSetKernelArg(this->ck_kernel, id, size, ptr);
 	clHandleError(err);
 }
 

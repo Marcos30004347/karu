@@ -1,6 +1,7 @@
 #include <cmath>
 #include <iostream>
 
+#include "algebra/lib/Scan.hpp"
 #include "algebra/lib/Commom.hpp"
 #include "algebra/lib/kernels/kernels.hpp"
 #include "algebra/core/compute/ComputeBuffer.hpp"
@@ -18,7 +19,7 @@ void sort(
 
 	int closesMultile = ceil(((float)size)/bs) * bs;
 
-	int next_multiple_of_two = roundToPowerOfTwo(size);
+	int next_multiple_of_two = karu::roundToPowerOfTwo(size);
 
 	int num_blocks = closesMultile / bs;
 
@@ -32,7 +33,7 @@ void sort(
 	
 	algebra::compute::Buffer intermediate = algebra::compute::Buffer(num_blocks*sizeof(int), algebra::compute::Buffer::READ_WRITE, algebra::compute::Buffer::MEM_GPU);
 
-	for(int i=0; i<2; i+=2)
+	for(int i=0; i<bits_count; i+=2)
 	{
 		radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(0, BUFFER_ARG_SIZE, keys_io.upload());
 		radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(1, BUFFER_ARG_SIZE, vals_io.upload());
@@ -89,25 +90,8 @@ void sort(
 		}
 		std::cout << std::endl;
 
-		// int wgSize = std::min(
-		// 	radix_scan_kernel->getWorkGroupSize(),
-		// 	(size_t)closesMultile
-		// );
+		scan(&block_sum, &prefi_sum, size);
 
-		// int localSize = std::min(wgSize, closesMultile);
-		
-		// radix_scan_kernel->setKernelArgument(2, BUFFER_ARG_SIZE, intermediate.upload());
-		// radix_scan_kernel->setKernelArgument(0, BUFFER_ARG_SIZE, prefi_sum.upload());
-		// radix_scan_kernel->setKernelArgument(1, BUFFER_ARG_SIZE, block_sum.upload());
-		// // radix_scan_kernel->setKernelArgument(2, BUFFER_ARG_SIZE, intermediate.upload());
-		// radix_scan_kernel->setKernelArgument(2, (closesMultile)*sizeof(int), nullptr);
-		// radix_scan_kernel->setKernelArgument(3, sizeof(int), &size);
-		// radix_scan_kernel->setKernelArgument(4, sizeof(int), &next_multiple_of_two);
-		// radix_scan_kernel->setKernelArgument(4, sizeof(int), &closesMultile);
-	
-		// radix_scan_kernel->enqueue({(unsigned long)((size+1)/2)}, {1});
-		// radix_scan_kernel->enqueue({(unsigned long)(size)}, {1});
-		
 		std::cout << "prefix sum: ";
 		int* pref_ptr = (int*)prefi_sum.download();
 		std::cout << std::endl;
@@ -118,18 +102,18 @@ void sort(
 		std::cout << std::endl;
 		// std::cout << std::endl;
 
-		// radix_move_int_to_int_elements_kernel->setKernelArgument(0, BUFFER_ARG_SIZE, key_shuff.upload());
-		// radix_move_int_to_int_elements_kernel->setKernelArgument(1, BUFFER_ARG_SIZE, val_shuff.upload());
-		// radix_move_int_to_int_elements_kernel->setKernelArgument(2, 4 * bs * sizeof(int), nullptr);
-		// radix_move_int_to_int_elements_kernel->setKernelArgument(3, 4 * bs * sizeof(int), nullptr);
-		// radix_move_int_to_int_elements_kernel->setKernelArgument(4, BUFFER_ARG_SIZE, block_sum.upload());
-		// radix_move_int_to_int_elements_kernel->setKernelArgument(5, BUFFER_ARG_SIZE, prefi_sum.upload());
-		// radix_move_int_to_int_elements_kernel->setKernelArgument(6, BUFFER_ARG_SIZE, keys_io.upload());
-		// radix_move_int_to_int_elements_kernel->setKernelArgument(7, BUFFER_ARG_SIZE, vals_io.upload());
-		// radix_move_int_to_int_elements_kernel->setKernelArgument(8, sizeof(int), &i);
-		// radix_move_int_to_int_elements_kernel->setKernelArgument(9, sizeof(int), &closesMultile);
+		radix_move_int_to_int_elements_kernel->setKernelArgument(0, BUFFER_ARG_SIZE, key_shuff.upload());
+		radix_move_int_to_int_elements_kernel->setKernelArgument(1, BUFFER_ARG_SIZE, val_shuff.upload());
+		radix_move_int_to_int_elements_kernel->setKernelArgument(2, 4 * bs * sizeof(int), nullptr);
+		radix_move_int_to_int_elements_kernel->setKernelArgument(3, 4 * bs * sizeof(int), nullptr);
+		radix_move_int_to_int_elements_kernel->setKernelArgument(4, BUFFER_ARG_SIZE, block_sum.upload());
+		radix_move_int_to_int_elements_kernel->setKernelArgument(5, BUFFER_ARG_SIZE, prefi_sum.upload());
+		radix_move_int_to_int_elements_kernel->setKernelArgument(6, BUFFER_ARG_SIZE, keys_io.upload());
+		radix_move_int_to_int_elements_kernel->setKernelArgument(7, BUFFER_ARG_SIZE, vals_io.upload());
+		radix_move_int_to_int_elements_kernel->setKernelArgument(8, sizeof(int), &i);
+		radix_move_int_to_int_elements_kernel->setKernelArgument(9, sizeof(int), &closesMultile);
 
-		// radix_move_int_to_int_elements_kernel->enqueue({ (unsigned long)closesMultile }, { (unsigned long)bs });
+		radix_move_int_to_int_elements_kernel->enqueue({ (unsigned long)closesMultile }, { (unsigned long)bs });
 	}
 
 	int* keys_ptr = (int*)keys_io.download();

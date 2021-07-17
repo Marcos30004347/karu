@@ -31,7 +31,7 @@ class Buffer {
 
 	void* download();
 	void* upload();
-
+	
 	void toComputeUnit();
 	void toLogicUnit();
 

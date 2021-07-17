@@ -1,7 +1,7 @@
 
-#define SHARED_MEMORY_BANKS 32
-#define LOG_MEM_BANKS 5
-#define CONFLICT_FREE_OFFSET(n) ((n) >> LOG_MEM_BANKS)
+// #define SHARED_MEMORY_BANKS 32
+// #define LOG_MEM_BANKS 5
+// #define CONFLICT_FREE_OFFSET(n) ((n) >> LOG_MEM_BANKS)
 
 int four_way_prefix_sum_with_shuffle_internal(
     __global int* keys_i,
@@ -166,37 +166,37 @@ __kernel void int_to_int_four_way_prefix_sum_shuffle(
 }
 
 
+// int four_way_move_elements_internal
+// (
+// 	int thid, 
+// 	__local int *counts, 
+// 	__global int *blkSum, 
+// 	__local int *prefixSums, 
+// 	__global int *prefixBlkSum,
+// 	__local int *offsets, 
+// 	int extracted
+// )
+// {
+// 	if (thid == 0) {
+// 		offsets[0] = 0;
 
+// 		for (int b = 0; b < 4; ++b) {
+// 			counts[b] = blkSum[get_num_groups(0)*b + get_group_id(0)];
+// 			prefixSums[b] = prefixBlkSum[get_num_groups(0)*b + get_group_id(0)];
+// 			offsets[b+1] = offsets[b] + counts[b];
+// 		}
+// 	}
 
-int four_way_move_elements_internal
-(
-	int thid, 
-	__local int *counts, 
-	__global int *blkSum, 
-	__local int *prefixSums, 
-	__global int *prefixBlkSum,
-	__local int *offsets, 
-	int extracted
-)
-{
-	if (thid == 0) {
-		for (int b = 0; b < 4; ++b) {
-			counts[b] = blkSum[get_num_groups(0)*b + get_group_id(0)];
-			prefixSums[b] = (get_group_id(0) == 0 && b == 0) ? 0 : prefixBlkSum[get_num_groups(0) * b + get_group_id(0) - 1];
-			offsets[b] = (b == 0) ? 0 : offsets[b - 1] + counts[b - 1];
-		}
-	}
+// 	barrier(CLK_LOCAL_MEM_FENCE);
 
-	barrier(CLK_LOCAL_MEM_FENCE);
+// 	int Pdn = prefixSums[extracted];
+// 	int m = thid - offsets[extracted];
+// 	int a = Pdn + m;
 
-	int Pdn = prefixSums[extracted];
-	int m = thid - offsets[extracted];
-	int a = Pdn + m;
+// 	barrier(CLK_LOCAL_MEM_FENCE);
 
-	barrier(CLK_LOCAL_MEM_FENCE);
-
-	return a;
-}
+// 	return a;
+// }
 
 __kernel void move_int_to_int_elements(
 	__global int *keyShuffle,
@@ -226,16 +226,51 @@ __kernel void move_int_to_int_elements(
 	int extracted = (key >> bitIndx) & 3;
 
 	// Calculate the result address
-	int a = four_way_move_elements_internal(thid, counts, blkSum, prefixSums, prefixBlkSum, offsets, extracted);
 
-	// Move the element
-	if (a < numElems) {
-		keys[a] = key;
-		vals[a] = val;
+	if (thid == 0) {
+		offsets[0] = 0;
+
+		for (int b = 0; b < 4; ++b) {
+			counts[b] = blkSum[get_num_groups(0)*b + get_group_id(0)];
+			prefixSums[b] = prefixBlkSum[get_num_groups(0)*b + get_group_id(0)];
+			offsets[b+1] = offsets[b] + counts[b];
+		}
+	}
+
+	barrier(CLK_LOCAL_MEM_FENCE);
+
+	int Pdn = prefixSums[extracted];
+	int m = thid - offsets[extracted];
+	int pos = Pdn + m;
+
+	barrier(CLK_LOCAL_MEM_FENCE);
+
+	if (pos < numElems) {
+		keys[pos] = key;
+		vals[pos] = val;
 	}
 }
 
+// __kernel void parallel_order_checking(
+// 	__global int *input,
+// 	__global int *out,
+// 	__local int  *temp,
+// )
+// {
+// 	const unsigned int t_block_idx  = get_group_id(0);
+// 	const unsigned int t_block_dim  = get_local_size(0);
+// 	const unsigned int thid 		= get_local_id(0);
 
+// 	unsigned int id = thid + t_block_idx*t_block_dim;
+
+// 	temp[thid] = input[id];
+// 	temp[thid+1] = input[id+1];
+
+// 	barrier(CLK_LOCAL_MEM_FENCE);
+
+// 	temp[thid] = temp[thid] > temp[thid+1];
+// 	output[id] = temp[thid];
+// }
 
 
 // #define SHARED_MEMORY_BANKS 32

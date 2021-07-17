@@ -12,7 +12,7 @@ int main()
 {
 	algebra::compute::Context::initContext();
 
-	sort(keys, vals, 20, 32);
+	sort(keys, vals, 20, 30);
 	
 	algebra::compute::Context::stopContext();
 	return 0;
