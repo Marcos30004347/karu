@@ -45,16 +45,16 @@ int main()
 	compute::Kernel kernel = compute::Kernel(&prog, "test_kernel");
 
 	kernel.setKernelArgument(0, sizeof(f32), &alpha);
-	kernel.setKernelArgument(1, BUFFER_ARG_SIZE, A_Buffer.computeUnitRef());
-	kernel.setKernelArgument(2, BUFFER_ARG_SIZE, B_Buffer.computeUnitRef());
-	kernel.setKernelArgument(3, BUFFER_ARG_SIZE, C_Buffer.computeUnitRef());
+	kernel.setKernelArgument(1, BUFFER_ARG_SIZE, A_Buffer.upload());
+	kernel.setKernelArgument(2, BUFFER_ARG_SIZE, B_Buffer.upload());
+	kernel.setKernelArgument(3, BUFFER_ARG_SIZE, C_Buffer.upload());
 
 	kernel.enqueue({ VECTOR_SIZE }, { 64 }, std::vector<compute::Event>(), nullptr);
 
 	// Transfer the data from the C Buffer in the Compute Unit to the Logic Unit
 	C_Buffer.toLogicUnit();
 
-	f32* data = (f32*)C_Buffer.logicUnitRef();
+	f32* data = (f32*)C_Buffer.download();
 
 	for(i32 i = 0; i < VECTOR_SIZE; i++)
 	{

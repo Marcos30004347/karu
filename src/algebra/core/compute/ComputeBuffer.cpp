@@ -99,7 +99,7 @@ Buffer::~Buffer()
 		}
 }
 
-void* Buffer::logicUnitRef()
+void* Buffer::download()
 {
 	this->toLogicUnit();
 	return this->s_logic_unit_ref;
@@ -204,7 +204,7 @@ void Buffer::toLogicUnit()
 	}
 }
 
-void* Buffer::computeUnitRef()
+void* Buffer::upload()
 {
 	if(!this->s_is_compute_unit_allocated)
 	{

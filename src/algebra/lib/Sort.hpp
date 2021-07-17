@@ -7,8 +7,6 @@
 
 namespace karu {
 
-
-
 void sort(
 	int* keys,
 	int* vals,
@@ -36,8 +34,8 @@ void sort(
 
 	for(int i=0; i<2; i+=2)
 	{
-		radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(0, BUFFER_ARG_SIZE, keys_io.computeUnitRef());
-		radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(1, BUFFER_ARG_SIZE, vals_io.computeUnitRef());
+		radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(0, BUFFER_ARG_SIZE, keys_io.upload());
+		radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(1, BUFFER_ARG_SIZE, vals_io.upload());
 
 		radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(2, sizeof(int), &i);
 		radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(3, sizeof(int), &size);
@@ -46,15 +44,15 @@ void sort(
 		radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(5, sizeof(int) * bs, nullptr);
 		radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(6, sizeof(int) * bs, nullptr);
 
-		radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(7, BUFFER_ARG_SIZE, block_sum.computeUnitRef());
-		radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(8, BUFFER_ARG_SIZE, key_shuff.computeUnitRef());
-		radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(9, BUFFER_ARG_SIZE, val_shuff.computeUnitRef());
+		radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(7, BUFFER_ARG_SIZE, block_sum.upload());
+		radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(8, BUFFER_ARG_SIZE, key_shuff.upload());
+		radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(9, BUFFER_ARG_SIZE, val_shuff.upload());
 
 		// Dispatch kernel
 		radix_sort_int_to_int_prefix_sum_kernel->enqueue({ (unsigned long)closesMultile }, { (unsigned long)bs });
 
 		std::cout << "key: ";
-		int* keys_ptr = (int*)keys_io.logicUnitRef();
+		int* keys_ptr = (int*)keys_io.download();
 		std::cout << std::endl;
 		for(int i=0; i<size;i++)
 		{
@@ -63,7 +61,7 @@ void sort(
 		std::cout << std::endl;
 
 		std::cout << "local shuffle: ";
-		int* key_shu = (int*)key_shuff.logicUnitRef();
+		int* key_shu = (int*)key_shuff.download();
 		std::cout << std::endl;
 		for(int i=0; i<size;i++)
 		{
@@ -72,7 +70,7 @@ void sort(
 		std::cout << std::endl;
 
 		// std::cout << " local shuffle: ";
-		// int* local_pref_shu = (int*)val_shuff.logicUnitRef();
+		// int* local_pref_shu = (int*)val_shuff.download();
 		// std::cout << std::endl;
 		// for(int i=0; i<size;i++)
 		// {
@@ -83,7 +81,7 @@ void sort(
 		// std::cout << std::endl;
 	
 		std::cout << "block sum: ";
-		int* block_sum_ptr = (int*)block_sum.logicUnitRef();
+		int* block_sum_ptr = (int*)block_sum.download();
 		std::cout << std::endl;
 		for(int i=0; i<size;i++)
 		{
@@ -98,10 +96,10 @@ void sort(
 
 		// int localSize = std::min(wgSize, closesMultile);
 		
-		// radix_scan_kernel->setKernelArgument(2, BUFFER_ARG_SIZE, intermediate.computeUnitRef());
-		// radix_scan_kernel->setKernelArgument(0, BUFFER_ARG_SIZE, prefi_sum.computeUnitRef());
-		// radix_scan_kernel->setKernelArgument(1, BUFFER_ARG_SIZE, block_sum.computeUnitRef());
-		// // radix_scan_kernel->setKernelArgument(2, BUFFER_ARG_SIZE, intermediate.computeUnitRef());
+		// radix_scan_kernel->setKernelArgument(2, BUFFER_ARG_SIZE, intermediate.upload());
+		// radix_scan_kernel->setKernelArgument(0, BUFFER_ARG_SIZE, prefi_sum.upload());
+		// radix_scan_kernel->setKernelArgument(1, BUFFER_ARG_SIZE, block_sum.upload());
+		// // radix_scan_kernel->setKernelArgument(2, BUFFER_ARG_SIZE, intermediate.upload());
 		// radix_scan_kernel->setKernelArgument(2, (closesMultile)*sizeof(int), nullptr);
 		// radix_scan_kernel->setKernelArgument(3, sizeof(int), &size);
 		// radix_scan_kernel->setKernelArgument(4, sizeof(int), &next_multiple_of_two);
@@ -111,7 +109,7 @@ void sort(
 		// radix_scan_kernel->enqueue({(unsigned long)(size)}, {1});
 		
 		std::cout << "prefix sum: ";
-		int* pref_ptr = (int*)prefi_sum.logicUnitRef();
+		int* pref_ptr = (int*)prefi_sum.download();
 		std::cout << std::endl;
 		for(int i=0; i<size;i++)
 		{
@@ -120,22 +118,22 @@ void sort(
 		std::cout << std::endl;
 		// std::cout << std::endl;
 
-		// radix_move_int_to_int_elements_kernel->setKernelArgument(0, BUFFER_ARG_SIZE, key_shuff.computeUnitRef());
-		// radix_move_int_to_int_elements_kernel->setKernelArgument(1, BUFFER_ARG_SIZE, val_shuff.computeUnitRef());
+		// radix_move_int_to_int_elements_kernel->setKernelArgument(0, BUFFER_ARG_SIZE, key_shuff.upload());
+		// radix_move_int_to_int_elements_kernel->setKernelArgument(1, BUFFER_ARG_SIZE, val_shuff.upload());
 		// radix_move_int_to_int_elements_kernel->setKernelArgument(2, 4 * bs * sizeof(int), nullptr);
 		// radix_move_int_to_int_elements_kernel->setKernelArgument(3, 4 * bs * sizeof(int), nullptr);
-		// radix_move_int_to_int_elements_kernel->setKernelArgument(4, BUFFER_ARG_SIZE, block_sum.computeUnitRef());
-		// radix_move_int_to_int_elements_kernel->setKernelArgument(5, BUFFER_ARG_SIZE, prefi_sum.computeUnitRef());
-		// radix_move_int_to_int_elements_kernel->setKernelArgument(6, BUFFER_ARG_SIZE, keys_io.computeUnitRef());
-		// radix_move_int_to_int_elements_kernel->setKernelArgument(7, BUFFER_ARG_SIZE, vals_io.computeUnitRef());
+		// radix_move_int_to_int_elements_kernel->setKernelArgument(4, BUFFER_ARG_SIZE, block_sum.upload());
+		// radix_move_int_to_int_elements_kernel->setKernelArgument(5, BUFFER_ARG_SIZE, prefi_sum.upload());
+		// radix_move_int_to_int_elements_kernel->setKernelArgument(6, BUFFER_ARG_SIZE, keys_io.upload());
+		// radix_move_int_to_int_elements_kernel->setKernelArgument(7, BUFFER_ARG_SIZE, vals_io.upload());
 		// radix_move_int_to_int_elements_kernel->setKernelArgument(8, sizeof(int), &i);
 		// radix_move_int_to_int_elements_kernel->setKernelArgument(9, sizeof(int), &closesMultile);
 
 		// radix_move_int_to_int_elements_kernel->enqueue({ (unsigned long)closesMultile }, { (unsigned long)bs });
 	}
 
-	int* keys_ptr = (int*)keys_io.logicUnitRef();
-	int* vals_ptr = (int*)vals_io.logicUnitRef();
+	int* keys_ptr = (int*)keys_io.download();
+	int* vals_ptr = (int*)vals_io.download();
 
 	std::cout << std::endl;
 	std::cout <<  "keys: " << std::endl;

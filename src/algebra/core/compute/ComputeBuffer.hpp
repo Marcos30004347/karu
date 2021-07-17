@@ -10,6 +10,8 @@ namespace compute {
 #define BUFFER_ARG_SIZE sizeof(cl_mem)
 
 class Buffer {
+	friend class Kernel;
+
 	public:
 	enum type {
 		READ_ONLY = 0,
@@ -27,8 +29,8 @@ class Buffer {
 
 	~Buffer();
 
-	void* logicUnitRef();
-	void* computeUnitRef();
+	void* download();
+	void* upload();
 
 	void toComputeUnit();
 	void toLogicUnit();
@@ -43,7 +45,6 @@ class Buffer {
 	void*     		s_logic_unit_ref;
 	u64     		s_size;
 	type    		s_kind;
-
 };
 
 }

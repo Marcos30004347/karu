@@ -62,3 +62,39 @@ size_t Kernel::getWorkGroupSize()
 	clGetKernelWorkGroupInfo(this->ck_kernel, karu_core_global_ctx->getGpuDevice(), CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &max_available_local_wg_size, nullptr);
 	return max_available_local_wg_size;
 }
+
+template<typename T>
+void Kernel::setKernelArgument(u32 id, T& value)
+{
+	cl_int err = clSetKernelArg(this->ck_kernel, id, sizeof(T), &value);
+	clHandleError(err);
+}
+
+// template<typename T>
+// void Kernel::setKernelArgument(u32 id, T&& value)
+// {
+// 	T val = value;
+// 	cl_int err = clSetKernelArg(this->ck_kernel, id, sizeof(T), &val);
+// 	clHandleError(err);
+// }
+
+template<typename T>
+void Kernel::setKernelArgument(u32 id, T* value)
+{
+	cl_int err = clSetKernelArg(this->ck_kernel, id, sizeof(T), value);
+	clHandleError(err);
+}
+
+template<>
+void Kernel::setKernelArgument<Buffer>(u32 id, Buffer& value)
+{
+	cl_int err = clSetKernelArg(this->ck_kernel, id, sizeof(cl_mem), &value.s_compute_unit_ref);
+	clHandleError(err);
+}
+
+template<>
+void Kernel::setKernelArgument<Buffer>(u32 id, Buffer* value)
+{
+	cl_int err = clSetKernelArg(this->ck_kernel, id, sizeof(cl_mem), &value->s_compute_unit_ref);
+	clHandleError(err);
+}

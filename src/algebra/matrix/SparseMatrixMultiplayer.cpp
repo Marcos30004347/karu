@@ -169,11 +169,11 @@ void SparseMatrixMultiplayer::sparseMVMultiplyGPU(SparseMatrixData* A, SparseMat
 	bsMV_kernel->setKernelArgument(1, sizeof(unsigned long int), &A->bcsr_block_width);
 	bsMV_kernel->setKernelArgument(2, sizeof(unsigned long int), &x->bcsr_block_heigth);
 	bsMV_kernel->setKernelArgument(3, sizeof(unsigned long int), &x->bcsr_block_width);
-	bsMV_kernel->setKernelArgument(4, BUFFER_ARG_SIZE, col_idx.computeUnitRef());
-	bsMV_kernel->setKernelArgument(5, BUFFER_ARG_SIZE, row_ptr.computeUnitRef());
-	bsMV_kernel->setKernelArgument(6, BUFFER_ARG_SIZE, A_buffe.computeUnitRef());
-	bsMV_kernel->setKernelArgument(7, BUFFER_ARG_SIZE, x_buffe.computeUnitRef());
-	bsMV_kernel->setKernelArgument(8, BUFFER_ARG_SIZE, y_buffe.computeUnitRef());
+	bsMV_kernel->setKernelArgument(4, BUFFER_ARG_SIZE, col_idx.upload());
+	bsMV_kernel->setKernelArgument(5, BUFFER_ARG_SIZE, row_ptr.upload());
+	bsMV_kernel->setKernelArgument(6, BUFFER_ARG_SIZE, A_buffe.upload());
+	bsMV_kernel->setKernelArgument(7, BUFFER_ARG_SIZE, x_buffe.upload());
+	bsMV_kernel->setKernelArgument(8, BUFFER_ARG_SIZE, y_buffe.upload());
 
 	// shared memory
 	bsMV_kernel->setKernelArgument(9, block_dim * sizeof(float), nullptr);
@@ -182,7 +182,7 @@ void SparseMatrixMultiplayer::sparseMVMultiplyGPU(SparseMatrixData* A, SparseMat
 
 	y_buffe.toLogicUnit();
 
-	f32* data = (f32*)y_buffe.logicUnitRef();
+	f32* data = (f32*)y_buffe.download();
 
 	for(u64 i=0; i<y->bcsr_lines; i++)
 	{

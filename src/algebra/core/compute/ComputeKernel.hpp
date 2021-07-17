@@ -28,6 +28,15 @@ class Kernel {
 	Kernel(Program* program, const char* kernel_name);
 	~Kernel();
 
+	// template<typename T>
+	// void setKernelArgument(u32 id, T&& value);
+
+	template<typename T>
+	void setKernelArgument(u32 id, T& value);
+
+	template<typename T>
+	void setKernelArgument(u32 id, T* value);
+
 	void setKernelArgument(u32 id, u32 size, void* ptr);
 	
 	void enqueue(std::vector<u64> global_work_size, std::vector<u64> local_work_size, std::vector<Event> wait_list, Event* event);
@@ -38,6 +47,9 @@ class Kernel {
 	private:
 	cl_kernel ck_kernel;
 };
+
+
+
 
 }
 }
