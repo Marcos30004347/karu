@@ -251,26 +251,63 @@ __kernel void move_int_to_int_elements(
 	}
 }
 
-// __kernel void parallel_order_checking(
-// 	__global int *input,
-// 	__global int *out,
-// 	__local int  *temp,
-// )
-// {
-// 	const unsigned int t_block_idx  = get_group_id(0);
-// 	const unsigned int t_block_dim  = get_local_size(0);
-// 	const unsigned int thid 		= get_local_id(0);
+__kernel void parallel_order_checking(
+	__global int *input,
+	__global volatile int output,
+	__local int  *temp,
+)
+{
+	get_global_size()
+	const unsigned int t_block_idx  = get_group_id(0);
+	const unsigned int t_block_dim  = get_local_size(0);
+	const unsigned int thid 		= get_local_id(0);
 
-// 	unsigned int id = thid + t_block_idx*t_block_dim;
+	unsigned int id = thid + t_block_idx*t_block_dim;
 
-// 	temp[thid] = input[id];
-// 	temp[thid+1] = input[id+1];
+	temp[thid] = input[id];
+	if(thid == 0)
+	{
+		if(t_block_idx < (get_num_groups(0) - 1))
+		{
+			temp[t_block_dim] = input[t_block_idx*t_block_dim + t_block_dim];
+		}
+		else
+		{
+			temp[t_block_dim] = 2147483647;
+		}
+	}
 
-// 	barrier(CLK_LOCAL_MEM_FENCE);
+	barrier(CLK_LOCAL_MEM_FENCE);
 
-// 	temp[thid] = temp[thid] > temp[thid+1];
-// 	output[id] = temp[thid];
-// }
+	temp[thid] = temp[thid] > temp[thid+1];
+
+
+    int blockSize = get_local_size(0);
+    int halfBlockSize = blockSize / 2;
+
+    while (halfBlockSize > 0) {
+
+        if (thid < halfBlockSize) {
+            temp[thid] += temp[thid + halfBlockSize];
+
+            if ((halfBlockSize*2)<blockSize) { // uneven block division
+                if (thid==0) { // when localID==0
+                    temp[thid] += temp[thid + (blockSize-1)];
+                }
+            }
+
+        }
+
+        barrier(CLK_LOCAL_MEM_FENCE);
+        blockSize = halfBlockSize;
+        halfBlockSize = blockSize / 2;
+    }
+
+    if (thid==0) {
+		atomic_add(output, temp[0]);
+        // output[get_group_id(0)] = temp[0];
+    }
+}
 
 
 // #define SHARED_MEMORY_BANKS 32

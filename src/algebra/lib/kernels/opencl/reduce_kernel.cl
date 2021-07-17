@@ -1,6 +1,6 @@
 __kernel void reduce(
     __global float * input,
-    __global float *output,
+    __global float * output,
     __local float * target,
     unsigned int AOffset
 ) {
