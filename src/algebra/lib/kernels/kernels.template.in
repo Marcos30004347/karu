@@ -10,6 +10,7 @@ karu::algebra::compute::Kernel* block_scan_kernel = nullptr;
 karu::algebra::compute::Kernel* scan_kernel = nullptr;
 karu::algebra::compute::Kernel* add_sums_kernel = nullptr;
 karu::algebra::compute::Kernel* reduce_kernel = nullptr;
+karu::algebra::compute::Kernel* radix_parallel_order_checking_kernel = nullptr;
 
 void create_algebra_lib_kernels()
 {
@@ -23,6 +24,7 @@ void create_algebra_lib_kernels()
 
     radix_sort_int_to_int_prefix_sum_kernel = new karu::algebra::compute::Kernel(radix_sort_program, "int_to_int_four_way_prefix_sum_shuffle");
     radix_move_int_to_int_elements_kernel = new karu::algebra::compute::Kernel(radix_sort_program, "move_int_to_int_elements");
+    radix_parallel_order_checking_kernel = new karu::algebra::compute::Kernel(radix_sort_program, "parallel_block_order_checking");
     
     block_scan_kernel = new karu::algebra::compute::Kernel(array_scan_program, "block_scan_kernel");
     scan_kernel = new karu::algebra::compute::Kernel(array_scan_program, "small_scan_kernel");
