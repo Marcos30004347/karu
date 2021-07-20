@@ -42,6 +42,7 @@ add_library(
     src/algebra/matrix/BlockSparseMatrixData.cpp
     src/algebra/matrix/BlockSparseMatrixMultiplayer.cpp
     src/algebra/matrix/kernels/kernels.cpp
+    src/image/Image.cpp
 )
     
 target_include_directories(karu PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)

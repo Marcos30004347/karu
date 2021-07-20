@@ -26,3 +26,9 @@ project(AlgebraBlockSparseMatrixMultiplayerTests)
 add_executable(AlgebraBlockSparseMatrixMultiplayerTests algebra/matrix/BlockSparseMatrixMultiplayer.cpp)
 target_link_libraries(AlgebraBlockSparseMatrixMultiplayerTests karu)
 add_test(NAME AlgebraBlockSparseMatrixMultiplayerTests COMMAND AlgebraBlockSparseMatrixMultiplayerTests)
+
+project(SiftTests)
+add_executable(SiftTests sift/sift.cpp)
+target_link_libraries(SiftTests karu)
+add_test(NAME SiftTests COMMAND SiftTests)
+
