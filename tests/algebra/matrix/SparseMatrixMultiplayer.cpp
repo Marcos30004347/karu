@@ -193,7 +193,7 @@ int main()
 		{}
 	);
 
-	algebra::SparseMatrixMultiplayer::sparseMMMultiplyGPU(&A0, &B0, &C0);
+	// algebra::SparseMatrixMultiplayer::sparseMMMultiplyGPU(&A0, &B0, &C0);
 	
 	C0.print();
 	std::cout << std::endl;
