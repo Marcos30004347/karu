@@ -26,35 +26,33 @@ __kernel void int_to_int_four_way_prefix_sum_shuffle(
 	int gid = get_global_id(0);
 	int thid = get_local_id(0);
 	int blkSize = get_local_size(0);
-
-	int n = roundPowerOfTwo(blkSize);
+	int offset = 1;
 
 	__local int offsets[4];
 
 	// Do 4 way predication
-	int key;
-	int val;
+	int key = 2147483647;
+	int val = 2147483647;
 
-	if (gid >= size && bitIndx == 0)
-	{
-		key = 2147483647;
-		val = 2147483647;
-	}
-	else
+	if (gid < size)
 	{
 		key = keys_i[gid];
 		val = vals_i[gid];
 	}
-	// keyShuffle_o[thid] = gid;
-	// return;
+
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	/* Compute masks */
+	int n = roundPowerOfTwo(blkSize);
+
 	int extracted = (key >> bitIndx) & 3;
+
 	for(int b=0; b<4; ++b)
 	{
 		cnt[b * n + thid] = (extracted == b);
 	}
+
+	barrier(CLK_LOCAL_MEM_FENCE);
 
 	if (thid == 0)
 	{
@@ -67,10 +65,6 @@ __kernel void int_to_int_four_way_prefix_sum_shuffle(
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	// Up-Seep 4 ways
-	int offset = 1;
-
-	valShuffle_o[gid] = cnt[1*n + thid];
-
 	for (int d = n>>1; d > 0; d >>= 1)
 	{
 
@@ -84,11 +78,12 @@ __kernel void int_to_int_four_way_prefix_sum_shuffle(
 				cnt[n*b + bi] += cnt[n*b + ai];
 			}
 		}
-	
 		barrier(CLK_LOCAL_MEM_FENCE);
 
 		offset*=2;
 	}
+
+	barrier(CLK_LOCAL_MEM_FENCE);
 
 	// Down-Sweep 4 ways
 	if (thid == 0)
@@ -106,7 +101,6 @@ __kernel void int_to_int_four_way_prefix_sum_shuffle(
 
 		offset >>= 1;
 
-		// barrier(CLK_LOCAL_MEM_FENCE);
 		if(thid < d)
 		{
 
@@ -124,8 +118,9 @@ __kernel void int_to_int_four_way_prefix_sum_shuffle(
 	}
 
 	// build Block Sums
+
 	barrier(CLK_LOCAL_MEM_FENCE);
-	
+
 	if (thid == 0) {
 		for(int b=0; b<4; ++b)
 		{
@@ -140,23 +135,17 @@ __kernel void int_to_int_four_way_prefix_sum_shuffle(
 	for (int i = 0; i < extracted; ++i)
 		offset += offsets[i];
 
+	barrier(CLK_LOCAL_MEM_FENCE);
+	
 	int addr = cnt[extracted * n + thid] + offset;
 
 	s_keys[addr] = key;
 	s_vals[addr] = val;
 
-	// if(gid < size)
-	// {
+	barrier(CLK_LOCAL_MEM_FENCE);
+
 	keyShuffle_o[gid] = s_keys[thid];
 	valShuffle_o[gid] = s_vals[thid];
-	// }
-	// else 
-	// {
-		// keyShuffle_o[gid] = 2147483647;
-		// valShuffle_o[gid] = 2147483647;
-	// }
-
-	barrier(CLK_LOCAL_MEM_FENCE);
 
 	if (thid < 4)
 	{
@@ -179,21 +168,21 @@ __kernel void move_int_to_int_elements(
 	int gid = get_global_id(0);
 	int thid = get_local_id(0);
 
-	__local int offsets[4];
+	__local int offsets[5];
 	__local int counts[4];
 	__local int prefixSums[4];
 
-	// Get four way predication
 	int key = keyShuffle[gid];
 	int val = valShuffle[gid];
 
 	int extracted = (key >> bitIndx) & 3;
 
-	// Calculate the result address
-	if (thid == 0) {
+	if (thid == 0)
+	{
 		offsets[0] = 0;
-
-		for (int b = 0; b < 4; ++b) {
+	
+		for (int b = 0; b < 4; ++b)
+		{
 			counts[b] = blkSum[get_num_groups(0)*b + get_group_id(0)];
 			prefixSums[b] = prefixBlkSum[get_num_groups(0)*b + get_group_id(0)];
 			offsets[b+1] = offsets[b] + counts[b];
@@ -207,15 +196,11 @@ __kernel void move_int_to_int_elements(
 	int pos = Pdn + m;
 
 	barrier(CLK_LOCAL_MEM_FENCE);
-
-	if (pos < size) {
+	
+	if (pos < size)
+	{
 		keys[pos] = key;
 		vals[pos] = val;
-	}
-	else 
-	{
-		keys[pos] = 2147483647;
-		vals[pos] = 2147483647;
 	}
 }
 

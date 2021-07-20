@@ -180,18 +180,18 @@ void Buffer::toLogicUnit()
 	{
 		if(!s_is_logic_unit_allocated)
 			this->s_logic_unit_ref = malloc(this->s_size);
-
-		cl_int err = clEnqueueReadBuffer(
-			karu_core_global_ctx->getComputeQueue(),
-			this->s_compute_unit_ref,
-			CL_TRUE,
-			0,
-			this->s_size,
-			this->s_logic_unit_ref,
-			0,
-			NULL,
-			NULL
-		);
+			// std::cout << this->s_size << std::endl;
+			cl_int err = clEnqueueReadBuffer(
+				karu_core_global_ctx->getComputeQueue(),
+				this->s_compute_unit_ref,
+				CL_TRUE,
+				0,
+				this->s_size,
+				this->s_logic_unit_ref,
+				0,
+				NULL,
+				NULL
+			);
 		
 		clHandleError(err);
 

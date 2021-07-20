@@ -14,14 +14,15 @@ set(LIB_KERNELS_PATH "src/algebra/lib/kernels/opencl")
 
 macro(set_kernel_var filename variable)
     file(STRINGS ${filename} TMP)
-    set(TMP2 " ")
+    set(TMP2 "R\"(")
     foreach(LINE ${TMP})
         set(
             TMP2
             "${TMP2}
-            \"${LINE}\\n\""
+            ${LINE}"
         )
     endforeach()
+    set(TMP2 "${TMP2})\"")
     set(${variable} ${TMP2})
 endmacro()
 

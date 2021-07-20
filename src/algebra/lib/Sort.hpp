@@ -37,47 +37,17 @@ void prefix_sum(
 	int rounded
 )
 {
-
-	// std::cout << "asdas\n";
-	// int* b = (int*)keys->download();
-	// for(int i=0; i<size; i++)
-	// {
-	// 	std::cout << b[i] << " ";
-	// }
-	// std::cout << "\n";
-	// keys->upload();
-
 	radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(0, keys);
 	radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(1, vals);
 	radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(2, &i);
 	radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(3, &size);
 	radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(4, sizeof(int) * roundToPowerOfTwo(bs) * 4, nullptr);
-	radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(5, sizeof(int) * bs, nullptr);
-	radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(6, sizeof(int) * bs, nullptr);
+	radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(5, sizeof(int) * 2*bs, nullptr);
+	radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(6, sizeof(int) * 2*bs, nullptr);
 	radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(7, block_sum);
 	radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(8, keys_shuffle);
 	radix_sort_int_to_int_prefix_sum_kernel->setKernelArgument(9, vals_shuffle);
 	radix_sort_int_to_int_prefix_sum_kernel->enqueue({ (unsigned long)rounded }, { (unsigned long)bs });
-
-	// std::cout << "vals\n";
-	// int* b = (int*)vals_shuffle->download();
-	// for(int i=0; i<rounded; i++)
-	// {
-	// 	std::cout << b[i] << " ";
-	// }
-	// std::cout << "\n";
-	// vals_shuffle->upload();
-
-	std::cout << "keys\n";
-	int* a = (int*)keys_shuffle->download();
-	for(int i=0; i<rounded; i++)
-	{
-		std::cout << a[i] << " ";
-	}
-	std::cout << "\n";
-	keys_shuffle->upload();
-
-
 }
 
 
@@ -113,18 +83,55 @@ void sort(Buffer* keys, Buffer* vals, int size, bool do_order_check = false)
 	int rounded = ceil(((float)size)/bs) * bs;
 	int num_blocks = rounded / bs;
 
-	algebra::compute::Buffer block_sum = algebra::compute::Buffer(4*rounded/bs*sizeof(int), algebra::compute::Buffer::READ_WRITE, algebra::compute::Buffer::MEM_GPU);
+	algebra::compute::Buffer block_sum = algebra::compute::Buffer((4*num_blocks)*sizeof(int), algebra::compute::Buffer::READ_WRITE, algebra::compute::Buffer::MEM_GPU);
+	algebra::compute::Buffer prefi_sum = algebra::compute::Buffer((4*num_blocks)*sizeof(int), algebra::compute::Buffer::READ_WRITE, algebra::compute::Buffer::MEM_GPU);
 	algebra::compute::Buffer key_shuff = algebra::compute::Buffer(rounded*sizeof(int), algebra::compute::Buffer::READ_WRITE, algebra::compute::Buffer::MEM_GPU);
 	algebra::compute::Buffer val_shuff = algebra::compute::Buffer(rounded*sizeof(int), algebra::compute::Buffer::READ_WRITE, algebra::compute::Buffer::MEM_GPU);
-	algebra::compute::Buffer prefi_sum = algebra::compute::Buffer((4*rounded/bs)*sizeof(int), algebra::compute::Buffer::READ_WRITE, algebra::compute::Buffer::MEM_GPU);
-	algebra::compute::Buffer intermediate = algebra::compute::Buffer(num_blocks*sizeof(int), algebra::compute::Buffer::READ_WRITE, algebra::compute::Buffer::MEM_GPU);
+	// algebra::compute::Buffer intermediate = algebra::compute::Buffer(num_blocks*sizeof(int), algebra::compute::Buffer::READ_WRITE, algebra::compute::Buffer::MEM_GPU);
 
-	for(int i=0; i<32; i+=2)
+	for(int i=0; i<30; i+=2)
 	{
-		if(do_order_check && isInOrder(keys, rounded, num_blocks)) break;
+		// if(do_order_check && isInOrder(keys, rounded, num_blocks)) break;
 		prefix_sum(keys, vals, i, size, bs, &block_sum, &key_shuff, &val_shuff, rounded);
-		scan(&block_sum, &prefi_sum, size);
+
+		// int* ks = (int*)key_shuff.download();
+		// std::cout << "keys shuffle\n";
+		// for(int i=0; i<rounded; i++)
+		// {
+		// 	std::cout << ks[i] << " ";
+		// }	
+		// key_shuff.upload();
+		// std::cout << "\n\n\n\n";
+
+		// int* blk = (int*)block_sum.download();
+		// std::cout << "block sum\n";
+		// for(int i=0; i<(4*rounded/bs); i++)
+		// {
+		// 	std::cout << blk[i] << " ";
+		// }	
+		// block_sum.upload();
+
+		scan(&block_sum, &prefi_sum, 4*num_blocks);
+
+		// int* pf = (int*)prefi_sum.download();
+		// std::cout << "prefi_sum\n";
+		// for(int i=0; i<(4*rounded/bs); i++)
+		// {
+		// 	std::cout << pf[i] << " ";
+		// }	
+		// prefi_sum.upload();
+		// std::cout << "\n\n\n\n";
 		move_elements(&key_shuff, &val_shuff, i, bs, keys, vals, &block_sum, &prefi_sum, size, rounded);
+	
+		// int* k = (int*)keys->download();
+		// std::cout << "keys buff\n";
+		// for(int i=0; i<size; i++)
+		// {
+		// 	std::cout << k[i] << " ";
+		// }	
+		// keys->upload();
+		// std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n";
+	
 	}
 }
 
