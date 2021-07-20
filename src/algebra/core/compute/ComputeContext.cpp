@@ -44,7 +44,7 @@ Context::Context()
 	{
 		numGPUs = 0;
 		numCPUs = 0;
-	
+
 		clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_GPU, 0, nullptr, &numGPUs);
 	
 		if(numGPUs != 0)
@@ -72,7 +72,6 @@ Context::Context()
 			this->cpus.push_back(cpus);
 		}
 	}
-
 	
 	for(int i=0; i<this->gpu_platforms.size(); i++)
 	{
@@ -91,22 +90,23 @@ Context::Context()
 		}
 	}
 
-	for(int i=0; i<this->cpu_platforms.size(); i++)
-	{
-		for(cl_device_id cpu: this->cpus[i])
-		{
-			cl_context_properties properties[] = { CL_CONTEXT_PLATFORM, (cl_context_properties)cpu_platforms[i], 0 };
-			cl_context context = clCreateContextFromType(properties, CL_DEVICE_TYPE_ALL, NULL, NULL, &err);
-			clHandleError(err);
+	// for(int i=0; i<this->cpu_platforms.size(); i++)
+	// {
+	// 	for(cl_device_id cpu: this->cpus[i])
+	// 	{
+	// 		cl_context_properties properties[] = { CL_CONTEXT_PLATFORM, (cl_context_properties)cpu_platforms[i], 0 };
+	// 		cl_context context = clCreateContextFromType(properties, CL_DEVICE_TYPE_ALL, NULL, NULL, &err);
+	// 		clHandleError(err);
 		
-			this->cpus_contexts.push_back(context);
+	// 		this->cpus_contexts.push_back(context);
 		
-			cl_command_queue queue = clCreateCommandQueueWithProperties(context, cpu, nullptr, &err);
-			clHandleError(err);
+	// 		cl_command_queue queue = clCreateCommandQueueWithProperties(context, cpu, nullptr, &err);
+	// 		clHandleError(err);
 
-			this->cpus_queue.push_back(queue);
-		}
-	}
+	// 		this->cpus_queue.push_back(queue);
+	// 	}
+	// }
+
 }
 
 Context::~Context()
