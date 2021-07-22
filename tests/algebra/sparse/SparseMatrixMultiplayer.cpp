@@ -70,13 +70,10 @@ int main()
 	algebra::SparseMatrixMultiplayer::sparseMVMultiplyGPU(&M0, &v0, &v1);
 	assert(v1 == algebra::Vector({198, 243, 288,198,243,288,198,243,288}));
 
-
-
-
 	algebra::SparseMatrixData M1 = algebra::SparseMatrixData(
 		1, 1,
 		9, 9,
-		{0, 9, 18, 27, 36, 45, 54, 63, 72, 81 }, // row_ptr
+		{ 0, 9, 18, 27, 36, 45, 54, 63, 72, 81 }, // row_ptr
 		{
 			0,1,2,3,4,5,6,7,8,
 			0,1,2,3,4,5,6,7,8,

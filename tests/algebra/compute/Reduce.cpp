@@ -7,11 +7,15 @@
 using namespace karu;
 using namespace karu::algebra::compute;
 
-#define N 2
+#define N 6
 
 unsigned sizes[N] = {
 	256,
 	512,
+	1000,
+	10000,
+	100000,
+	1000000,
 };
 
 unsigned cpuReduce(int* arr, int size)
