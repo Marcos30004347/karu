@@ -42,8 +42,3 @@ add_executable(AlgebraSparseMatrixMultiplayerTests algebra/sparse/SparseMatrixMu
 target_link_libraries(AlgebraSparseMatrixMultiplayerTests karu)
 add_test(NAME AlgebraSparseMatrixMultiplayerTests COMMAND AlgebraSparseMatrixMultiplayerTests)
 
-project(CameraTests)
-add_executable(CameraTests camera/Camera.cpp)
-target_link_libraries(CameraTests karu)
-add_test(NAME CameraTests COMMAND CameraTests)
-

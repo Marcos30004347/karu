@@ -14,16 +14,16 @@ f32 radians(f32 degrees)
 
 int main()
 {
-	Renderer renderer;
+	Renderer renderer(1000, 1000);
 
 	// 33mm focal lengths and (1000, 1000) principal point
-	Camera cam = Camera(1187, 1187, 0, 0, algebra::Vector({0, 0, 0}), algebra::Vector({0, 0, radians(360)}), 10, 0.01, 0.0);
+	Camera cam = Camera(1187, 1187, 100, 100, algebra::Vector({0, 0, 0}), algebra::Vector({0, 0, radians(360)}), 15.3);
 
 	std::vector<algebra::Vector> pixels;
 
-	for(int i=-800; i<800; i+=20)
+	for(int i=-800; i<800; i+=10)
 	{
-		for(int j=-800; j<800; j+=20)
+		for(int j=-800; j<800; j+=10)
 		{
 			pixels.push_back(cam.projection({ (float)i, (float)j, 5000 }));
 		}
@@ -34,6 +34,6 @@ int main()
 		std::cout << (pix[0]) << " " << (pix[1]) << "\n";
 	}
 
-	renderer.draw2dPoints(pixels, 0, 0, 100, 100);
+	renderer.draw2dPoints(pixels, 100, 100, 100, 100);
 
 }

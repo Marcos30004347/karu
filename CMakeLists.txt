@@ -65,6 +65,8 @@ add_library(
     src/algebra/compute/lib/Reduce.cpp
     src/algebra/compute/lib/Commom.cpp
     src/algebra/compute/lib/kernels/kernels.cpp
+    src/camera/Camera.cpp
+    src/camera/codegen/cameraModel.cpp
     src/algebra/vector/Vector.cpp
     src/algebra/matrix/MatrixData.cpp
     src/algebra/matrix/MatrixMultiplayer.cpp
@@ -74,6 +76,7 @@ add_library(
     src/algebra/sparse/SparseMatrixMultiplayer.cpp
     src/algebra/sparse/lib/kernels/kernels.cpp
     src/algebra/sparse/lib/HashMap.cpp
+    src/renderer/Renderer.cpp
 )
     
 target_include_directories(karu PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
@@ -85,6 +88,8 @@ target_link_libraries(karu ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(karu glad)
 
 target_compile_definitions(karu PRIVATE DEBUG=1)
+
+add_subdirectory(samples)
 
 enable_testing()
 add_subdirectory(tests)
