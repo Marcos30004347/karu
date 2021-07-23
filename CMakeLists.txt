@@ -4,6 +4,21 @@ project(karu)
 
 set (CMAKE_CXX_STANDARD 11)
 
+add_subdirectory(vendor/glfw)
+find_package(OpenGL REQUIRED)
+
+# include_directories(${GLEW_INCLUDE_DIRS})
+include_directories(${OPENGL_INCLUDE_DIRS})
+
+# link_libraries(${GLEW_LIBRARIES})
+link_libraries(${OPENGL_LIBRARIES})
+link_libraries(${OPENGL_gl_LIBRARY})
+link_libraries(${OPENGL_glu_LIBRARY})
+
+set(GLAD_DIR "vendor/glad")
+add_library("glad" "${GLAD_DIR}/src/glad.c")
+target_include_directories("glad" PRIVATE "${GLAD_DIR}/include")
+
 find_package(OpenCL REQUIRED)
 find_package( Threads )
 include_directories(src)
@@ -62,8 +77,12 @@ add_library(
 )
     
 target_include_directories(karu PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
+target_include_directories(karu PUBLIC "${GLAD_DIR}/include")
+
 target_link_libraries(karu OpenCL::OpenCL)
+target_link_libraries(karu glfw)
 target_link_libraries(karu ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(karu glad)
 
 target_compile_definitions(karu PRIVATE DEBUG=1)
 

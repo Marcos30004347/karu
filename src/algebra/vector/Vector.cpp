@@ -1,13 +1,26 @@
 #include "algebra/vector/Vector.hpp"
-
+#include <iostream>
 namespace karu::algebra
 {
+Vector::Vector()
+{
+	v_size = 0;
+	this->v_data = nullptr;
+}
 
 Vector::Vector(std::initializer_list<f32> vals)
 {
 	v_size = vals.size();
 	this->v_data = new f32[vals.size()];
 	std::copy(vals.begin(), vals.end(), v_data);
+}
+
+
+Vector::Vector(const Vector& other)
+{
+	v_size = other.v_size;
+	this->v_data = new f32[other.v_size];
+	std::copy(other.v_data, other.v_data + other.v_size, v_data);
 }
 
 Vector::Vector(size_t size, f32* data)
@@ -56,5 +69,14 @@ bool Vector::operator ==(Vector&& other)
 	}
 	return true;
 }
+
+Vector& Vector::operator =(const Vector& other)
+{
+	v_size = other.v_size;
+	this->v_data = new f32[other.v_size];
+	std::copy(other.v_data, other.v_data + other.v_size, v_data);
+	return *this;
+}
+
 
 }

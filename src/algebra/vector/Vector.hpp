@@ -14,6 +14,8 @@ public:
 
 	Vector(std::initializer_list<f32> vals);
 	Vector(size_t size, f32* data);
+	Vector(const Vector& other);
+	Vector();
 	~Vector();
 	u32 size();
 	f32* data();
@@ -21,6 +23,7 @@ public:
 	
 	bool operator ==(Vector& other);
 	bool operator ==(Vector&& other);
+	Vector& operator =(const Vector& other);
 
 };
 
