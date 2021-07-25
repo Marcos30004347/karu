@@ -5,27 +5,29 @@
 using namespace karu;
 using namespace algebra;
 
-MatrixData MatrixSubtractor::sub(MatrixData* A, MatrixData* B, bool A_T, bool B_T)
+void MatrixSubtractor::sub(MatrixData* C, const MatrixData* const A, const MatrixData* const B, bool A_T, bool B_T)
 {
 	assert(A->columns() == B->columns());
 	assert(A->lines() == B->lines());
 
-	assert(A->blockHeight() == B->blockHeight());
-	assert(A->blockWidth() == B->blockWidth());
+	for(i32 i=0; i<C->m_lines; i+= C->blockHeight()) 
+	{
+		for(i32 j=0; j<C->m_columns; j+= C->blockWidth()) 
+		{
+			u32 row_margin = C->m_lines - i;
+			u32 col_margin = C->m_columns - j;
+	
+			i32 width = std::min(C->m_block_width, col_margin);
+			i32 heigth = std::min(C->m_block_heigth, row_margin);
 
-	MatrixData C = MatrixData(A->lines(), B->columns(), A->blockWidth(), B->blockHeight());
+			for(i32 y=0; y<heigth; y++)
+			{
+				for(i32 x=0; x<width; x++)
+				{
+					i32 Ci = i+y;
+					i32 Cj = j+x;
 
-	// Iterate over C blocks
-	for(i32 i=0; i<A->lines()/A->blockHeight(); i++) {
-		for(i32 j=0; j<B->columns()/B->blockWidth(); j++) {
-
-			for(i32 x=0; x<B->blockWidth(); x++) {
-				for(i32 y=0; y<A->blockHeight(); y++) {
-
-					i32 Ci = (A->blockHeight()*i) % A->lines() + y;
-					i32 Cj = (B->blockWidth()*j) % B->columns() + x;
-
-					C.set(
+					C->set(
 						Ci, Cj,
 						A->get((1 - A_T) * Ci + A_T * Cj, (1 - A_T) * Cj + A_T * Ci) -
 						B->get((1 - B_T) * Ci + B_T * Cj, (1 - B_T) * Cj + B_T * Ci)
@@ -34,5 +36,4 @@ MatrixData MatrixSubtractor::sub(MatrixData* A, MatrixData* B, bool A_T, bool B_
 			}
 		}
 	}
-	return C;
 }

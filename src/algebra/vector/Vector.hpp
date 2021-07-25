@@ -17,8 +17,8 @@ public:
 	Vector(const Vector& other);
 	Vector();
 	~Vector();
-	u32 size();
-	f32* data();
+	const u32 size() const;
+	f32* data() const;
 	f32& operator[](u32 i);
 	
 	bool operator ==(Vector& other);

@@ -35,7 +35,7 @@ Vector::~Vector()
 	delete this->v_data;
 }
 
-f32* Vector::data()
+f32* Vector::data() const
 {
 	return this->v_data;
 }
@@ -45,7 +45,7 @@ f32& Vector::operator[](u32 i)
 	return this->v_data[i];
 }
 
-u32 Vector::size()
+const u32 Vector::size() const
 {
 	return this->v_size;
 }

@@ -5,38 +5,106 @@
 using namespace karu;
 using namespace algebra;
 
-MatrixData MatrixMultiplayer::multiply(MatrixData* A, MatrixData* B, bool A_T, bool B_T)
+void MatrixMultiplayer::mul(MatrixData* C, const MatrixData* const A, const MatrixData* const B, bool A_T, bool B_T)
 {
 	assert(A->columns() == B->lines());
-	assert(A->blockWidth() == B->blockHeight());
-	
-	MatrixData C = MatrixData(A->lines(), B->columns(), A->blockWidth(), B->blockHeight());
 
-	// Iterate over C blocks
-	for(i32 i=0; i<A->lines()/A->blockHeight(); i++) {
-		for(i32 j=0; j<B->columns()/B->blockWidth(); j++) {
-			//working C(i,j) block
-			// C(i,j) = A(i,:)*B(:,j)
-			for(i32 k=0; k<A->columns()/A->blockWidth(); k++) {
-				// k'th A block line
-				// k'th B block column
+	// code for GPU multiplication
+	for(i32 i=0; i<C->m_lines; i+= C->blockHeight()) 
+	{
+		for(i32 j=0; j<C->m_columns; j+= C->blockWidth()) 
+		{
+			// loops above will become one block
+			for(i32 y=0; y<B->m_block_heigth; y++)
+			{
+				for(i32 x=0; x<A->m_block_width; x++)
+				{
+					// loops above will become one thread
+					f32 acc = 0;
 
-				// Multiply block matrix
-				for(i32 y=0; y<B->blockHeight(); y++) {
-					for(i32 x=0; x<A->blockWidth(); x++) {
-						for(i32 q=0; q<A->blockWidth(); q++) {
-							i32 Ai = (B->blockHeight()*i) % A->lines() + y;
-							i32 Aj = (A->blockWidth()*k) % A->columns() + (x+q) % A->blockWidth();
+					i32 Ci = i + y, Cj = j + x;
+					for(i32 k=0; k<A->columns(); k += A->blockWidth())
+					{
+						for(i32 q=0; q<A->m_block_width; q++)
+						{
+							i32 Ai = i + y, Aj = k + q;
+							i32 Bi = k + q, Bj = j + x;
+							acc += A->get(Ai, Aj) * B->get(Bi, Bj);
+						}
+					}
+					C->set(Ci, Cj, acc);
+				}
+			}
+		}
+	}
 
-							i32 Bi = (B->blockHeight()*k) % B->lines() + (x+q) % A->blockWidth();
-							i32 Bj = (A->blockWidth()*j) % B->columns() + x;
 
-							i32 Ci = (B->blockHeight()*i) % A->lines() + y;
-							i32 Cj = (A->blockWidth()*j) % B->columns() + x;
+	// Above lines just set the padding of the matrix to an identity like matrix
+	for(int j=0; j<C->m_stored_column - C->m_columns; j++)
+	{
+		for(int i=0; i<C->m_lines; i++)
+		{
+			i32 block_y = i/C->m_block_heigth;
+			i32 block_x = (C->m_columns + j)/C->m_block_width;
 
-							C.set(
+			i32 y = i - block_y*C->m_block_heigth;
+			i32 x = (C->m_columns + j) - block_x*C->m_block_width;
+
+			C->m_data[C->stride(block_y, block_x) + y*C->m_block_width + x] = 0.f;
+		}
+	}
+	for(int i=0; i<C->m_stored_lines - C->m_lines; i++)
+	{
+		for(int j=0; j<C->m_columns; j++)
+		{
+			i32 block_y = (C->m_lines + i)/C->m_block_heigth;
+			i32 block_x = j/C->m_block_width;
+
+			i32 y = (C->m_lines + i) - block_y*C->m_block_heigth;
+			i32 x = j - block_x*C->m_block_width;
+
+			C->m_data[C->stride(block_y, block_x) + y*C->m_block_width + x] = 0.f;
+		}
+	}
+	for(int i=0; i<std::min(C->m_stored_lines - C->m_lines, C->m_stored_column - C->m_columns); i++)
+	{
+		i32 block_y = (C->m_lines + i)/C->m_block_heigth;
+		i32 block_x = (C->m_columns + i)/C->m_block_width;
+
+		i32 y = (C->m_lines + i) - block_y*C->m_block_heigth;
+		i32 x = (C->m_columns + i) - block_x*C->m_block_width;
+
+		C->m_data[C->stride(block_y, block_x) + y*C->m_block_width + x] = 1.f;
+	}
+
+	return;
+
+	// code for CPU multiplication
+	for(i32 i=0; i<C->m_lines; i+= C->blockHeight()) 
+	{
+		for(i32 j=0; j<C->m_columns; j+= C->blockWidth()) 
+		{
+			for(i32 k=0; k<A->columns(); k+=A->blockWidth())
+			{
+				u32 row_margin = C->m_lines - i;
+				u32 col_margin = C->m_columns - j;
+		
+				i32 width = std::min(A->m_block_width, col_margin);
+				i32 heigth = std::min(B->m_block_heigth, row_margin);
+
+				for(i32 y=0; y<heigth; y++)
+				{
+					for(i32 x=0; x<width; x++)
+					{
+						for(i32 q=0; q<A->m_block_width; q++)
+						{
+							i32 Ci = i + y, Cj = j + x;
+							i32 Ai = i + y, Aj = k + q;
+							i32 Bi = k + q, Bj = j + x;
+
+							C->set(
 								Ci, Cj,
-								C.get(Ci,Cj) +
+								C->get(Ci,Cj) +
 								A->get((1 - A_T) * Ai + A_T * Aj, (1 - A_T) * Aj + A_T * Ai) *
 								B->get((1 - B_T) * Bi + B_T * Bj, (1 - B_T) * Bj + B_T * Bi)
 							);
@@ -46,5 +114,16 @@ MatrixData MatrixMultiplayer::multiply(MatrixData* A, MatrixData* B, bool A_T, b
 			}
 		}
 	}
-	return C;
+
+	for(int i=0; i<std::min(C->m_stored_lines - C->m_lines, C->m_stored_column - C->m_columns); i++)
+	{
+		i32 block_y = (C->m_lines + i)/C->m_block_heigth;
+		i32 block_x = (C->m_columns + i)/C->m_block_width;
+
+		i32 y = (C->m_lines + i) - block_y*C->m_block_heigth;
+		i32 x = (C->m_columns + i) - block_x*C->m_block_width;
+
+		C->m_data[C->stride(block_y, block_x) + y*C->m_block_width + x] = 1.f;
+	}
+
 }

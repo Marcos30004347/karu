@@ -35,7 +35,7 @@ void SparseMatrixMultiplayer::sparseMVMultiplyThreadHandler(void* data)
 	Vector* x = args->x;
 	Vector* y = args->y;
 
-	f32* x_data = x->data();
+	const f32* x_data = x->data();
 	f32* y_data = y->data();
 
 	u64 first_block = A->bcsr_row_ptr[target_block_row];

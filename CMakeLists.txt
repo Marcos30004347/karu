@@ -68,6 +68,7 @@ add_library(
     src/camera/Camera.cpp
     src/camera/codegen/cameraModel.cpp
     src/algebra/vector/Vector.cpp
+    src/algebra/matrix/Matrix.cpp
     src/algebra/matrix/MatrixData.cpp
     src/algebra/matrix/MatrixMultiplayer.cpp
     src/algebra/matrix/MatrixAdder.cpp

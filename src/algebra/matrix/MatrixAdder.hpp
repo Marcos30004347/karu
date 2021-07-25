@@ -7,7 +7,7 @@ namespace algebra {
 
 class MatrixAdder {
 	public:
-	static MatrixData add(MatrixData* A, MatrixData* B, bool A_T, bool B_T);
+	static void add(MatrixData* C, const MatrixData* const A, const MatrixData* const B, bool A_T, bool B_T);
 };
 
 // convulação

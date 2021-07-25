@@ -7,7 +7,7 @@ namespace algebra {
 
 class MatrixSubtractor {
 	public:
-	static MatrixData sub(MatrixData* A, MatrixData* B, bool A_T, bool B_T);
+	static void sub(MatrixData* C, const MatrixData* const A, const MatrixData* const B, bool A_T, bool B_T);
 };
 
 }
