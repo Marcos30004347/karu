@@ -18,6 +18,7 @@ MatrixData::MatrixData()
 
 MatrixData::MatrixData(const MatrixData& other)
 {
+
 	this->m_lines = other.m_lines;
 	this->m_columns = other.m_columns;
 	this->m_block_heigth = other.m_block_heigth;
@@ -26,7 +27,7 @@ MatrixData::MatrixData(const MatrixData& other)
 	this->m_stored_lines  = other.m_stored_lines;
 	this->m_stored_column  = other.m_stored_column;
 	
-	std::copy(other.m_data, other.m_data + other.m_stored_lines * other.m_stored_column, this->m_data);
+	std::copy(other.m_data, other.m_data + (other.m_stored_lines*other.m_stored_column), this->m_data);
 }
 MatrixData::MatrixData(u32 lines, u32 columns, u32 block_width, u32 block_heigth, std::initializer_list<f32> data)
 {
@@ -66,7 +67,6 @@ MatrixData::MatrixData(u32 lines, u32 columns, u32 block_width, u32 block_heigth
 			i32 heigth = std::min(m_block_heigth, row_margin);
 
 			// where current block starts 
-			// u32 stride = (block_x + block_y*(this->m_stored_column/this->m_block_width))*this->m_block_width*this->m_block_heigth;
 
 			u32 idx = this->m_block_heigth * this->m_columns * block_y + block_x*this->m_block_width;
 
@@ -93,7 +93,7 @@ MatrixData::MatrixData(u32 lines, u32 columns, u32 block_width, u32 block_heigth
 	this->m_stored_lines  = std::ceil(this->m_lines/(f32)this->m_block_heigth) * this->m_block_heigth;
 	this->m_stored_column = std::ceil(this->m_columns/(f32)this->m_block_width) * this->m_block_width;
 	
-	this->m_data = new f32[lines*columns];
+	this->m_data = new f32[this->m_stored_lines*this->m_stored_column];
 	std::fill(this->m_data, this->m_data + this->m_stored_column*this->m_stored_lines, 0);
 	
 	// define extra space as identity
@@ -136,15 +136,16 @@ MatrixData::MatrixData(u32 lines, u32 columns, u32 block_width, u32 block_heigth
 	}
 }
 
-MatrixData::MatrixData(u32 lines, u32 columns, u32 block_width, u32 block_heigth):
-	m_lines(lines),
-	m_columns(columns),
-	m_block_heigth(block_heigth),
-	m_block_width(block_width)
+MatrixData::MatrixData(u32 lines, u32 columns, u32 block_width, u32 block_heigth)
 {
+	m_lines = lines;
+	m_columns = columns;
+	m_block_heigth = block_heigth;
+	m_block_width = block_width;
+
 	this->m_stored_lines  = std::ceil(this->m_lines/(f32)this->m_block_heigth) * this->m_block_heigth;
 	this->m_stored_column = std::ceil(this->m_columns/(f32)this->m_block_width) * this->m_block_width;	
-
+	
 	this->m_data = new f32[this->m_stored_lines*this->m_stored_column];
 	std::fill(this->m_data, this->m_data + this->m_stored_column*this->m_stored_lines, 0);
 
@@ -163,8 +164,9 @@ MatrixData::MatrixData(u32 lines, u32 columns, u32 block_width, u32 block_heigth
 
 MatrixData::~MatrixData()
 {
+
 	if(this->m_data)
-		delete this->m_data;
+		delete[] this->m_data;
 }
 
 const u32 MatrixData::lines() const
@@ -187,16 +189,17 @@ const u32 MatrixData::blockHeight() const
 	return this->m_block_heigth;
 }
 
+#include<string.h>
+
 MatrixData& MatrixData::operator=(const MatrixData& other)
 {
 	this->m_lines = other.m_lines;
 	this->m_columns = other.m_columns;
 	this->m_block_heigth = other.m_block_heigth;
 	this->m_block_width = other.m_block_width;
-	this->m_data = new f32[this->m_stored_lines*this->m_stored_column];
 	this->m_stored_lines  = other.m_stored_lines;
 	this->m_stored_column  = other.m_stored_column;
-
-	std::copy(other.m_data, other.m_data + other.m_stored_lines * other.m_stored_column, this->m_data);
+	this->m_data = new f32[this->m_stored_lines*this->m_stored_column];
+	std::copy(other.m_data, other.m_data + (other.m_stored_lines * other.m_stored_column), this->m_data);
 	return *this;
 }

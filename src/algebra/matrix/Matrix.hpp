@@ -8,15 +8,15 @@ class Matrix {
 public:
 	MatrixData m_data;
 
+	Matrix(float k);
 	Matrix(const MatrixData& other);
 	Matrix(const Vector& other);
 	Matrix(const Matrix& other);
 
-	Matrix(u32 l, u32 c);
+	Matrix();
 	Matrix(u32 l, u32 c, f32* data);
-	Matrix(u32 l, u32 c, std::initializer_list<f32> data);
-	Matrix(u32 l, u32 c, std::initializer_list<f32> data, u32 bx = 16, u32 by = 16);
-	Matrix(u32 l, u32 c, u32 bx = 16, u32 by = 16);
+	Matrix(u32 l, u32 c, std::initializer_list<f32> data, u32 bx = 1, u32 by = 1);
+	Matrix(u32 l, u32 c, u32 bx = 1, u32 by = 1);
 
 	~Matrix();
 
@@ -28,6 +28,9 @@ public:
 	Matrix operator+(const Matrix& other);
 	Matrix operator-(const Matrix& other);
 	Matrix operator*(const Matrix& other);
+	Matrix operator*(const f32 other);
+	Matrix operator/(const Matrix& other);
+	Matrix operator/(const f32 other);
 
 	class MatrixLineGetter {
 		friend class Matrix;
@@ -40,5 +43,13 @@ public:
 
 	MatrixLineGetter operator[](const unsigned int idx);
 };
+
+Matrix transpose(Matrix& matrix);
+Matrix transpose(Matrix* matrix);
+
+void printMatrixWithMargin(Matrix& A);
+void printMatrixWithMargin(Matrix* A);
+void printMatrix(Matrix& A);
+void printMatrix(Matrix* A);
 
 }

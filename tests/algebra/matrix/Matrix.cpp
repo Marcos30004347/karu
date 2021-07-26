@@ -129,6 +129,55 @@ int main()
 
 	for(int i=0; i<9; i++)
 		assert(L[i][0] == 285);
+
+	Matrix M = transpose(J);
+
+	assert(M.rows() == J.columns());
+	assert(M.columns() == J.rows());
+
+	for(int i=0; i<M.rows(); i++)
+		for(int j=0; j<M.columns(); j++)
+			assert(M[i][j] == J[j][i]);
+
+	Matrix N = transpose(L);
+	assert(N.rows() == L.columns());
+	assert(N.columns() == L.rows());
+
+	for(int i=0; i<N.rows(); i++)
+		for(int j=0; j<N.columns(); j++)
+			assert(N[i][j] == L[j][i]);
+
+	Matrix P = N*L;
+
+	assert(P.columns() == 1);
+	assert(P.rows() == 1);
+	assert(P[0][0] == 731025);
+
+	Matrix Q = M*3.f;
+
+	for(int i=0; i<Q.rows(); i++)
+		for(int j=0; j<Q.columns(); j++)
+			assert(Q[i][j] == 3*M[i][j]);
+
+	Matrix W = Q/3.f;
+
+	for(int i=0; i<Q.rows(); i++)
+		for(int j=0; j<Q.columns(); j++)
+			assert(W[i][j] == Q[i][j]/3.f);
+	
+	Matrix X = 3;
+
+	Matrix Z = Q/X;
+
+	for(int i=0; i<Q.rows(); i++)
+		for(int j=0; j<Q.columns(); j++)
+			assert(Z[i][j] == Q[i][j]/3.f);
+	
+	Matrix Y = W*X;
+
+	for(int i=0; i<Q.rows(); i++)
+		for(int j=0; j<Q.columns(); j++)
+			assert(Y[i][j] == W[i][j]*3.f);
 	
 	return 0;
 }

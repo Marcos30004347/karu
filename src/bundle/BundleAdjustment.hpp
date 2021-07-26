@@ -53,71 +53,17 @@ without forming S on memory:
 	Sx = x4 - x3
 **/
 
-typedef int Vector;
-typedef int Matrix;
+#include <cmath>
+#include <assert.h>
+#include "algebra/matrix/Matrix.hpp"
 
-float dot(Vector a, Vector b){}
-float norm(Vector a){}
+using namespace karu::algebra;
 
-// solve A*x = b
-Matrix ConjugateGradient(Matrix A, Matrix x0, Matrix b, float e)
+namespace karu::bundle 
 {
-	Matrix x_k, x_k_min_1, x_k_add_1;
-	Matrix p_k, p_k_min_1, p_k_add_1;
-	Matrix r_k, r_k_min_1, r_k_add_1;
 
-	float alpha_k, alpha_k_add_1;
-	float beta_k;
 
-	x_k_min_1 = x0;
-	r_k_min_1 = b - A*x_k_min_1;
-	p_k = r_k_min_1;
 
-	Matrix w = A*p_k;
-
- 	alpha_k = dot(r_k_min_1, r_k_min_1)/(dot(p_k, w));
-
-	x_k = x_k_min_1 + alpha_k*p_k;
-	r_k = r_k_min_1 - alpha_k*w;
-
-	int k = 1;
-
-	while (norm(r_k) > e)
-	{
-		beta_k = dot(r_k, r_k)/(dot(r_k_min_1, r_k_min_1));
-		p_k_add_1 = r_k + beta_k*p_k;
-		
-		w = A*p_k_add_1;
-		
-		alpha_k_add_1 = dot(r_k, r_k)/(dot(p_k_add_1, w));
-
-		x_k_add_1 = x_k + alpha_k_add_1*p_k_add_1;
-		r_k_add_1 = r_k - alpha_k_add_1*w;
-		
-		x_k_min_1 = x_k;
-		x_k = x_k_add_1;
-	
-		r_k_min_1 = r_k;
-		r_k = r_k_add_1;
-	
-		p_k_min_1 = p_k;
-		p_k = p_k_add_1;
-	
-		alpha_k = alpha_k_add_1;
-	}
-
-	return x_k;
 }
 
 
-// solve A*x0 = b
-void PreconditionedConjugateGradient(
-	Matrix M,
-	Matrix A,
-	Vector x0,
-	Vector b
-)
-{
-	Vector r0 = b - A*x0;
-
-}

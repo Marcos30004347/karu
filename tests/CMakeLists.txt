@@ -49,3 +49,8 @@ add_executable(AlgebraSparseMatrixMultiplayerTests algebra/sparse/SparseMatrixMu
 target_link_libraries(AlgebraSparseMatrixMultiplayerTests karu)
 add_test(NAME AlgebraSparseMatrixMultiplayerTests COMMAND AlgebraSparseMatrixMultiplayerTests)
 
+project(LinearConjugateGradientTests)
+add_executable(LinearConjugateGradientTests linear/ConjugateGradient.cpp)
+target_link_libraries(LinearConjugateGradientTests karu)
+add_test(NAME LinearConjugateGradientTests COMMAND LinearConjugateGradientTests)
+
