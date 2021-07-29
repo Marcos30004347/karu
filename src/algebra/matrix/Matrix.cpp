@@ -4,6 +4,9 @@
 #include "algebra/matrix/MatrixMultiplayer.hpp"
 #include "algebra/matrix/MatrixTransposer.hpp"
 #include "algebra/matrix/MatrixDivider.hpp"
+#include "algebra/matrix/MatrixLU.hpp"
+
+#include <iomanip>
 
 namespace karu::algebra {
 
@@ -159,13 +162,57 @@ Matrix transpose(Matrix* other)
 	return C;
 }
 
+std::pair<Matrix, Matrix> LUDecomposition(const Matrix* const A)
+{
+	Matrix L(A->rows(), A->columns(), A->m_data.blockWidth(), A->m_data.blockHeight());
+	Matrix U(A->rows(), A->columns(), A->m_data.blockWidth(), A->m_data.blockHeight());
+	MatrixLU::LUdecompose(&L.m_data, &U.m_data, &A->m_data);
+	return {L, U};
+}
+
+std::pair<Matrix, Matrix> LUDecomposition(const Matrix& A)
+{
+	Matrix L(A.rows(), A.columns(), A.m_data.blockWidth(), A.m_data.blockHeight());
+	Matrix U(A.rows(), A.columns(), A.m_data.blockWidth(), A.m_data.blockHeight());
+	MatrixLU::LUdecompose(&L.m_data, &U.m_data, &A.m_data);
+	return {L, U};
+}
+
+std::pair<Matrix, Matrix> LUPDecomposition(const Matrix& A)
+{
+	Matrix R = Matrix(A);
+	Matrix P(A.rows()+1, 1);
+	MatrixLU::LUPdecompose(&R.m_data, &P.m_data);
+	return {R, P};
+}
+
+Matrix LUPSolve(const Matrix& A, const Matrix& P, const Matrix& b)
+{
+	Matrix x(A.rows(), 1);
+	MatrixLU::LUPSolve(&A.m_data, &P.m_data, &b.m_data, &x.m_data);
+	return x;
+}
+
+Matrix LUPInverse(const Matrix& A, const Matrix& P)
+{
+	Matrix Inv(A.rows(), A.columns(), A.m_data.blockWidth(), A.m_data.blockHeight());
+	MatrixLU::LUPInvet(&A.m_data, &P.m_data, &Inv.m_data);
+	return Inv;
+}
+
+f32 LUPDeterminant(const Matrix& A, const Matrix& P)
+{
+	return MatrixLU::LUPDeterminant(&A.m_data, &P.m_data);
+}
+
+
 void printMatrixWithMargin(Matrix* A)
 {
 	for(int i=0;i<A->m_data.m_stored_lines; i++)
 	{
 		for(int j=0; j<A->m_data.m_stored_column;j++)
 		{
-			std::cout << A->m_data.get(i,j) << " ";
+			std::cout << std::setw(2) << A->m_data.get(i,j) << "\t";
 		}
 		std::cout << std::endl;
 	}
@@ -177,7 +224,7 @@ void printMatrixWithMargin(Matrix& A)
 	{
 		for(int j=0; j<A.m_data.m_stored_column;j++)
 		{
-			std::cout << A.m_data.get(i,j) << " ";
+			std::cout << std::setw(2) << A.m_data.get(i,j) << "\t";
 		}
 		std::cout << std::endl;
 	}
@@ -189,7 +236,7 @@ void printMatrix(Matrix* A)
 	{
 		for(int j=0; j<A->m_data.m_columns;j++)
 		{
-			std::cout << A->m_data.get(i,j) << " ";
+			std::cout << std::setw(2) << A->m_data.get(i,j) << "\t";
 		}
 		std::cout << std::endl;
 	}
@@ -201,7 +248,7 @@ void printMatrix(Matrix& A)
 	{
 		for(int j=0; j<A.m_data.m_columns;j++)
 		{
-			std::cout << A.m_data.get(i,j) << " ";
+			std::cout << std::setw(2) << A.m_data.get(i,j) << "\t";
 		}
 		std::cout << std::endl;
 	}

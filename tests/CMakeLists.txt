@@ -38,7 +38,6 @@ add_executable(AlgebraMatrixTests algebra/matrix/Matrix.cpp)
 target_link_libraries(AlgebraMatrixTests karu)
 add_test(NAME AlgebraMatrixTests COMMAND AlgebraMatrixTests)
 
-
 project(AlgebraSparseMatrixDataTests)
 add_executable(AlgebraSparseMatrixDataTests algebra/sparse/SparseMatrixData.cpp)
 target_link_libraries(AlgebraSparseMatrixDataTests karu)
@@ -50,7 +49,7 @@ target_link_libraries(AlgebraSparseMatrixMultiplayerTests karu)
 add_test(NAME AlgebraSparseMatrixMultiplayerTests COMMAND AlgebraSparseMatrixMultiplayerTests)
 
 project(LinearConjugateGradientTests)
-add_executable(LinearConjugateGradientTests linear/ConjugateGradient.cpp)
+add_executable(LinearConjugateGradientTests algebra/linear/ConjugateGradient.cpp)
 target_link_libraries(LinearConjugateGradientTests karu)
 add_test(NAME LinearConjugateGradientTests COMMAND LinearConjugateGradientTests)
 

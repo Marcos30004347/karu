@@ -1,6 +1,7 @@
 #include <cmath>
 #include <assert.h>
 #include "algebra/matrix/Matrix.hpp"
+
 namespace karu::algebra 
 {
 

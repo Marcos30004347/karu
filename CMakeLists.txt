@@ -75,6 +75,7 @@ add_library(
     src/algebra/matrix/MatrixSubtractor.cpp
     src/algebra/matrix/MatrixTransposer.cpp
     src/algebra/matrix/MatrixDivider.cpp
+    src/algebra/matrix/MatrixLU.cpp
     src/algebra/sparse/SparseMatrixData.cpp
     src/algebra/sparse/SparseMatrixMultiplayer.cpp
     src/algebra/sparse/lib/kernels/kernels.cpp

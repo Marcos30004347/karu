@@ -179,5 +179,57 @@ int main()
 		for(int j=0; j<Q.columns(); j++)
 			assert(Y[i][j] == W[i][j]*3.f);
 	
+	Matrix T(3,3,{
+		1,1,0,
+		2,1,3,
+		3,1,1
+	});
+
+	std::pair<Matrix, Matrix> T_LU = LUDecomposition(&T);
+
+	assert(T_LU.first[0][0] == 1);
+	assert(T_LU.first[0][1] == 0);
+	assert(T_LU.first[0][2] == 0);
+	assert(T_LU.first[1][0] == 2);
+	assert(T_LU.first[1][1] == -1);
+	assert(T_LU.first[1][2] == 0);
+	assert(T_LU.first[2][0] == 3);
+	assert(T_LU.first[2][1] == -2);
+	assert(T_LU.first[2][2] == -5);
+
+	assert(T_LU.second[0][0] == 1);
+	assert(T_LU.second[0][1] == 1);
+	assert(T_LU.second[0][2] == 0);
+	assert(T_LU.second[1][0] == 0);
+	assert(T_LU.second[1][1] == 1);
+	assert(T_LU.second[1][2] == -3);
+	assert(T_LU.second[2][0] == 0);
+	assert(T_LU.second[2][1] == 0);
+	assert(T_LU.second[2][2] == 1);
+
+	Matrix System(2,2,{
+		3,2,
+		2,6,
+	});
+
+	// LU decomposition tests
+	std::pair<Matrix, Matrix> System_Permutation = LUPDecomposition(System);
+	Matrix b(2, 1, {2,-8});
+
+	Matrix x = LUPSolve(System_Permutation.first, System_Permutation.second, b);
+
+	assert(x[0][0] == 2);
+	assert(x[1][0] == -2);
+
+	Matrix System_Inv = LUPInverse(System_Permutation.first, System_Permutation.second);
+	Matrix Res = System*System_Inv;
+	assert(Res[0][0] - 1 < 0.00000001);
+	assert(Res[0][1] - 0 < 0.00000001);
+	assert(Res[1][0] - 0 < 0.00000001);
+	assert(Res[1][1] - 1 < 0.00000001);
+
+	karu::f32 System_det = LUPDeterminant(System_Permutation.first, System_Permutation.second);
+	assert(System_det == 14);
+	
 	return 0;
 }

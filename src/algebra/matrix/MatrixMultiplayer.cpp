@@ -35,9 +35,9 @@ void MatrixMultiplayer::mul(MatrixData* C, const MatrixData* const A, const Matr
 							bool Bi_bounds = Bi < B->m_stored_lines;
 							bool Bj_bounds = Bj < B->m_stored_column;
 
-							Ai = (A->m_stored_lines-1)*!Ai_bounds + Ai*Ai_bounds;
+							Ai = (A->m_stored_lines-1)*!Ai_bounds  + Ai*Ai_bounds;
 							Aj = (A->m_stored_column-1)*!Aj_bounds + Aj*Aj_bounds;
-							Bi = (B->m_stored_lines-1)*!Bi_bounds + Bi*Bi_bounds;
+							Bi = (B->m_stored_lines-1)*!Bi_bounds  + Bi*Bi_bounds;
 							Bj = (B->m_stored_column-1)*!Bj_bounds + Bj*Bj_bounds;
 
 							acc += A->get(Ai, Aj) * B->get(Bi, Bj);

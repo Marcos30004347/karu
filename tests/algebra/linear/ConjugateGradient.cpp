@@ -1,8 +1,8 @@
 #include <assert.h>
-#include "linear/ConjugateGradient.hpp"
 
-using namespace karu;
-using namespace algebra;
+#include "algebra/linear/ConjugateGradient.hpp"
+
+using namespace karu::algebra;
 
 int main()
 {
