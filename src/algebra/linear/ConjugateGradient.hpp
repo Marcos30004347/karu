@@ -16,7 +16,7 @@ float norm(Matrix& A){
 	return std::sqrt(n);
 }
 
-// Matrix _conjugateGradient(Matrix A, Matrix x, Matrix b, float tolerance)
+// Matrix _conjGrad(Matrix A, Matrix x, Matrix b, float tolerance)
 // {
 // 	Matrix r = b - A*x;
 // 	Matrix p = r;
@@ -50,7 +50,7 @@ float norm(Matrix& A){
 
 
 // Solve Symmetric Positive Definite systems A*x = b, returns x
-Matrix conjugateGradient(Matrix A, Matrix x, Matrix b, float tolerance)
+Matrix conjGrad(Matrix A, Matrix x, Matrix b, float tolerance)
 {
 	Matrix p;
 	Matrix r[2];
@@ -79,6 +79,58 @@ Matrix conjugateGradient(Matrix A, Matrix x, Matrix b, float tolerance)
 		x = x + alpha*p;
 
 		r[0] = r[1];
+		r[1] = r[1] - alpha*W;
+
+		k = k+1;	
+	}
+
+	return x;
+}
+
+
+
+// Solve Symmetric Positive Definite systems A*x = b, returns x
+Matrix preConjGrad(Matrix A, Matrix x, Matrix b, Matrix M, float tolerance)
+{
+	Matrix p;
+
+	Matrix r[2];
+	Matrix z[2];
+
+	r[0] = b - A*x;
+ 	
+	std::pair<Matrix, Matrix> LUP = LUPDecomposition(M);
+	
+	z[0] = LUPSolve(LUP.first, LUP.second, r[0]);
+
+	p = z[0];
+
+	Matrix W = A*p;
+
+ 	Matrix alpha = (transpose(r[0])*z[0])/(transpose(p)*W);
+
+	x = x + alpha*p;
+	r[1] = r[0] - alpha*W;
+
+	i32 k = 1;
+
+	while (norm(r[1]) > tolerance)
+	{
+		z[1] = LUPSolve(LUP.first, LUP.second, r[1]);
+
+		Matrix beta = (transpose(r[1])*z[1])/(transpose(r[0])*z[0]);
+	
+		p = z[1] + beta*p;
+
+		W = A*p;
+
+		alpha =(transpose(r[1])*z[1])/(transpose(p)*W);
+
+		x = x + alpha*p;
+
+		z[0] = z[1];
+		r[0] = r[1];
+
 		r[1] = r[1] - alpha*W;
 
 		k = k+1;	
