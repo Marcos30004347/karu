@@ -46,6 +46,19 @@ class Kernel {
 		clHandleError(err);
 	}
 
+	template<typename T>
+	void setKernelArgument(u32 id, const T* const value)
+	{
+		cl_int err = clSetKernelArg(this->ck_kernel, id, sizeof(T), value);
+		clHandleError(err);
+	}
+
+	template<typename T>
+	void setKernelArgument(u32 id, const T* value)
+	{
+		cl_int err = clSetKernelArg(this->ck_kernel, id, sizeof(T), value);
+		clHandleError(err);
+	}
 
 	void setKernelArgument(u32 id, u32 size, void* ptr);
 	

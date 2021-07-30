@@ -18,11 +18,8 @@ SparseMatrixData::SparseMatrixData(
 	this->bcsr_row_ptr = row_ptr;
 	this->bcsr_col_idx = col_idx;
 	this->bcsr_data = data;
-
 	this->bcsr_lines = lines;
 	this->bcsr_columns = columns;
-
-
 }
 
 f32 SparseMatrixData::get(u64 l, u64 c)

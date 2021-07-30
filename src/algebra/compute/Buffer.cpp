@@ -73,7 +73,7 @@ Buffer::Buffer(u64 size, type kind, state state)
 	}
 }
 
-Buffer::Buffer(void* data, u64 size, type kind, bool cleanup)
+Buffer::Buffer(void* const data, u64 size, type kind, bool cleanup)
 {
 		this->s_kind = kind;
 		this->s_is_logic_unit_allocated = true;

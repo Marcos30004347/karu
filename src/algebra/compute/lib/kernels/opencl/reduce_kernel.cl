@@ -1,3 +1,7 @@
+
+// 1 2 3 4   5 6 7 8
+// 0       | 1
+// 1 2 3 4 | 1 2 3 4
 __kernel void reduce(
     __global float * input,
     __global float * output,
@@ -5,8 +9,7 @@ __kernel void reduce(
     unsigned int AOffset
 ) {
     const size_t globalId = get_global_id(0);
-    const size_t localId = get_local_id(0);
-
+    const size_t localId  = get_local_id(0);
     target[localId] = input[globalId+AOffset];
 
     barrier(CLK_LOCAL_MEM_FENCE);

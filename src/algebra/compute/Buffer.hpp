@@ -24,7 +24,7 @@ class Buffer {
 		MEM_GPU,
 	};
 
-	Buffer(void* buffer, u64 size, type kind, bool cleanup);
+	Buffer(void* const buffer, u64 size, type kind, bool cleanup);
 	Buffer(u64 size, type kind, state state);
 
 	~Buffer();

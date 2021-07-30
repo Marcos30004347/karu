@@ -238,21 +238,20 @@ __kernel void parallel_block_order_checking(
 	int halfBlockSize = blockSize / 2;
 
 	while (halfBlockSize > 0) {
+		if (thid < halfBlockSize) {
+			temp[thid] += temp[thid + halfBlockSize];
 
-			if (thid < halfBlockSize) {
-					temp[thid] += temp[thid + halfBlockSize];
-
-					if ((halfBlockSize*2)<blockSize) { // uneven block division
-							if (thid==0) { // when localID==0
-									temp[thid] += temp[thid + (blockSize-1)];
-							}
-					}
-
+			if ((halfBlockSize*2)<blockSize) { // uneven block division
+				if (thid==0) { // when localID==0
+					temp[thid] += temp[thid + (blockSize-1)];
+				}
 			}
-			barrier(CLK_LOCAL_MEM_FENCE);
 
-			blockSize = halfBlockSize;
-			halfBlockSize = blockSize / 2;
+		}
+		barrier(CLK_LOCAL_MEM_FENCE);
+
+		blockSize = halfBlockSize;
+		halfBlockSize = blockSize / 2;
 	}
 
 	if (thid==0) {

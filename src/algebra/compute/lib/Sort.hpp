@@ -13,9 +13,13 @@ bool isInOrder(Buffer* input, int size, int num_blocks)
 {
 	Buffer output = Buffer(num_blocks*sizeof(int), Buffer::READ_WRITE, Buffer::MEM_GPU);
 
+	// Thread blocks
+	// Threads 
+
 	radix_parallel_order_checking_kernel->setKernelArgument(0, input);
 	radix_parallel_order_checking_kernel->setKernelArgument(1, &output);
 	radix_parallel_order_checking_kernel->setKernelArgument(2, num_blocks*sizeof(int), nullptr);
+
 	radix_parallel_order_checking_kernel->enqueue({ (u32)size }, { (u32)(size/num_blocks) });
 
 	Buffer result = Buffer(sizeof(int), Buffer::READ_WRITE, Buffer::MEM_GPU);

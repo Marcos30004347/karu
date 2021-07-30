@@ -1,3 +1,5 @@
+#pragma once
+
 #include "algebra/matrix/MatrixData.hpp"
 #include "algebra/vector/Vector.hpp"
 #include <initializer_list>

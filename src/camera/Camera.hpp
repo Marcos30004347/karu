@@ -9,6 +9,7 @@ namespace karu {
 
 class Camera 
 {
+public:
 	// focal lengths
 	f32 fx, fy;
 
@@ -24,7 +25,6 @@ class Camera
 	// distortion parameters
 	f32 k1, k2, k3, p1, p2;
 
-public:
 	Camera(
 		f32 fx, f32 fy,
 		f32 cx, f32 cy, 
