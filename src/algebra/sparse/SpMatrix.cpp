@@ -1,9 +1,9 @@
-#include "SMatrix.hpp"
+#include "SpMatrix.hpp"
 #include "SparseMatrixMultiplayer.hpp"
 
 namespace karu::algebra {
 
-SMatrix::SMatrix(
+SpMatrix::SpMatrix(
 	u64 lines,
 	u64 columns,
 	u64 block_heigth,
@@ -22,7 +22,7 @@ SMatrix::SMatrix(
 	} {}
 
 
-Matrix& SMatrix::operator*(const Matrix& other)
+Matrix SpMatrix::operator*(const Matrix& other)
 {
 	if(other.columns() == 1)
 	{
@@ -32,12 +32,19 @@ Matrix& SMatrix::operator*(const Matrix& other)
 			(MatrixData*)&other.m_data,
 			&y.m_data
 		);
+		return y;
 	}
 	else
 	{
-		std::cout << "ERROR: SMatrix * Matrix not implemented\n";
+		std::cout << "ERROR: SpMatrix * Matrix not implemented\n";
 		exit(EXIT_FAILURE);
 	}
 }
+
+void printMatrix(SpMatrix& mat)
+{
+	mat.m_data.print();
+}
+
 
 }

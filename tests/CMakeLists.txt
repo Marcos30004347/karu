@@ -38,6 +38,12 @@ add_executable(AlgebraMatrixTests algebra/matrix/Matrix.cpp)
 target_link_libraries(AlgebraMatrixTests karu)
 add_test(NAME AlgebraMatrixTests COMMAND AlgebraMatrixTests)
 
+project(AlgebraSparseMatrixTests)
+add_executable(AlgebraSparseMatrixTests algebra/sparse/SpMatrix.cpp)
+target_link_libraries(AlgebraSparseMatrixTests karu)
+add_test(NAME AlgebraSparseMatrixTests COMMAND AlgebraSparseMatrixTests)
+
+
 project(AlgebraSparseMatrixDataTests)
 add_executable(AlgebraSparseMatrixDataTests algebra/sparse/SparseMatrixData.cpp)
 target_link_libraries(AlgebraSparseMatrixDataTests karu)

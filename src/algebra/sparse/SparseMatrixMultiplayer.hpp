@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algebra/vector/Vector.hpp"
+// #include "algebra/vector/Vector.hpp"
 #include "algebra/sparse/SparseMatrixData.hpp"
 #include "algebra/matrix/MatrixData.hpp"
 

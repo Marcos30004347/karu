@@ -7,11 +7,11 @@
 
 namespace karu::algebra {
 
-class SMatrix {
+class SpMatrix {
 public:
 	SparseMatrixData m_data;
 
-	SMatrix(
+	SpMatrix(
 		u64 lines, u64 columns,
 		u64 block_heigth, u64 block_width,
 		std::vector<u64> row_ptr,
@@ -19,7 +19,10 @@ public:
 		std::vector<f32> data
 	);
 
-	Matrix& operator*(const Matrix& other);
+	Matrix operator*(const Matrix& other);
 };
+
+void printMatrix(SpMatrix& mat);
+
 
 }

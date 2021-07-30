@@ -21,6 +21,8 @@ Buffer::Buffer(u64 size, type kind, state state)
 		switch (this->s_kind)
 		{
 		case type::READ_WRITE:
+			std::cout << this->s_size << std::endl;
+		
 			this->s_compute_unit_ref = clCreateBuffer(
 				karu_core_global_ctx->getComputeContext(),
 				CL_MEM_READ_WRITE,
@@ -28,6 +30,7 @@ Buffer::Buffer(u64 size, type kind, state state)
 				NULL,
 				&err
 			);
+		
 			break;
 		case type::READ_ONLY:
 			this->s_compute_unit_ref = clCreateBuffer(

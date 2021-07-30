@@ -59,7 +59,7 @@ without forming S on memory:
 #include <array>
 #include <assert.h>
 #include "algebra/matrix/Matrix.hpp"
-#include "algebra/sparse/SMatrix.hpp"
+#include "algebra/sparse/SpMatrix.hpp"
 #include "camera/Camera.hpp"
 
 using namespace karu::algebra;
@@ -204,7 +204,7 @@ Matrix B(std::vector<Bundle>& bundles, std::vector<Point>& points, u64 i, u64 j)
 
 
 
-void sparseHessian(std::vector<Bundle>& bundles, std::vector<Point>& points, SMatrix& U, SMatrix& V, SMatrix& W)
+void sparseHessian(std::vector<Bundle>& bundles, std::vector<Point>& points, SpMatrix& U, SpMatrix& V, SpMatrix& W)
 {
 	// Compute Hessian [[U, W], [W.T, V]]
 	std::vector<u64> U_rows;
@@ -271,8 +271,8 @@ void sparseHessian(std::vector<Bundle>& bundles, std::vector<Point>& points, SMa
 		}
 	}
 	
-	U = SMatrix((U_rows.size() - 1)*2, 13*U_cols_idx.size(), 2, 13, U_rows, U_cols_idx, U_data);
-	V = SMatrix((V_rows.size() - 1)*2, 6*V_cols_idx.size(), 2, 3, V_rows, V_cols_idx, V_data);
+	U = SpMatrix((U_rows.size() - 1)*2, 13*U_cols_idx.size(), 2, 13, U_rows, U_cols_idx, U_data);
+	V = SpMatrix((V_rows.size() - 1)*2, 6*V_cols_idx.size(), 2, 3, V_rows, V_cols_idx, V_data);
 }
 
 }

@@ -7,6 +7,8 @@
 namespace karu {
 namespace algebra {
 
+
+
 class SparseMatrixData {
 	public:
 	SparseMatrixData(

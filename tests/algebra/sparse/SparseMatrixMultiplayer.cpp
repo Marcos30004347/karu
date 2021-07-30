@@ -43,69 +43,69 @@ int main()
 
 	// M0.defineElement(0, 1);
 
-	algebra::SparseMatrixData M0 = algebra::SparseMatrixData(
-		3, 3, // blocks will have 3 elements width, 2 elements heigth
-		9, 9, // 6 lines and 9 columns
-		{0, 3, 6, 9 }, // row_ptr
-		{0, 3, 6, 0, 3, 6, 0, 3, 6}, // col_idx
-		{
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-		}
-	);
+	// algebra::SparseMatrixData M0 = algebra::SparseMatrixData(
+	// 	3, 3, // blocks will have 3 elements width, 2 elements heigth
+	// 	9, 9, // 6 lines and 9 columns
+	// 	{0, 3, 6, 9 }, // row_ptr
+	// 	{0, 3, 6, 0, 3, 6, 0, 3, 6}, // col_idx
+	// 	{
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 	}
+	// );
 
-	algebra::Vector v0 = algebra::Vector({ 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f });
-	algebra::Vector v1 = algebra::Vector({ 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f });
+	// // algebra::Vector v0 = algebra::Vector({ 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f });
+	// // algebra::Vector v1 = algebra::Vector({ 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f });
 
-	algebra::SparseMatrixMultiplayer::sparseMVMultiplyCPU(&M0, &v0, &v1);
-	assert(v1 == algebra::Vector({198, 243, 288,198,243,288,198,243,288}));
+	// algebra::SparseMatrixMultiplayer::sparseMVMultiplyCPU(&M0, &v0, &v1);
+	// assert(v1 == algebra::Vector({198, 243, 288,198,243,288,198,243,288}));
 	
-	algebra::SparseMatrixMultiplayer::sparseMVMultiplyGPU(&M0, &v0, &v1);
-	assert(v1 == algebra::Vector({198, 243, 288,198,243,288,198,243,288}));
+	// algebra::SparseMatrixMultiplayer::sparseMVMultiplyGPU(&M0, &v0, &v1);
+	// assert(v1 == algebra::Vector({198, 243, 288,198,243,288,198,243,288}));
 
-	algebra::SparseMatrixData M1 = algebra::SparseMatrixData(
-		1, 1,
-		9, 9,
-		{ 0, 9, 18, 27, 36, 45, 54, 63, 72, 81 }, // row_ptr
-		{
-			0,1,2,3,4,5,6,7,8,
-			0,1,2,3,4,5,6,7,8,
-			0,1,2,3,4,5,6,7,8,
-			0,1,2,3,4,5,6,7,8,
-			0,1,2,3,4,5,6,7,8,
-			0,1,2,3,4,5,6,7,8,
-			0,1,2,3,4,5,6,7,8,
-			0,1,2,3,4,5,6,7,8,
-			0,1,2,3,4,5,6,7,8
-		}, // col_idx
-		{
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-			1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
-		}
-	);
+	// algebra::SparseMatrixData M1 = algebra::SparseMatrixData(
+	// 	1, 1,
+	// 	9, 9,
+	// 	{ 0, 9, 18, 27, 36, 45, 54, 63, 72, 81 }, // row_ptr
+	// 	{
+	// 		0,1,2,3,4,5,6,7,8,
+	// 		0,1,2,3,4,5,6,7,8,
+	// 		0,1,2,3,4,5,6,7,8,
+	// 		0,1,2,3,4,5,6,7,8,
+	// 		0,1,2,3,4,5,6,7,8,
+	// 		0,1,2,3,4,5,6,7,8,
+	// 		0,1,2,3,4,5,6,7,8,
+	// 		0,1,2,3,4,5,6,7,8,
+	// 		0,1,2,3,4,5,6,7,8
+	// 	}, // col_idx
+	// 	{
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 		1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f,
+	// 	}
+	// );
 
-	algebra::Vector v2 = algebra::Vector({ 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f });
-	algebra::Vector v3 = algebra::Vector({ 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f });
+	// algebra::Vector v2 = algebra::Vector({ 1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f, 8.f, 9.f });
+	// algebra::Vector v3 = algebra::Vector({ 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f });
 
-	algebra::SparseMatrixMultiplayer::sparseMVMultiplyCPU(&M1, &v2, &v3);
-	assert(v3 == algebra::Vector({ 285, 285, 285, 285, 285, 285, 285, 285,285 }));
+	// algebra::SparseMatrixMultiplayer::sparseMVMultiplyCPU(&M1, &v2, &v3);
+	// assert(v3 == algebra::Vector({ 285, 285, 285, 285, 285, 285, 285, 285,285 }));
 
-	algebra::SparseMatrixMultiplayer::sparseMVMultiplyGPU(&M1, &v2, &v3);
-	assert(v3 == algebra::Vector({ 285, 285, 285, 285, 285, 285, 285, 285,285 }));
+	// algebra::SparseMatrixMultiplayer::sparseMVMultiplyGPU(&M1, &v2, &v3);
+	// assert(v3 == algebra::Vector({ 285, 285, 285, 285, 285, 285, 285, 285,285 }));
 
 	// algebra::SparseMatrixData A = algebra::SparseMatrixData(
 	// 	2, 2, // blocks will have 3 elements width, 2 elements heigth
