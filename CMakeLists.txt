@@ -27,6 +27,7 @@ include_directories(${OpenCL_INCLUDE_DIRS})
 set(SPARSE_KERNELS_PATH "src/algebra/sparse/lib/kernels/opencl")
 set(COMPUTE_LIB_KERNELS_PATH "src/algebra/compute/lib/kernels/opencl")
 
+
 macro(set_kernel_var filename variable)
     file(STRINGS ${filename} TMP)
     set(TMP2 "R\"(")
@@ -83,7 +84,12 @@ add_library(
     src/algebra/sparse/lib/HashMap.cpp
     src/renderer/Renderer.cpp
 )
-    
+
+set_property(TARGET karu PROPERTY
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED ON
+)
+
 target_include_directories(karu PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
 target_include_directories(karu PUBLIC "${GLAD_DIR}/include")
 
