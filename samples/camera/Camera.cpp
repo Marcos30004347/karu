@@ -22,26 +22,32 @@ int main()
 	Renderer renderer(1000, 1000);
 
 	// 33mm focal lengths and (1000, 1000) principal point
-	Camera cam = Camera(1187, 1187, 100, 100, algebra::Vector({0, 0, 0}), algebra::Vector({0, 0, radians(360)}), 15.3);
+	f32 cy = 3;
+	f32 cx = 3;
+
+	f32 fy = 30;
+	f32 fx = 30;
+
+	Camera cam = Camera(fx, fy, cx, cy, algebra::Vector({0, 0, 0}), algebra::Vector({0, 0, radians(360)}), 0.0);
 
 	std::vector<algebra::Vector> pixels;
 
-	for(int i=-800; i<800; i+=10)
+	for(int i=-400; i<400; i+=10)
 	{
-		for(int j=-800; j<800; j+=10)
+		for(int j=-400; j<400; j+=10)
 		{
 			begin = std::chrono::steady_clock::now();
-			pixels.push_back(cam.projection({ (float)i, (float)j, 5000 }));
+			pixels.push_back(cam.projection({ (f32)i, (f32)j, 100 }));
 			end = std::chrono::steady_clock::now();
-			std::cout << "Projection Time: " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "µs" << std::endl;
+			// std::cout << "Projection Time: " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "µs" << std::endl;
 		}
 	}
 	
-	// for(algebra::Vector pix : pixels)
-	// {
-	// 	std::cout << (pix[0]) << " " << (pix[1]) << "\n";
-	// }
+	for(algebra::Vector pix : pixels)
+	{
+		std::cout << (pix[0]-cx)/fx << " " << (pix[1]-cy)/fy << "\n";
+	}
 
-	renderer.draw2dPoints(pixels, 100, 100, 100, 100);
+	renderer.draw2dPoints(pixels, cx, cy, fx, fy);
 
 }

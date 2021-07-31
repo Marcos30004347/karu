@@ -59,3 +59,8 @@ add_executable(LinearConjugateGradientTests algebra/linear/ConjugateGradient.cpp
 target_link_libraries(LinearConjugateGradientTests karu)
 add_test(NAME LinearConjugateGradientTests COMMAND LinearConjugateGradientTests)
 
+project(BundleAdjustmentTests)
+add_executable(BundleAdjustmentTests bundle/BundleAdjustment.cpp)
+target_link_libraries(BundleAdjustmentTests karu)
+add_test(NAME BundleAdjustmentTests COMMAND BundleAdjustmentTests)
+

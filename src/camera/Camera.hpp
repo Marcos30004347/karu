@@ -24,6 +24,24 @@ public:
 
 	// distortion parameters
 	f32 k1, k2, k3, p1, p2;
+	Camera()
+	{
+		this->fx = 30;
+		this->fy = 30;
+		this->cx = 0;
+		this->cy = 0;
+		this->Cx = 0;
+		this->Cy = 0;
+		this->Cz = 0;
+		this->r1 = 0;
+		this->r2 = 0;
+		this->r3 = ( 360 * 3.14 ) / 180.f;
+		this->k1 = 0;
+		this->k2 = 0;
+		this->k3 = 0;
+		this->p1 = 0;
+		this->k2 = 0;
+	}
 
 	Camera(
 		f32 fx, f32 fy,
@@ -101,6 +119,12 @@ public:
 			pos[2]
 		);
 		return algebra::Vector({x, y});
+	}
+
+
+	algebra::Vector normalCoordinate(algebra::Vector pixel)
+	{
+		return { (pixel[0]-this->cx)/this->fx, (pixel[1]-this->cy)/this->fy };
 	}
 
 };

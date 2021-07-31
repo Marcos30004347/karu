@@ -7,12 +7,16 @@ K = Matrix([[Symbol("fx"), 0,                Symbol("cx")],
 C = Matrix([Symbol("Cx"), Symbol("Cy"), Symbol("Cz")])
 
 r = Matrix([Symbol("r1"), Symbol("r2"), Symbol("r3")])
-rc = Matrix([[0, -r[2], r[1]], [r[2], 0,  -r[0]], [-r[1],  r[0], 0]])
-rc = rc/(sqrt(r[0]**2 + r[1]**2 + r[2]**2))
-R = cos(sqrt(r[0]**2 + r[1]**2 + r[2]**2))*Identity(3) + sin(sqrt(r[0]**2 + r[1]**2 + r[2]**2))*rc + (1-cos(sqrt(r[0]**2 + r[1]**2 + r[2]**2)))*((r/sqrt(r[0]**2 + r[1]**2 + r[2]**2))*(r.T/sqrt(r[0]**2 + r[1]**2 + r[2]**2)))
+
+a = r/(sqrt(r[0]**2 + r[1]**2 + r[2]**2))
+
+rc = Matrix([[0, -a[2], a[1]], [a[2], 0,  -a[0]], [-a[1],  a[0], 0]])
+
+angle = sqrt(r[0]**2 + r[1]**2 + r[2]**2)
+
+R = cos(angle)*Identity(3) + sin(angle)*rc + (1-cos(angle))*(rc**2)
 
 V = Matrix(R).row_join(Matrix(C))
-
 P = Matrix([Symbol("X"), Symbol("Y"), Symbol("Z"), 1])
 
 P = Matrix(V*P)

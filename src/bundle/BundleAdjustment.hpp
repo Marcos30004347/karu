@@ -52,6 +52,7 @@ without forming S on memory:
 	x4 = B*x
 	Sx = x4 - x3
 **/
+#pragma once
 
 #include <cmath>
 #include <vector>
@@ -92,34 +93,34 @@ struct Bundle
 	std::vector<u64> point_idx;
 };
 
-Matrix packObservations(std::vector<Bundle>& bundles, std::vector<Point>& points)
-{
-	std::vector<f32> x(0);
+// Matrix packObservations(std::vector<Bundle>& bundles, std::vector<Point>& points)
+// {
+// 	std::vector<f32> x(0);
 
-	for(Bundle b : bundles)
-	{
-		x.push_back(b.camera.fx);
-		x.push_back(b.camera.fy);
-		x.push_back(b.camera.cx);
-		x.push_back(b.camera.cy);
-		x.push_back(b.camera.Cx);
-		x.push_back(b.camera.Cy);
-		x.push_back(b.camera.Cz);
-		x.push_back(b.camera.r1);
-		x.push_back(b.camera.r2);
-		x.push_back(b.camera.r3);
-		x.push_back(b.camera.k1);
-		x.push_back(b.camera.k2);
-		x.push_back(b.camera.k3);
-	}
+// 	for(Bundle b : bundles)
+// 	{
+// 		x.push_back(b.camera.fx);
+// 		x.push_back(b.camera.fy);
+// 		x.push_back(b.camera.cx);
+// 		x.push_back(b.camera.cy);
+// 		x.push_back(b.camera.Cx);
+// 		x.push_back(b.camera.Cy);
+// 		x.push_back(b.camera.Cz);
+// 		x.push_back(b.camera.r1);
+// 		x.push_back(b.camera.r2);
+// 		x.push_back(b.camera.r3);
+// 		x.push_back(b.camera.k1);
+// 		x.push_back(b.camera.k2);
+// 		x.push_back(b.camera.k3);
+// 	}
 
-	for(Point p : points)
-	{
-		x.push_back(p.x);
-		x.push_back(p.y);
-		x.push_back(p.z);
-	}
-}
+// 	for(Point p : points)
+// 	{
+// 		x.push_back(p.x);
+// 		x.push_back(p.y);
+// 		x.push_back(p.z);
+// 	}
+// }
 
 // Point i, camera j
 Matrix A(std::vector<Bundle>& bundles, std::vector<Point>& points, u64 i, u64 j)
@@ -156,7 +157,7 @@ Matrix A(std::vector<Bundle>& bundles, std::vector<Point>& points, u64 i, u64 j)
 
 Matrix B(std::vector<Bundle>& bundles, std::vector<Point>& points, u64 i, u64 j)
 {
-	return Matrix(2, 6, {
+	return Matrix(2, 3, {
 		u_dX(bundles[j].camera.fx, bundles[j].camera.fy, bundles[j].camera.cx, bundles[j].camera.cy, bundles[j].camera.Cx, bundles[j].camera.Cy, bundles[j].camera.Cz, bundles[j].camera.r1, bundles[j].camera.r2, bundles[j].camera.r3, bundles[j].camera.k1, bundles[j].camera.k2, bundles[j].camera.k3, 0, 0, points[i].x, points[i].y, points[i].z),
 		u_dY(bundles[j].camera.fx, bundles[j].camera.fy, bundles[j].camera.cx, bundles[j].camera.cy, bundles[j].camera.Cx, bundles[j].camera.Cy, bundles[j].camera.Cz, bundles[j].camera.r1, bundles[j].camera.r2, bundles[j].camera.r3, bundles[j].camera.k1, bundles[j].camera.k2, bundles[j].camera.k3, 0, 0, points[i].x, points[i].y, points[i].z),
 		u_dZ(bundles[j].camera.fx, bundles[j].camera.fy, bundles[j].camera.cx, bundles[j].camera.cy, bundles[j].camera.Cx, bundles[j].camera.Cy, bundles[j].camera.Cz, bundles[j].camera.r1, bundles[j].camera.r2, bundles[j].camera.r3, bundles[j].camera.k1, bundles[j].camera.k2, bundles[j].camera.k3, 0, 0, points[i].x, points[i].y, points[i].z),
@@ -204,7 +205,7 @@ Matrix B(std::vector<Bundle>& bundles, std::vector<Point>& points, u64 i, u64 j)
 
 
 
-void sparseHessian(std::vector<Bundle>& bundles, std::vector<Point>& points, SpMatrix& U, SpMatrix& V, SpMatrix& W)
+void sparseHessian(std::vector<Bundle>& bundles, std::vector<Point>& points, SpMatrix& U, SpMatrix& V, SpMatrix& W, SpMatrix& W_T)
 {
 	// Compute Hessian [[U, W], [W.T, V]]
 	std::vector<u64> U_rows;
@@ -254,6 +255,7 @@ void sparseHessian(std::vector<Bundle>& bundles, std::vector<Point>& points, SpM
 	}
 
 	std::vector<f32> V_data(6*V_cols_idx.size(), 0);
+	
 	for(i64 j=0; j<bundles.size(); j++)
 	{
 		for(u64 i : bundles[j].point_idx)
@@ -272,7 +274,79 @@ void sparseHessian(std::vector<Bundle>& bundles, std::vector<Point>& points, SpM
 	}
 	
 	U = SpMatrix((U_rows.size() - 1)*2, 13*U_cols_idx.size(), 2, 13, U_rows, U_cols_idx, U_data);
-	V = SpMatrix((V_rows.size() - 1)*2, 6*V_cols_idx.size(), 2, 3, V_rows, V_cols_idx, V_data);
+	V = SpMatrix((V_rows.size() - 1)*2, 3*V_cols_idx.size(), 2, 3, V_rows, V_cols_idx, V_data);
+
+
+	// 2*len(cameras) , 3*len(points)
+	std::vector<std::vector<bool>> W_count;
+
+	for(i64 j=0; j<bundles.size(); j++)
+	{
+		W_count.push_back(std::vector<bool>(points.size(), false));
+	}
+
+	for(i64 i=0; i<bundles.size(); i++)
+	{
+		for(u64 j : bundles[i].point_idx)
+		{
+			W_count[i][j] = true;
+		}
+	}
+
+	u64 W_blocks_count = 0;
+
+	for(i64 i=0; i<bundles.size(); i++)
+	{
+		for(i64 j=0; j<points.size(); j++)
+		{
+			if(W_count[j][i])
+			{
+				W_blocks_count++;
+			}
+		}
+	}
+
+	std::vector<u64> W_rows_ptr(bundles.size()+1);
+	std::vector<u64> W_cols_idx(W_blocks_count, 0);
+	std::vector<f32> W_data(13*3*W_blocks_count, 0);
+
+
+	for(i64 i=0; i<bundles.size(); i++)
+	{
+		for(i64 j=0; j<points.size(); j++)
+		{
+			if(W_count[j][i])
+			{
+				W_rows_ptr[i+1]++;
+			}
+
+			if(i+1 < bundles.size())
+				W_rows_ptr[i+2] = W_rows_ptr[i+1];
+		}
+	}
+
+	for(i64 i=0; i<bundles.size(); i++)
+	{
+		for(u64 j : bundles[i].point_idx)
+		{
+			Matrix A_block = A(bundles, points, i, j);
+			Matrix B_block = B(bundles, points, i, j);
+
+			Matrix W_block = transpose(A_block) * B_block;
+
+			for(i64 c = 0; c<3; c++)
+			{
+				for(i64 l = 0; l<13; l++)
+				{
+					W_data[39*(points.size()*i + j) + l + c*3] += W_block[l][c];
+				}
+			}
+		}
+	}
+
+
+	W = SpMatrix(bundles.size()*13, 3*points.size(), 13, 3, W_rows_ptr, W_cols_idx, W_data);
+
 }
 
 }

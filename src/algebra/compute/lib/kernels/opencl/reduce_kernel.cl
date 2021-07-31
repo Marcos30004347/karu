@@ -10,6 +10,7 @@ __kernel void reduce(
 ) {
     const size_t globalId = get_global_id(0);
     const size_t localId  = get_local_id(0);
+
     target[localId] = input[globalId+AOffset];
 
     barrier(CLK_LOCAL_MEM_FENCE);

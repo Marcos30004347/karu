@@ -44,8 +44,6 @@ __kernel void bsMV_kernel(
       
 
       barrier(CLK_LOCAL_MEM_FENCE);
-      printf("stride %d\n", stride + by*x_block_width);
-      printf("pos %d\n", pos);
       shared_x[t_idx] = x[stride + by*x_block_width];
       barrier(CLK_LOCAL_MEM_FENCE);
       

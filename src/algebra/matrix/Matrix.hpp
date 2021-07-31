@@ -10,7 +10,7 @@ class Matrix {
 public:
 	MatrixData m_data;
 
-	Matrix(float k);
+	Matrix(f32 k);
 	Matrix(const MatrixData& other);
 	Matrix(const Vector& other);
 	Matrix(const Matrix& other);
