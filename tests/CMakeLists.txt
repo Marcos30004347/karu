@@ -32,7 +32,6 @@ add_executable(AlgebraMatrixMultiplayerTests algebra/matrix/MatrixMultiplayer.cp
 target_link_libraries(AlgebraMatrixMultiplayerTests karu)
 add_test(NAME AlgebraMatrixMultiplayerTests COMMAND AlgebraMatrixMultiplayerTests)
 
-
 project(AlgebraMatrixTests)
 add_executable(AlgebraMatrixTests algebra/matrix/Matrix.cpp)
 target_link_libraries(AlgebraMatrixTests karu)
@@ -43,7 +42,6 @@ add_executable(AlgebraSparseMatrixTests algebra/sparse/SpMatrix.cpp)
 target_link_libraries(AlgebraSparseMatrixTests karu)
 add_test(NAME AlgebraSparseMatrixTests COMMAND AlgebraSparseMatrixTests)
 
-
 project(AlgebraSparseMatrixDataTests)
 add_executable(AlgebraSparseMatrixDataTests algebra/sparse/SparseMatrixData.cpp)
 target_link_libraries(AlgebraSparseMatrixDataTests karu)
@@ -53,6 +51,12 @@ project(AlgebraSparseMatrixMultiplayerTests)
 add_executable(AlgebraSparseMatrixMultiplayerTests algebra/sparse/SparseMatrixMultiplayer.cpp)
 target_link_libraries(AlgebraSparseMatrixMultiplayerTests karu)
 add_test(NAME AlgebraSparseMatrixMultiplayerTests COMMAND AlgebraSparseMatrixMultiplayerTests)
+
+project(LinearRotationTests)
+add_executable(LinearRotationTests algebra/linear/Rotation.cpp)
+target_link_libraries(LinearRotationTests karu)
+add_test(NAME LinearRotationTests COMMAND LinearRotationTests)
+
 
 project(LinearConjugateGradientTests)
 add_executable(LinearConjugateGradientTests algebra/linear/ConjugateGradient.cpp)

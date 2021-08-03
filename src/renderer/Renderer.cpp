@@ -38,6 +38,8 @@ namespace karu
 Renderer::Renderer(size_t width, size_t heigth)
 {
 	window = nullptr;
+	this->width = width;
+	this->heigth = heigth;
 
 	glfwSetErrorCallback(error_callback);
 
@@ -78,14 +80,14 @@ Renderer::~Renderer()
 	glfwTerminate();
 }
 
-void Renderer::draw2dPoints(std::vector<algebra::Vector> points, float centerX, float centerY, float normX, float normY)
+void Renderer::draw2dPoints(Camera& cam, std::vector<algebra::Matrix> points)
 {
 	std::vector<float> data;
 
 	for(int i=0; i<points.size(); i++)
 	{
-		data.push_back((points[i][0] - centerX)/normX);
-		data.push_back((points[i][1] - centerY)/normY);
+		data.push_back(points[i][0][0]);
+		data.push_back(points[i][1][0]);
 	}
 
 	glfwSwapInterval(1);
@@ -123,27 +125,30 @@ void Renderer::draw2dPoints(std::vector<algebra::Vector> points, float centerX, 
 
 	glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
 
-
 	mat4x4 m, p, mvp;
 	float ratio;
 	int width, height;
+
 	glfwGetFramebufferSize(window, &width, &height);
+
 	ratio = width / (float) height;
+
 	mat4x4_identity(m);
-	mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+
+  mat4x4_ortho(p, 0, this->width, this->heigth, 0.f, -1.f, 1.f);
+
 	mat4x4_mul(mvp, p, m);
 
-	glPointSize(2);
+	glPointSize(4);
 
 	glEnable(GL_BLEND);
+
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	while (!glfwWindowShouldClose(window))
 	{
-
 			glViewport(0, 0, width, height);
 			glClear(GL_COLOR_BUFFER_BIT);
-		
 
 			glUseProgram(program);
 			glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) mvp);

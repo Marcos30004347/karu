@@ -57,9 +57,9 @@ Matrix LUPSolve(const Matrix& A, const Matrix& P, const Matrix& b);
 Matrix LUPInverse(const Matrix& A, const Matrix& P);
 f32 LUPDeterminant(const Matrix& A, const Matrix& P);
 
-void printMatrixWithMargin(Matrix& A);
-void printMatrixWithMargin(Matrix* A);
-void printMatrix(Matrix& A);
-void printMatrix(Matrix* A);
+void printMatrixWithMargin(Matrix& A, unsigned precision = 3);
+void printMatrixWithMargin(Matrix* A, unsigned precision = 3);
+void printMatrix(Matrix& A, unsigned precision = 3);
+void printMatrix(Matrix* A, unsigned precision = 3);
 
 }

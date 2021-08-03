@@ -5,8 +5,8 @@
 #include <GL/glu.h>
 #include <vector>
 
-#include "algebra/vector/Vector.hpp"
-
+#include "algebra/matrix/Matrix.hpp"
+#include "camera/Camera.hpp"
 
 
 namespace karu
@@ -17,11 +17,12 @@ namespace karu
 class Renderer
 {
 	GLFWwindow* window;
-
+	u64 width;
+	u64 heigth;
 public:
 	Renderer(size_t width, size_t heigth);
 	~Renderer();
-	void draw2dPoints(std::vector<algebra::Vector> points, float centerX = 0, float centerY = 0, float normX = 1, float normY = 1);
+	void draw2dPoints(Camera& cam, std::vector<algebra::Matrix> points);
 };
 
 } // namespace karu

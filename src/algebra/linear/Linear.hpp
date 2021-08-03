@@ -6,18 +6,11 @@
 
 namespace karu::algebra {
 
-Matrix cross(Matrix A, Matrix B)
-{
-	return {
-		A[1][0]*B[2][0] - A[2][0]*B[1][0],
-		A[2][0]*B[0][0] - A[0][0]*B[2][0],
-		A[0][0]*B[1][0] - A[1][0]*B[0][0],
-	};
-}
+#define pi 3.141592653589793238462643383279502884197169399375105820974944
 
-f32 norm(Matrix v) {
-	return std::sqrt( v[0][0]*v[0][0] + v[1][0]*v[1][0] + v[2][0]*v[2][0] ) ;
-}
-
+Matrix cross(Matrix A, Matrix B);
+f32 norm(Matrix v);
+f32 radians(f32 degrees);
+f32 roundToPrecision(f32 val, u64 p);
 
 }

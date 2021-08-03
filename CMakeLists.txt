@@ -82,6 +82,7 @@ add_library(
     src/algebra/sparse/SparseMatrixMultiplayer.cpp
     src/algebra/sparse/lib/kernels/kernels.cpp
     src/algebra/sparse/lib/HashMap.cpp
+    src/algebra/linear/Linear.cpp
     src/renderer/Renderer.cpp
 )
 

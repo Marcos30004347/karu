@@ -5,7 +5,8 @@
 #include "algebra/matrix/MatrixTransposer.hpp"
 #include "algebra/matrix/MatrixDivider.hpp"
 #include "algebra/matrix/MatrixLU.hpp"
-
+#include "algebra/linear/Linear.hpp"
+#include <cmath>
 #include <iomanip>
 
 namespace karu::algebra {
@@ -206,49 +207,53 @@ f32 LUPDeterminant(const Matrix& A, const Matrix& P)
 }
 
 
-void printMatrixWithMargin(Matrix* A)
+
+
+
+
+void printMatrixWithMargin(Matrix* A, unsigned precision)
 {
 	for(int i=0;i<A->m_data.m_stored_lines; i++)
 	{
 		for(int j=0; j<A->m_data.m_stored_column;j++)
 		{
-			std::cout << std::setw(2) << A->m_data.get(i,j) << "\t";
+			std::cout << std::setw(2) << std::setprecision(precision) << A->m_data.get(i,j) << "\t";
 		}
 		std::cout << std::endl;
 	}
 }
 
-void printMatrixWithMargin(Matrix& A)
+void printMatrixWithMargin(Matrix& A, unsigned precision)
 {
 	for(int i=0;i<A.m_data.m_stored_lines; i++)
 	{
 		for(int j=0; j<A.m_data.m_stored_column;j++)
 		{
-			std::cout << std::setw(2) << A.m_data.get(i,j) << "\t";
+			std::cout << std::setw(2) << std::setprecision(precision) << roundToPrecision(A.m_data.get(i,j),precision) << "\t";
 		}
 		std::cout << std::endl;
 	}
 }
 
-void printMatrix(Matrix* A)
+void printMatrix(Matrix* A, unsigned precision)
 {
 	for(int i=0;i<A->m_data.m_lines; i++)
 	{
 		for(int j=0; j<A->m_data.m_columns;j++)
 		{
-			std::cout << std::setw(2) << A->m_data.get(i,j) << "\t";
+			std::cout << std::setw(2) << std::setprecision(precision) << roundToPrecision(A->m_data.get(i,j),precision) << "\t";
 		}
 		std::cout << std::endl;
 	}
 }
 
-void printMatrix(Matrix& A)
+void printMatrix(Matrix& A, unsigned precision)
 {
 	for(int i=0;i<A.m_data.m_lines; i++)
 	{
 		for(int j=0; j<A.m_data.m_columns;j++)
 		{
-			std::cout << std::setw(2) << A.m_data.get(i,j) << "\t";
+			std::cout << std::setw(2) << std::setprecision(precision) << roundToPrecision(A.m_data.get(i,j),precision) << "\t";
 		}
 		std::cout << std::endl;
 	}
