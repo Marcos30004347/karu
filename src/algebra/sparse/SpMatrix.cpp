@@ -3,6 +3,8 @@
 
 namespace karu::algebra {
 
+SpMatrix::SpMatrix(){}
+
 SpMatrix::SpMatrix(
 	u64 lines,
 	u64 columns,

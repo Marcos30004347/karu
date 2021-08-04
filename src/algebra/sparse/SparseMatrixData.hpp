@@ -11,6 +11,7 @@ namespace algebra {
 
 class SparseMatrixData {
 	public:
+
 	SparseMatrixData(
 		u64 block_width, u64 block_heigth,
 		u64 lines, u64 columns,
@@ -19,6 +20,8 @@ class SparseMatrixData {
 		std::vector<u64> col_idx,
 		std::vector<f32> data
 	);
+
+	SparseMatrixData();
 
 	f32 get(u64 l, u64 c);
 

@@ -1,5 +1,7 @@
 #include <iostream>
+#include <iomanip>
 
+#include "algebra/linear/Linear.hpp"
 #include "algebra/sparse/SparseMatrixData.hpp"
 
 using namespace karu;
@@ -56,6 +58,8 @@ f32 SparseMatrixData::get(u64 l, u64 c)
 
 void SparseMatrixData::print()
 {
+	std::cout.precision(3);
+
 	for(u32 l = 0; l < this->lines()/this->bcsr_block_heigth; l++)
 	{
 		for(u32 bl = 0; bl < this->bcsr_block_heigth; bl++)
@@ -64,38 +68,49 @@ void SparseMatrixData::print()
 			{
 				for(u32 c = 0; c < this->columns(); c++)
 				{
-					std::cout << "0 ";
+					std::cout << std::scientific << std::setw(10) << 0 << "\t";
 				}
 			}
 			else
 			{
+		
 				u32 col = 0;
 				for(u32 b = this->bcsr_row_ptr[l]; b < this->bcsr_row_ptr[l+1]; b++)
 				{
 
 					while(col < this->bcsr_col_idx[b])
 					{
-						std::cout << "0 ";
+						std::cout << std::scientific << std::setw(10) << 0 << "\t";
 						col++;
 					}
 
 					for(i32 c = 0; c<this->bcsr_block_width; c++)
 					{
-						std::cout << this->bcsr_data[
+						std::cout << std::scientific << std::setw(10) << this->bcsr_data[
 							b*this->bcsr_block_heigth*bcsr_block_width +
 							c*bcsr_block_heigth + bl
-						] << " ";
+						] << "\t";
 						col++;
 					}
 				
 				}
 				while(col < this->columns())
 				{
-					std::cout << "0 ";
+					std::cout << std::scientific << std::setw(10) << 0 << "\t";
 					col++;
 				}
 			}
 			std::cout << std::endl;
 		}
 	}
+}
+
+SparseMatrixData::SparseMatrixData() {
+	this->bcsr_block_heigth = 0;
+	this->bcsr_block_width = 0;
+	this->bcsr_lines = 0;
+	this->bcsr_columns = 0;
+	this->bcsr_data = std::vector<f32>(0);
+	this->bcsr_col_idx = std::vector<u64>(0);
+	this->bcsr_row_ptr = std::vector<u64>(0);
 }

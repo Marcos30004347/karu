@@ -11,6 +11,8 @@ class SpMatrix {
 public:
 	SparseMatrixData m_data;
 
+	SpMatrix();
+
 	SpMatrix(
 		u64 lines, u64 columns,
 		u64 block_heigth, u64 block_width,
