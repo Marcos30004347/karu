@@ -37,6 +37,16 @@ class SparseMatrixData {
 		return this->bcsr_columns;
 	} 
 
+	inline u64 columnsBlocks()
+	{
+		return this->bcsr_columns/this->bcsr_block_width;
+	}
+
+	inline u64 linesBlocks()
+	{
+		return this->bcsr_lines/this->bcsr_block_heigth;
+	}
+
 	inline f32* data()
 	{
 		return this->bcsr_data.data();

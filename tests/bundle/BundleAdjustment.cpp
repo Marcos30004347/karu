@@ -55,12 +55,9 @@ int main()
 		{
 			Matrix projection = bundles[i].camera.projection(points[j]);
 		
-			bundle::Pixel p;
-			p.u = projection[0][0];
-			p.v = projection[1][0];
 		
 			bundles[i].point_idx.push_back(j);
-			bundles[i].projections.push_back(p);
+			bundles[i].projections.push_back(projection);
 
 			pixels.push_back(projection);
 		}
@@ -69,13 +66,16 @@ int main()
 		// renderer.draw2dPoints(bundles[i].camera, pixels);
 	}
 
-	SpMatrix U, V, W;
+	SpMatrix U, V, W, W_T;
 
-	hessian(bundles, points, U, V, W);
+	hessian(bundles, points, U, V, W, W_T);
+
 	printMatrix(U);
 	std::cout << "\n";
-	printMatrix(V);
+	printMatrix(W_T);
 	std::cout << "\n";
 	printMatrix(W);
+	std::cout << "\n";
+	printMatrix(V);
 	return 0;
 }
