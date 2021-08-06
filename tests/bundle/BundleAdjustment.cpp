@@ -66,16 +66,22 @@ int main()
 		// renderer.draw2dPoints(bundles[i].camera, pixels);
 	}
 
-	SpMatrix U, V, W, W_T;
+	SpMatrix U, V, V_inv, W, W_T;
 
 	hessian(bundles, points, U, V, W, W_T);
+	buildHessianVInverse(V, V_inv);
+	
+	// printMatrix(U);
+	// std::cout << "\n";
+	// printMatrix(W_T);
+	// std::cout << "\n";
+	// printMatrix(W);
+	// std::cout << "\n";
+	// printMatrix(V);
+	// std::cout << "\n";
+	// printMatrix(V_inv);
+	// std::cout << "\n";
 
-	printMatrix(U);
-	std::cout << "\n";
-	printMatrix(W_T);
-	std::cout << "\n";
-	printMatrix(W);
-	std::cout << "\n";
-	printMatrix(V);
+	solveNormalEquations(bundles, points);
 	return 0;
 }

@@ -248,44 +248,29 @@ void buildHessianV(std::vector<Bundle>& bundles, std::vector<Matrix>& points, Sp
 	V = SpMatrix((V_rows.size() - 1)*3, 3*V_cols_idx.size(), 3, 3, V_rows, V_cols_idx, V_data);
 }
 
-void buildHessianVInverse(std::vector<Bundle>& bundles, std::vector<Matrix>& points, SpMatrix& V_inv)
+void buildHessianVInverse(SpMatrix V, SpMatrix& V_inv)
 {
-	std::vector<u64> V_rows;
-	std::vector<u64> V_cols_idx;
+	std::vector<u64> V_rows = V.m_data.rowPtr();
+	std::vector<u64> V_cols_idx = V.m_data.columnsIdx();
+	std::vector<f32> V_data(V.m_data.storedElements(), 0);
 
-	for(i64 j=0; j<points.size(); j++)
+	for(i64 i=0; i<V.m_data.blocksCount(); i++)
 	{
-		V_rows.push_back(j);
-		V_cols_idx.push_back(j*3);
+		Matrix V_blk = Matrix(V.m_data.blockHeight(), V.m_data.blockWidth());
+		
+		for(i64 c=0; c<V.m_data.blockWidth(); c++)
+			for(i64 l=0; l<V.m_data.blockHeight(); l++)
+				V_blk[l][c] = V.m_data.data()[i*V.m_data.blockHeight()*V.m_data.blockWidth() + c*V.m_data.blockHeight() + l];
+
+		std::pair<Matrix, Matrix> VLUP = LUPDecomposition(V_blk);
+		Matrix V_block_inv = LUPInverse(VLUP.first, VLUP.second);
+
+		for(i64 c=0; c<V.m_data.blockWidth(); c++)
+			for(i64 l=0; l<V.m_data.blockHeight(); l++)
+				V_data[i*V.m_data.blockHeight()*V.m_data.blockWidth() + c*V.m_data.blockHeight() + l] = V_block_inv[l][c];
 	}
 
-	V_rows.push_back(points.size());
-
-	std::vector<f32> V_data(9*V_cols_idx.size(), 0);
-	
-	for(i64 j=0; j<bundles.size(); j++)
-	{
-		for(u64 i : bundles[j].point_idx)
-		{
-			Matrix B_block = pointParametersDerivatives(bundles, points, i, j);
-			Matrix V_block = transpose(B_block) * B_block; 
-
-			std::pair<Matrix, Matrix> VLUP = LUPDecomposition(V_block);
-
-			Matrix V_block_inv = LUPInverse(VLUP.first, VLUP.second);
-
-			// Push data into col major layout
-			for(i64 c = 0; c<3; c++)
-			{
-				for(i64 l = 0; l<3; l++)
-				{
-					V_data[i*9 + l + c*3] += V_block_inv[l][c];
-				}
-			}
-		}
-	}
-
-	V_inv = SpMatrix((V_rows.size() - 1)*3, 3*V_cols_idx.size(), 3, 3, V_rows, V_cols_idx, V_data);
+	V_inv = SpMatrix(V.m_data.lines(), V.m_data.columns(), V.m_data.blockHeight(), V.m_data.blockWidth(), V_rows, V_cols_idx, V_data);
 }
 
 
@@ -405,6 +390,68 @@ void hessian(std::vector<Bundle>& bundles, std::vector<Matrix>& points, SpMatrix
 	buildHessianW_T(bundles, points, W_T);
 }
 
+void shurComplementTimesX(SpMatrix& U, SpMatrix& W, SpMatrix& W_T, SpMatrix& V_inv, Matrix& x, Matrix& Sx)
+{
+	Matrix x1 = W_T*x;
+	Matrix x2 = V_inv*x1;
+	Matrix x3 = W*x2;
+	Matrix x4 = U*x;
+	Sx = x4 - x3;
+}
+
+float norm(Matrix& A){
+	assert(A.columns() == 1);
+	
+	f32 n = 0;
+	
+	for(i32 l=0; l<A.rows(); l++)
+		n += A[l][0]*A[l][0];
+	
+	return std::sqrt(n);
+}
+
+
+Matrix shurComplementConjugateGradient(SpMatrix& U, SpMatrix& W, SpMatrix& W_T, SpMatrix& V_inv, Matrix& x, Matrix b, float tolerance)
+{
+	Matrix p;
+	Matrix r[2];
+
+	Matrix Sx; shurComplementTimesX(U, W, W_T, V_inv, x, Sx);
+	
+	r[0] = b - Sx;
+	
+	p = r[0];
+
+	Matrix D; shurComplementTimesX(U, W, W_T, V_inv, p, D);
+
+ 	Matrix alpha = (transpose(r[0])*r[0])/(transpose(p)*D);
+
+	x = x + alpha*p;
+	r[1] = r[0] - alpha*D;
+
+	i32 k = 1;
+
+	while (norm(r[1]) > tolerance)
+	{
+		Matrix beta = (transpose(r[1])*r[1])/(transpose(r[0])*r[0]);
+	
+		p = r[1] + beta*p;
+		
+		shurComplementTimesX(U, W, W_T, V_inv, p, D);
+
+		alpha =(transpose(r[1])*r[1])/(transpose(p)*D);
+
+		x = x + alpha*p;
+
+		r[0] = r[1];
+		r[1] = r[1] - alpha*D;
+
+		k = k+1;	
+	}
+
+	return x;
+}
+
 // void buildShurComplement(std::vector<Bundle>& bundles, std::vector<Matrix>& points, SpMatrix& U, SpMatrix& V, SpMatrix& W)
 // {
 // 	u64 K = U.m_data.columnsBlocks();
@@ -454,17 +501,19 @@ void hessian(std::vector<Bundle>& bundles, std::vector<Matrix>& points, SpMatrix
 
 void solveNormalEquations(std::vector<Bundle>& bundles, std::vector<Matrix>& points, f32 lambda = 0.0)
 {
-	SpMatrix U, V, W, W_T;
+	SpMatrix U, V, W, W_T, V_inv;
 
-	std::vector<Matrix> r(bundles.size());
-	std::vector<Matrix> rc(bundles.size());
-	std::vector<Matrix> rp(points.size());
+	std::vector<Matrix> r;
+	std::vector<Matrix> rc;
+	std::vector<Matrix> rp;
 	
 	for(int j=0; j<bundles.size(); j++)
 		r.push_back(Matrix(3, 1));
 	
 	for(int j=0; j<bundles.size(); j++)
+	{
 		rc.push_back(Matrix(15, 1));
+	}
 	
 	for(int i=0; i<points.size(); i++)
 		rp.push_back(Matrix(3, 1));
@@ -487,36 +536,62 @@ void solveNormalEquations(std::vector<Bundle>& bundles, std::vector<Matrix>& poi
 	}
 
 	hessian(bundles, points, U, V, W, W_T);
-	
+
+	buildHessianVInverse(V, V_inv);
+
 	// TODO: augment diagonals of U and V
 
 	for(i64 j=0; j<bundles.size(); j++)
 	{
-		Matrix Y_rp = Matrix(15, 3);
+		Matrix Y_rp = Matrix(15, 1);
 	
 		for(u64 i : bundles[j].point_idx)
 		{
 			Matrix A_block = cameraParametersDerivatives(bundles, points, i, j);
 			Matrix B_block = pointParametersDerivatives(bundles, points, i, j);
-
-			Matrix V_block = transpose(B_block) * B_block; 
-
-			// Compute the inverse of V[i]
-			std::pair<Matrix, Matrix> V_LUP = LUPDecomposition(V_block);
-			Matrix V_block_inv = LUPInverse(V_LUP.first, V_LUP.second);
-			
-			// A is 2x15, B is 2x3, W is 15x3
 			Matrix W_block = transpose(A_block)*B_block;
 
-			// V is 3x3, Y is 15x3
-			Matrix Y_block = W_block*V_block_inv;
+			Matrix V_blk_inv(V_inv.m_data.blockHeight(), V_inv.m_data.blockWidth());
+			for(i64 c=0; c<V_inv.m_data.blockWidth(); c++)
+				for(i64 l=0; l<V_inv.m_data.blockHeight(); l++)
+					V_blk_inv[l][c] = V_inv.m_data.data()[];
 
+			// V is 3x3, Y is 15x3
+			Matrix Y_block = W_block*V_blk_inv;
+
+			// Matrix L = Y_block*rp[i];
 			// Y_rp is 15x1
+			// std::cout <<"Y_block:\n";
+			// printMatrix(Y_block);
+			// std::cout << "\n";
+			// std::cout <<"rp[i]:\n";
+			// printMatrix(rp[i]);
+			// std::cout << "\n";
+			// std::cout <<"L:\n";
+			// printMatrix(L);
+			// std::cout << "\n";
+			// std::cout <<"Y[r][p]:\n";
+			// printMatrix(Y_rp);
+			// std::cout << "\n";
+
 			Y_rp = Y_rp + Y_block*rp[i];
+			// std::cout <<"Y[r][p]1:\n";
+			// printMatrix(Y_rp);
+			// std::cout << "\n";
+			// std::cout << "\n";
+
+			// std::cout << L.rows() << " " << L.columns() << "\n";
+			// std::cout << Y_rp.rows() << " " << Y_rp.columns() << "\n";
 		}
-	
-		r[j] = rc[j] - transpose(Y_rp);
+		// Matrix L = transpose(Y_rp);
+		// std::cout << rc[j].rows() << " " << rc[j].columns() << "\n";
+		// std::cout << L.rows() << " " << L.columns() << "\n";
+		// printMatrix(Y_rp);
+		std::cout << "\n";
+		r[j] = rc[j] - Y_rp;
 	}
+
+	// shurComplementConjugateGradient(U, W, W_T, V_inv, );
 
 }
 

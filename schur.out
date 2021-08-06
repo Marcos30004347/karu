@@ -1,0 +1,10 @@
+⎡U₁ - V⁻¹₁⋅W₁₁⋅transpose(W₁₁) - V⁻¹₂⋅W₁₂⋅transpose(W₁₂) - V⁻¹₃⋅W₁₃⋅transpose(W₁₃) - V⁻¹₄⋅W₁₄⋅transpose(W₁₄)    -V⁻¹₁⋅W₁₁⋅transpose(W₂₁) - V⁻¹₂⋅W₁₂⋅transpose(W₂₂) - V⁻¹₃⋅W₁₃⋅transpose(W₂₃) - V⁻¹₄⋅W₁₄⋅transpose(W₂₄)      -V⁻¹₁⋅W₁₁⋅transpose(W₃₁) - V⁻¹₂⋅W₁₂⋅transpose(W₃₂) - V⁻¹₃⋅W₁₃⋅transpose(W₃₃) - V⁻¹₄⋅W₁₄⋅transpose(W₃₄)  ⎤
+⎢                                                                                                                                                                                                                                                                                                                                  ⎥
+⎢  -V⁻¹₁⋅W₂₁⋅transpose(W₁₁) - V⁻¹₂⋅W₂₂⋅transpose(W₁₂) - V⁻¹₃⋅W₂₃⋅transpose(W₁₃) - V⁻¹₄⋅W₂₄⋅transpose(W₁₄)    U₂ - V⁻¹₁⋅W₂₁⋅transpose(W₂₁) - V⁻¹₂⋅W₂₂⋅transpose(W₂₂) - V⁻¹₃⋅W₂₃⋅transpose(W₂₃) - V⁻¹₄⋅W₂₄⋅transpose(W₂₄)    -V⁻¹₁⋅W₂₁⋅transpose(W₃₁) - V⁻¹₂⋅W₂₂⋅transpose(W₃₂) - V⁻¹₃⋅W₂₃⋅transpose(W₃₃) - V⁻¹₄⋅W₂₄⋅transpose(W₃₄)  ⎥
+⎢                                                                                                                                                                                                                                                                                                                                  ⎥
+⎣  -V⁻¹₁⋅W₃₁⋅transpose(W₁₁) - V⁻¹₂⋅W₃₂⋅transpose(W₁₂) - V⁻¹₃⋅W₃₃⋅transpose(W₁₃) - V⁻¹₄⋅W₃₄⋅transpose(W₁₄)      -V⁻¹₁⋅W₃₁⋅transpose(W₂₁) - V⁻¹₂⋅W₃₂⋅transpose(W₂₂) - V⁻¹₃⋅W₃₃⋅transpose(W₂₃) - V⁻¹₄⋅W₃₄⋅transpose(W₂₄)    U₃ - V⁻¹₁⋅W₃₁⋅transpose(W₃₁) - V⁻¹₂⋅W₃₂⋅transpose(W₃₂) - V⁻¹₃⋅W₃₃⋅transpose(W₃₃) - V⁻¹₄⋅W₃₄⋅transpose(W₃₄)⎦
+⎡-V⁻¹₁⋅W₁₁⋅rp₁ - V⁻¹₂⋅W₁₂⋅rp₂ - V⁻¹₃⋅W₁₃⋅rp₃ - V⁻¹₄⋅W₁₄⋅rp₄ + rc₁⎤
+⎢                                                                ⎥
+⎢-V⁻¹₁⋅W₂₁⋅rp₁ - V⁻¹₂⋅W₂₂⋅rp₂ - V⁻¹₃⋅W₂₃⋅rp₃ - V⁻¹₄⋅W₂₄⋅rp₄ + rc₂⎥
+⎢                                                                ⎥
+⎣-V⁻¹₁⋅W₃₁⋅rp₁ - V⁻¹₂⋅W₃₂⋅rp₂ - V⁻¹₃⋅W₃₃⋅rp₃ - V⁻¹₄⋅W₃₄⋅rp₄ + rc₃⎦

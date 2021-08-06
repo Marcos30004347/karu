@@ -1,5 +1,4 @@
 from sympy import *
-from sympy.tensor.functions import TensorProduct
 
 K = Matrix([[Symbol("fx"), 0,             Symbol("cx")], 
             [0,             Symbol("fy"), Symbol("cy")], 

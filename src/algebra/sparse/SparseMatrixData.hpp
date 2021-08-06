@@ -52,6 +52,36 @@ class SparseMatrixData {
 		return this->bcsr_data.data();
 	}
 
+	inline std::vector<u64> rowPtr()
+	{
+		return this->bcsr_row_ptr;
+	}
+
+	inline std::vector<u64> columnsIdx()
+	{
+		return this->bcsr_col_idx;
+	}
+
+	inline u64 storedElements()
+	{
+		return this->bcsr_data.size();
+	}
+
+	inline u64 blocksCount()
+	{
+		return this->bcsr_data.size()/(this->bcsr_block_width*this->bcsr_block_heigth);
+	}
+
+	inline u64 blockHeight()
+	{
+		return this->bcsr_block_heigth;
+	}
+
+	inline u64 blockWidth()
+	{
+		return this->bcsr_block_width;
+	}
+
 	private:
 	u64 bcsr_block_heigth;
 	u64 bcsr_block_width;
