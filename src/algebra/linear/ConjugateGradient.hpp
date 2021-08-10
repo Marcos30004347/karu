@@ -16,37 +16,37 @@ float norm(Matrix& A){
 	return std::sqrt(n);
 }
 
-// Matrix _conjGrad(Matrix A, Matrix x, Matrix b, float tolerance)
-// {
-// 	Matrix r = b - A*x;
-// 	Matrix p = r;
+Matrix _conjGrad(Matrix A, Matrix x, Matrix b, float tolerance)
+{
+	Matrix r = b - A*x;
+	Matrix p = r;
 
-// 	Matrix rsold = transpose(r)*r;
+	Matrix rsold = transpose(r)*r;
 
-// 	while(norm(r) > tolerance)
-// 	{
-// 		std::cout << norm(r) << std::endl;
+	while(norm(r) > tolerance)
+	{
+		std::cout << norm(r) << std::endl;
 	
-// 		Matrix Ap = A*p;
-// 		Matrix alpha = rsold/(transpose(p)*Ap);
+		Matrix Ap = A*p;
+		Matrix alpha = rsold/(transpose(p)*Ap);
 	
-// 		x = x + alpha*p;
-// 		r = r - alpha*Ap;
+		x = x + alpha*p;
+		r = r - alpha*Ap;
 		
-// 		Matrix rsnew = transpose(r)*r;
+		Matrix rsnew = transpose(r)*r;
 	
-// 		std::cout << norm(r) << std::endl;
+		std::cout << norm(r) << std::endl;
 	
-// 		// if(norm(r) < tolerance)
-// 		// {
-// 		// 	break;
-// 		// }
+		// if(norm(r) < tolerance)
+		// {
+		// 	break;
+		// }
 
-// 		p = r + (rsnew/rsold)*p;
-// 		rsold = rsnew;
-// 	}
-// 	return x;
-// }
+		p = r + (rsnew/rsold)*p;
+		rsold = rsnew;
+	}
+	return x;
+}
 
 
 // Solve Symmetric Positive Definite systems A*x = b, returns x

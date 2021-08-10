@@ -14,9 +14,26 @@ Matrix cross(Matrix A, Matrix B)
 	});
 }
 
-f32 norm(Matrix v) {
-	return std::sqrt( v[0][0]*v[0][0] + v[1][0]*v[1][0] + v[2][0]*v[2][0] ) ;
+f32 norm(Matrix& A){	
+	f32 n = 0;
+	
+	for(i32 l=0; l<A.rows(); l++)
+		n += A[l][0]*A[l][0];
+	
+	return std::sqrt(n);
 }
+
+f32 norm(Matrix A){	
+	f32 n = 0;
+	
+	for(i32 l=0; l<A.rows(); l++)
+		n += A[l][0]*A[l][0];
+	
+	return std::sqrt(n);
+}
+// f32 norm(Matrix v) {
+// 	return std::sqrt( v[0][0]*v[0][0] + v[1][0]*v[1][0] + v[2][0]*v[2][0] ) ;
+// }
 
 f32 radians(f32 degrees)
 {

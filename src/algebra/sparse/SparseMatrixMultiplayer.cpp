@@ -26,15 +26,14 @@ struct SparseMVMultiplyData
 void SparseMatrixMultiplayer::sparseMVMultiplyThreadHandler(void* data)
 {
 	SparseMVMultiplyData* args = (SparseMVMultiplyData*)data;
-
 	u64 target_block_row = args->idx;
 
 	const SparseMatrixData* const A = args->A;
 
-	const MatrixData* const x = args->x;
+	MatrixData* x = args->x;
 	MatrixData* y = args->y;
 
-	const f32* x_data = x->m_data;
+	f32* x_data = x->m_data;
 	f32* y_data = y->m_data;
 
 	u64 first_block = A->bcsr_row_ptr[target_block_row];
@@ -43,58 +42,54 @@ void SparseMatrixMultiplayer::sparseMVMultiplyThreadHandler(void* data)
 	u64 bs = A->bcsr_block_width * A->bcsr_block_heigth;
 
 	std::vector<f32> local_out = std::vector<f32>(bs, 0);
+
+	if(last_block - first_block == 0)	return;
+
 	for(u64 block = first_block; block < last_block; block++)
 	{
 		u64 target_block_col = A->bcsr_col_idx[block];
-	
-		u64 blocks = target_block_col/x->m_block_heigth;
-		u64 intra_block = target_block_col - blocks;
-
-		//
 
 		for(u64 c = 0; c<A->bcsr_block_width; c++)
 		{
 			u32 pos = target_block_col + c;
-		
-			i32 block_y = pos/x->m_block_heigth;
-			i32 by = pos - block_y;
-		
-			i32 block_x = 0;
-			i32 bx = 0 - block_x;
 			
+			i32 block_y = pos/x->m_block_heigth;
+			i32 by = pos - x->m_block_heigth*block_y;
+		
 			u32 blocks_per_block_line = x->m_stored_column/x->m_block_width;
+		
 			u32 x_block_size = x->m_block_heigth * x->m_block_width;
-			u32 stride = block_y*blocks_per_block_line*x_block_size + block_x*x_block_size;
-			f32 vec_this_col = x_data[stride + by*x->m_block_width + bx];
+		
+			u32 stride = block_y*blocks_per_block_line*x_block_size;
+	
+			f32 vec_this_col = x_data[stride + by*x->m_block_width];
 
 			for(u64 r = 0; r<A->bcsr_block_heigth; r++)
+			{
 				local_out[r] += A->bcsr_data[block*bs + c*A->bcsr_block_heigth + r] * vec_this_col;
+			}
 		}
 	}
 
-	for(u64 r=0; r<A->bcsr_block_width; r++)
+	for(u64 r=0; r<A->bcsr_block_heigth; r++)
 	{
-		u32 pos = target_block_row*A->bcsr_block_width + r;
+		u32 pos = target_block_row*A->bcsr_block_heigth + r;
 
 		i32 block_y = pos/x->m_block_heigth;
-		i32 by = pos - block_y;
+		i32 by = pos - x->m_block_heigth*block_y;
 	
-		i32 block_x = 0;
-		i32 bx = 0 - block_x;
-		
 		u32 blocks_per_block_line = x->m_stored_column/x->m_block_width;
 		u32 x_block_size = x->m_block_heigth * x->m_block_width;
-		u32 stride = block_y*blocks_per_block_line*x_block_size + block_x*x_block_size;
-		f32 vec_this_col = x_data[stride + by*x->m_block_width + bx];
+		u32 stride = block_y*blocks_per_block_line*x_block_size;
 
-		y_data[stride + by*x->m_block_width + bx] += local_out[r];
+		y_data[stride + by*x->m_block_width] += local_out[r];
 	}
 }
 
 void SparseMatrixMultiplayer::sparseMVMultiplyCPU(SparseMatrixData* A, MatrixData* x, MatrixData* y)
 {
-	u64 n = A->bcsr_lines/A->bcsr_block_heigth;
-
+	u64 n = A->bcsr_row_ptr.size() - 1;//A->bcsr_lines/A->bcsr_block_heigth;
+	// std::cout << n << std::endl;
 	std::thread t[n];
 	
 	SparseMVMultiplyData data[n];
@@ -102,10 +97,12 @@ void SparseMatrixMultiplayer::sparseMVMultiplyCPU(SparseMatrixData* A, MatrixDat
 	for(u64 i=0; i<n; i++)
 	{
 		data[i].idx = i;
+
 		data[i].A = A;
 		data[i].x = x;
 		data[i].y = y;
 
+		// SparseMatrixMultiplayer::sparseMVMultiplyThreadHandler(&data[i]);
 		t[i] = std::thread(SparseMatrixMultiplayer::sparseMVMultiplyThreadHandler, &data[i]);
 	}
 
@@ -184,6 +181,8 @@ i32 ceil_div(i32 x, i32 y)
 
 void SparseMatrixMultiplayer::sparseMVMultiplyGPU(SparseMatrixData* A, MatrixData* x, MatrixData* y)
 {
+	assert(A->columns() == x->lines());
+
 	compute::Buffer col_idx = compute::Buffer(A->bcsr_col_idx.data(), sizeof(u64)*A->bcsr_col_idx.size(), 							compute::Buffer::READ_WRITE, false);
 
 	compute::Buffer row_ptr = compute::Buffer(A->bcsr_row_ptr.data(), sizeof(u64)*A->bcsr_row_ptr.size(), 							compute::Buffer::READ_WRITE, false);
@@ -193,7 +192,6 @@ void SparseMatrixMultiplayer::sparseMVMultiplyGPU(SparseMatrixData* A, MatrixDat
 	compute::Buffer x_buffe = compute::Buffer(x->m_data, 							sizeof(f32)*x->m_stored_lines*x->m_stored_column,	compute::Buffer::READ_WRITE, false);
 
 	compute::Buffer y_buffe = compute::Buffer(sizeof(f32)*y->m_stored_lines*y->m_stored_column, compute::Buffer::READ_WRITE, compute::Buffer::MEM_GPU);
-	
 	// I think the same algorithm will work for the COO format
 	// if the block dim is equal to 1x1=1, in that case the matrix
 	// also need to have an row_ptr array with the same size
@@ -216,6 +214,7 @@ void SparseMatrixMultiplayer::sparseMVMultiplyGPU(SparseMatrixData* A, MatrixDat
 	bsMV_kernel->setKernelArgument(11, BUFFER_ARG_SIZE, x_buffe.upload());
 	bsMV_kernel->setKernelArgument(12, BUFFER_ARG_SIZE, y_buffe.upload());
 	bsMV_kernel->setKernelArgument(13, 4 * block_dim * sizeof(f32), nullptr);
+
 	bsMV_kernel->enqueue({ A->bcsr_data.size() }, { block_dim });
 
 	f32* data = (f32*)y_buffe.download();

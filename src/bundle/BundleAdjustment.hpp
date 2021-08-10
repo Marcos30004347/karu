@@ -61,6 +61,7 @@ without forming S on memory:
 #include <assert.h>
 #include "algebra/matrix/Matrix.hpp"
 #include "algebra/sparse/SpMatrix.hpp"
+#include "algebra/linear/Linear.hpp"
 #include "camera/Camera.hpp"
 
 using namespace karu::algebra;
@@ -92,6 +93,8 @@ struct Bundle
 	// idx of the point that projections[i] is the projection in this camera
 	std::vector<u64> point_idx;
 };
+
+
 
 Matrix packObservations(std::vector<Bundle>& bundles, std::vector<Point>& points)
 {
@@ -177,7 +180,7 @@ Matrix pointParametersDerivatives(std::vector<Bundle>& bundles, std::vector<Matr
 	});
 }
 
-void buildHessianU(std::vector<Bundle>& bundles, std::vector<Matrix>& points, SpMatrix& U)
+void buildHessianU(std::vector<Bundle>& bundles, std::vector<Matrix>& points, std::vector<std::vector<u64>>& point_idx_to_camera, f32 lambda, SpMatrix& U)
 {
 	std::vector<u64> U_rows;
 	std::vector<u64> U_cols_idx;
@@ -211,9 +214,22 @@ void buildHessianU(std::vector<Bundle>& bundles, std::vector<Matrix>& points, Sp
 	}
 
 	U = SpMatrix((U_rows.size() - 1)*15, 15*U_cols_idx.size(), 15, 15, U_rows, U_cols_idx, U_data);
+	
+	// Augment the diagonal of U for Levenber-Marquardt
+	if(lambda > 0.0)
+	{
+		for(i64 i=0; i<U.m_data.blocksCount(); i++)
+		{
+			for(i64 j=0; j<U.m_data.blockWidth(); j++)
+			{
+				u64 stride = i*U.m_data.blockHeight()*U.m_data.blockWidth() + j*U.m_data.blockHeight() + j;
+				U.m_data.data()[stride] = U.m_data.data()[stride] + lambda;
+			}
+		}
+	}
 }
 
-void buildHessianV(std::vector<Bundle>& bundles, std::vector<Matrix>& points, SpMatrix& V)
+void buildHessianV(std::vector<Bundle>& bundles, std::vector<Matrix>& points, std::vector<std::vector<u64>>& point_idx_to_camera, f32 lambda, SpMatrix& V)
 {
 	std::vector<u64> V_rows;
 	std::vector<u64> V_cols_idx;
@@ -245,13 +261,29 @@ void buildHessianV(std::vector<Bundle>& bundles, std::vector<Matrix>& points, Sp
 			}
 		}
 	}
+
 	V = SpMatrix((V_rows.size() - 1)*3, 3*V_cols_idx.size(), 3, 3, V_rows, V_cols_idx, V_data);
+
+	// Augment the diagonal of V for Levenber-Marquardt
+	if(lambda > 0.0)
+	{
+		for(i64 i=0; i<V.m_data.blocksCount(); i++)
+		{
+			for(i64 j=0; j<V.m_data.blockWidth(); j++)
+			{
+				u64 stride = i*V.m_data.blockHeight()*V.m_data.blockWidth() + j*V.m_data.blockHeight() + j;
+				V.m_data.data()[stride] = V.m_data.data()[stride] + lambda;
+			}
+		}
+	}
 }
 
-void buildHessianVInverse(SpMatrix V, SpMatrix& V_inv)
+void buildHessianVInverse(SpMatrix& V, SpMatrix& V_inv)
 {
 	std::vector<u64> V_rows = V.m_data.rowPtr();
+
 	std::vector<u64> V_cols_idx = V.m_data.columnsIdx();
+
 	std::vector<f32> V_data(V.m_data.storedElements(), 0);
 
 	for(i64 i=0; i<V.m_data.blocksCount(); i++)
@@ -273,8 +305,32 @@ void buildHessianVInverse(SpMatrix V, SpMatrix& V_inv)
 	V_inv = SpMatrix(V.m_data.lines(), V.m_data.columns(), V.m_data.blockHeight(), V.m_data.blockWidth(), V_rows, V_cols_idx, V_data);
 }
 
+void buildHessianUInverse(SpMatrix& U, SpMatrix& U_inv)
+{
+	std::vector<u64> U_rows = U.m_data.rowPtr();
+	std::vector<u64> U_cols_idx = U.m_data.columnsIdx();
+	std::vector<f32> U_data(U.m_data.storedElements(), 0);
 
-void buildHessianW(std::vector<Bundle>& bundles, std::vector<Matrix>& points, SpMatrix& W)
+	for(i64 i=0; i<U.m_data.blocksCount(); i++)
+	{
+		Matrix U_blk = Matrix(U.m_data.blockHeight(), U.m_data.blockWidth());
+		
+		for(i64 c=0; c<U.m_data.blockWidth(); c++)
+			for(i64 l=0; l<U.m_data.blockHeight(); l++)
+				U_blk[l][c] = U.m_data.data()[i*U.m_data.blockHeight()*U.m_data.blockWidth() + c*U.m_data.blockHeight() + l];
+
+		std::pair<Matrix, Matrix> ULUP = LUPDecomposition(U_blk);
+		Matrix U_block_inv = LUPInverse(ULUP.first, ULUP.second);
+
+		for(i64 c=0; c<U.m_data.blockWidth(); c++)
+			for(i64 l=0; l<U.m_data.blockHeight(); l++)
+				U_data[i*U.m_data.blockHeight()*U.m_data.blockWidth() + c*U.m_data.blockHeight() + l] = U_block_inv[l][c];
+	}
+
+	U_inv = SpMatrix(U.m_data.lines(), U.m_data.columns(), U.m_data.blockHeight(), U.m_data.blockWidth(), U_rows, U_cols_idx, U_data);
+}
+
+void buildHessianW(std::vector<Bundle>& bundles, std::vector<Matrix>& points, std::vector<std::vector<u64>>& point_idx_to_camera, f32 lambda, SpMatrix& W)
 {
 	u64 W_block_cnt = 0;
 
@@ -285,6 +341,20 @@ void buildHessianW(std::vector<Bundle>& bundles, std::vector<Matrix>& points, Sp
 	std::vector<f32> W_data(45*W_block_cnt, 0);
 	std::vector<u64> W_cols_idx(W_block_cnt, 0);
 	std::vector<u64> W_rows(bundles.size()+1, 0);
+
+	// u64 idx = 0;
+
+	// for(i64 i=0; i<points.size(); i++)
+	// {
+	// 	for(u64 j : point_idx_to_camera[i])
+	// 	{
+	// 		W_cols_idx[idx++] = 3*j;
+	// 		W_rows[i+1]++;
+	// 	}
+	
+	// 	if(i+2 < W_rows.size())
+	// 		W_rows[i+2] = W_rows[i+1];
+	// }
 
 	u64 idx = 0;
 
@@ -300,17 +370,18 @@ void buildHessianW(std::vector<Bundle>& bundles, std::vector<Matrix>& points, Sp
 			W_rows[i+2] = W_rows[i+1];
 	}
 
-	for(u64 i=0; i<bundles.size(); i++)
+	for(u64 j=0; j<bundles.size(); j++)
 	{
-		for(u64 j=0; j<bundles[i].point_idx.size(); j++)
+		for(u64 i=0; i<bundles[j].point_idx.size(); i++)
 		{
 			// W block i, j
-			Matrix A_block = cameraParametersDerivatives(bundles, points, bundles[i].point_idx[j], i);
-			Matrix B_block = pointParametersDerivatives(bundles, points, bundles[i].point_idx[j], i);
+			Matrix A_block = cameraParametersDerivatives(bundles, points, bundles[j].point_idx[i], j);
+			Matrix B_block = pointParametersDerivatives(bundles, points, bundles[j].point_idx[i], j);
 
 			Matrix W_block = transpose(A_block)*B_block;
-	
-			u64 stride = 45*(W_rows[i] + j);
+
+			// block i j should be in j i block position
+			u64 stride = 45*(W_rows[j] + i);
 
 			for(i64 c=0; c<3; c++)
 				for(i64 l=0; l<15; l++)
@@ -322,17 +393,8 @@ void buildHessianW(std::vector<Bundle>& bundles, std::vector<Matrix>& points, Sp
 }
 
 
-void buildHessianW_T(std::vector<Bundle>& bundles, std::vector<Matrix>& points, SpMatrix& W_T)
+void buildHessianW_T(std::vector<Bundle>& bundles, std::vector<Matrix>& points, std::vector<std::vector<u64>>& point_idx_to_camera, f32 lambda, SpMatrix& W_T)
 {
-	std::vector<std::vector<u64>> point_idx_to_camera(points.size());
-	
-	for(i64 j=0; j<bundles.size(); j++)
-	{
-		for(u64 i : bundles[j].point_idx)
-		{
-			point_idx_to_camera[i].push_back(j);
-		}
-	}
 
 	u64 W_block_cnt = 0;
 
@@ -350,7 +412,7 @@ void buildHessianW_T(std::vector<Bundle>& bundles, std::vector<Matrix>& points, 
 	{
 		for(u64 j : point_idx_to_camera[i])
 		{
-			W_cols_idx[idx++] = 3*j;
+			W_cols_idx[idx++] = 15*j;
 			W_rows[i+1]++;
 		}
 	
@@ -382,12 +444,20 @@ void buildHessianW_T(std::vector<Bundle>& bundles, std::vector<Matrix>& points, 
 
 
 // Compute Hessian [[U, W], [W.T, V]]
-void hessian(std::vector<Bundle>& bundles, std::vector<Matrix>& points, SpMatrix& U, SpMatrix& V, SpMatrix& W, SpMatrix& W_T)
+void hessian(
+	std::vector<Bundle>& bundles,
+	std::vector<Matrix>& points,
+	std::vector<std::vector<u64>>& point_idx_to_camera, f32 lambda,
+	SpMatrix& U,
+	SpMatrix& V,
+	SpMatrix& W,
+	SpMatrix& W_T
+)
 {
-	buildHessianU(bundles, points, U);
-	buildHessianV(bundles, points, V);
-	buildHessianW(bundles, points, W);
-	buildHessianW_T(bundles, points, W_T);
+	buildHessianU(bundles, points, point_idx_to_camera, lambda, U);
+	buildHessianV(bundles, points, point_idx_to_camera, lambda, V);
+	buildHessianW(bundles, points, point_idx_to_camera, lambda, W);
+	buildHessianW_T(bundles, points, point_idx_to_camera, lambda, W_T);
 }
 
 void shurComplementTimesX(SpMatrix& U, SpMatrix& W, SpMatrix& W_T, SpMatrix& V_inv, Matrix& x, Matrix& Sx)
@@ -396,117 +466,53 @@ void shurComplementTimesX(SpMatrix& U, SpMatrix& W, SpMatrix& W_T, SpMatrix& V_i
 	Matrix x2 = V_inv*x1;
 	Matrix x3 = W*x2;
 	Matrix x4 = U*x;
-	Sx = x4 - x3;
-}
-
-float norm(Matrix& A){
-	assert(A.columns() == 1);
-	
-	f32 n = 0;
-	
-	for(i32 l=0; l<A.rows(); l++)
-		n += A[l][0]*A[l][0];
-	
-	return std::sqrt(n);
+	Sx 				= x4 - x3;
 }
 
 
-Matrix shurComplementConjugateGradient(SpMatrix& U, SpMatrix& W, SpMatrix& W_T, SpMatrix& V_inv, Matrix& x, Matrix b, float tolerance)
+void shurComplementConjugateGradient(SpMatrix& U, SpMatrix& W, SpMatrix& W_T, SpMatrix& V_inv, Matrix& x, Matrix b, float tolerance)
 {
-	Matrix p;
-	Matrix r[2];
+	Matrix Sx;
+	Matrix Ap;
 
-	Matrix Sx; shurComplementTimesX(U, W, W_T, V_inv, x, Sx);
-	
-	r[0] = b - Sx;
-	
-	p = r[0];
+	shurComplementTimesX(U, W, W_T, V_inv, x, Sx);
 
-	Matrix D; shurComplementTimesX(U, W, W_T, V_inv, p, D);
+	Matrix r = b - Sx;
+	Matrix p = r;
 
- 	Matrix alpha = (transpose(r[0])*r[0])/(transpose(p)*D);
+	Matrix rsold = transpose(r)*r;
 
-	x = x + alpha*p;
-	r[1] = r[0] - alpha*D;
+	u64 it = 0;
 
-	i32 k = 1;
-
-	while (norm(r[1]) > tolerance)
+	while(norm(r) > tolerance && it++ < 20000)
 	{
-		Matrix beta = (transpose(r[1])*r[1])/(transpose(r[0])*r[0]);
-	
-		p = r[1] + beta*p;
+		// std::cout << "Converging: " << norm(r) << std::endl;
 		
-		shurComplementTimesX(U, W, W_T, V_inv, p, D);
+		shurComplementTimesX(U, W, W_T, V_inv, p, Ap);
 
-		alpha =(transpose(r[1])*r[1])/(transpose(p)*D);
-
+		Matrix alpha = rsold/(transpose(p)*Ap);
+	
 		x = x + alpha*p;
+		r = r - alpha*Ap;
 
-		r[0] = r[1];
-		r[1] = r[1] - alpha*D;
+		Matrix rsnew = transpose(r)*r;
 
-		k = k+1;	
+		p = r + (rsnew/rsold)*p;
+		rsold = rsnew;
 	}
-
-	return x;
 }
 
-// void buildShurComplement(std::vector<Bundle>& bundles, std::vector<Matrix>& points, SpMatrix& U, SpMatrix& V, SpMatrix& W)
-// {
-// 	u64 K = U.m_data.columnsBlocks();
-	
-// 	for(i64 j=0; j<bundles.size(); j++)
-// 	{
-// 		Matrix R = Matrix(15,3);
-	
-// 		for(i64 k=0; k<K; k++)
-// 		{
-	
-		// 	Matrix W_i_k_T;
-		// 	Matrix Y_i_j;
-		// 	for(i64 i : bundles[k].point_idx)
-		// 	{
-		// 		Matrix A_i_k = cameraParametersDerivatives(bundles, points, i, k);
-		// 		Matrix B_i_k = pointParametersDerivatives(bundles, points, i, k);
 
-		// 		Matrix W_i_k = transpose(A_i_k)*B_i_k;
-		// 		W_i_k_T = transpose(W_i_k);
-		// 	}
-
-
-		// 	for(i64 i : bundles[j].point_idx)
-		// 	{
-		// 		Matrix A_i_j = cameraParametersDerivatives(bundles, points, i, j);
-		// 		Matrix B_i_j = pointParametersDerivatives(bundles, points, i, j);
-
-		// 		Matrix V_i_j = transpose(B_i_j) * B_i_j; 
-
-		// 		std::pair<Matrix, Matrix> V_LUP = LUPDecomposition(V_i_j);
-		// 		Matrix V_i_j_inv = LUPInverse(V_LUP.first, V_LUP.second);
-				
-		// 		Matrix W_i_j = transpose(A_i_j)*B_i_j;
-
-		// 		Y_i_j = W_i_j*V_i_j_inv;
-		// 	}
-
-		// 	R = R + Y_i_j*W_i_k_T;
-		// }
-
-			
-			// A is 2x15, B is 2x3, W is 15x3
-// 		}
-// 	}
-// }
-
-void solveNormalEquations(std::vector<Bundle>& bundles, std::vector<Matrix>& points, f32 lambda = 0.0)
+void solveNormalEquations(std::vector<Bundle>& bundles, std::vector<Matrix>& points, std::vector<std::vector<u64>>& point_idx_to_camera, f32& lambda)
 {
-	SpMatrix U, V, W, W_T, V_inv;
+	SpMatrix U, V, W, W_T, /*U_inv,*/ V_inv;
 
 	std::vector<Matrix> r;
 	std::vector<Matrix> rc;
 	std::vector<Matrix> rp;
 	
+	lambda = 0;
+
 	for(int j=0; j<bundles.size(); j++)
 		r.push_back(Matrix(3, 1));
 	
@@ -518,81 +524,140 @@ void solveNormalEquations(std::vector<Bundle>& bundles, std::vector<Matrix>& poi
 	for(int i=0; i<points.size(); i++)
 		rp.push_back(Matrix(3, 1));
 
+
 	for(u64 j=0; j<bundles.size(); j++)
 	{
+
 		for(u64 i=0; i<bundles[j].projections.size(); i++)
 		{
 			u64 k = bundles[j].point_idx[i];
-			Matrix r = bundles[j].projections[i] - bundles[j].camera.projection(points[k]);
 
+			Matrix r = bundles[j].projections[i] - bundles[j].camera.projection(points[k]);
+			
+			lambda += pow(norm(r),2);
+			
 			Matrix A_block = cameraParametersDerivatives(bundles, points, k, j);
 			Matrix B_block = pointParametersDerivatives(bundles, points, k, j);
 
-			// 15x1
 			rc[j] = rc[j] + transpose(A_block)*r;
-			// 3x1
 			rp[k] = rp[k] + transpose(B_block)*r;
 		}
 	}
 
-	hessian(bundles, points, U, V, W, W_T);
+	lambda = sqrt(lambda);
+
+	hessian(bundles, points, point_idx_to_camera, lambda, U, V, W, W_T);
 
 	buildHessianVInverse(V, V_inv);
-
-	// TODO: augment diagonals of U and V
+	// buildHessianUInverse(U, U_inv);
 
 	for(i64 j=0; j<bundles.size(); j++)
 	{
 		Matrix Y_rp = Matrix(15, 1);
-	
 		for(u64 i : bundles[j].point_idx)
 		{
-			Matrix A_block = cameraParametersDerivatives(bundles, points, i, j);
-			Matrix B_block = pointParametersDerivatives(bundles, points, i, j);
-			Matrix W_block = transpose(A_block)*B_block;
-
 			Matrix V_blk_inv(V_inv.m_data.blockHeight(), V_inv.m_data.blockWidth());
+			
 			for(i64 c=0; c<V_inv.m_data.blockWidth(); c++)
 				for(i64 l=0; l<V_inv.m_data.blockHeight(); l++)
-					V_blk_inv[l][c] = V_inv.m_data.data()[];
+					V_blk_inv[l][c] = V_inv.m_data.data()[i*V_inv.m_data.blockHeight()*V_inv.m_data.blockWidth() + c*V_inv.m_data.blockHeight() + l];
 
-			// V is 3x3, Y is 15x3
-			Matrix Y_block = W_block*V_blk_inv;
+			Matrix A_block = cameraParametersDerivatives(bundles, points, i, j);
+			Matrix B_block = pointParametersDerivatives(bundles, points, i, j);
 
-			// Matrix L = Y_block*rp[i];
-			// Y_rp is 15x1
-			// std::cout <<"Y_block:\n";
-			// printMatrix(Y_block);
-			// std::cout << "\n";
-			// std::cout <<"rp[i]:\n";
-			// printMatrix(rp[i]);
-			// std::cout << "\n";
-			// std::cout <<"L:\n";
-			// printMatrix(L);
-			// std::cout << "\n";
-			// std::cout <<"Y[r][p]:\n";
-			// printMatrix(Y_rp);
-			// std::cout << "\n";
+			Matrix Y_block = transpose(A_block)*B_block*V_blk_inv;
 
 			Y_rp = Y_rp + Y_block*rp[i];
-			// std::cout <<"Y[r][p]1:\n";
-			// printMatrix(Y_rp);
-			// std::cout << "\n";
-			// std::cout << "\n";
-
-			// std::cout << L.rows() << " " << L.columns() << "\n";
-			// std::cout << Y_rp.rows() << " " << Y_rp.columns() << "\n";
 		}
-		// Matrix L = transpose(Y_rp);
-		// std::cout << rc[j].rows() << " " << rc[j].columns() << "\n";
-		// std::cout << L.rows() << " " << L.columns() << "\n";
-		// printMatrix(Y_rp);
-		std::cout << "\n";
+
 		r[j] = rc[j] - Y_rp;
 	}
 
-	// shurComplementConjugateGradient(U, W, W_T, V_inv, );
+	Matrix rf = Matrix(15*r.size(), 1);
+	Matrix dC = Matrix(15*r.size(), 1);
 
+	for(i64 k=0; k<r.size(); k++)
+		for(i64 idx=0; idx<15; idx++)
+			rf[k*15 + idx][0] = r[k][idx][0];
+
+	shurComplementConjugateGradient(U, W, W_T, V_inv, dC, rf, 0.0000001f);
+
+	Matrix dP = Matrix(3*points.size(), 1);
+
+	for(i64 i=0; i<points.size(); i++)
+	{
+		Matrix K = Matrix(3, 1);
+	
+		for(i64 j: point_idx_to_camera[i])
+		{
+			Matrix A_block = cameraParametersDerivatives(bundles, points, bundles[j].point_idx[i], j);
+			Matrix B_block = pointParametersDerivatives(bundles, points, bundles[j].point_idx[i], j);
+
+			Matrix W_block = transpose(A_block)*B_block;
+			Matrix W_block_T = transpose(W_block);
+		
+			Matrix dc(15, 1);
+	
+			for(i64 idx=0; idx<15; idx++)
+			{
+				dc[idx] = dC[j*15 + idx];
+			}
+	
+			K = K + W_block_T*dc;
+		}
+	
+		for(i64 idx=0; idx<3; idx++)
+		{
+			dP[i*3 + idx][0] = K[idx][0];
+		}
+	}
+
+	// Update camera parameters
+	for(i64 j=0; j<bundles.size(); j++)
+	{
+		bundles[j].camera.fx += dC[j*15 + 0][0];
+		bundles[j].camera.fy += dC[j*15 + 1][0];
+		bundles[j].camera.cx += dC[j*15 + 2][0];
+		bundles[j].camera.cy += dC[j*15 + 3][0];
+		bundles[j].camera.P[0][0] += dC[j*15 + 4][0];
+		bundles[j].camera.P[1][0] += dC[j*15 + 5][0];
+		bundles[j].camera.P[2][0] += dC[j*15 + 6][0];
+		bundles[j].camera.R[0][0] += dC[j*15 + 7][0];
+		bundles[j].camera.R[1][0] += dC[j*15 + 8][0];
+		bundles[j].camera.R[2][0] += dC[j*15 + 9][0];
+		bundles[j].camera.k1 += dC[j*15 + 10][0];
+		bundles[j].camera.k2 += dC[j*15 + 11][0];
+		bundles[j].camera.k3 += dC[j*15 + 12][0];
+		bundles[j].camera.p1 += dC[j*15 + 13][0];
+		bundles[j].camera.p2 += dC[j*15 + 14][0];
+	}
+
+	// Update point parameters
+	for(i64 i=0; i<points.size(); i++)
+	{
+		points[i][0][0] += dP[i*3 + 0][0];
+		points[i][1][0] += dP[i*3 + 1][0];
+		points[i][2][0] += dP[i*3 + 2][0];
+	}
+
+	// for(i64 j=0; j<bundles.size(); j++)
+	// {
+	// 	std::cout << "fx: " << bundles[j].camera.fx << "\n";
+	// 	std::cout << "fy: " << bundles[j].camera.fy << "\n";
+	// 	std::cout << "cx: " << bundles[j].camera.cx << "\n";
+	// 	std::cout << "cy: " << bundles[j].camera.cx << "\n";
+	// 	std::cout << "Cx: " << bundles[j].camera.P[0][0] << "\n";
+	// 	std::cout << "Cy: " << bundles[j].camera.P[1][0] << "\n";
+	// 	std::cout << "Cz: " << bundles[j].camera.P[2][0] << "\n";
+	// 	std::cout << "r1: " << bundles[j].camera.R[0][0] << "\n";
+	// 	std::cout << "r2: " << bundles[j].camera.R[1][0] << "\n";
+	// 	std::cout << "r3: " << bundles[j].camera.R[2][0] << "\n";
+	// 	std::cout << "\n";
+	// }
+	// std::cout << "camera parameters:\n";
+	// printMatrix(dC);
+	// std::cout << "point parameters:\n";
+	// printMatrix(dP);
 }
 
 }

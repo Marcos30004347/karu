@@ -189,17 +189,22 @@ const u32 MatrixData::blockHeight() const
 	return this->m_block_heigth;
 }
 
-#include<string.h>
+#include <string.h>
 
 MatrixData& MatrixData::operator=(const MatrixData& other)
 {
-	this->m_lines = other.m_lines;
-	this->m_columns = other.m_columns;
-	this->m_block_heigth = other.m_block_heigth;
-	this->m_block_width = other.m_block_width;
+	this->m_stored_column = other.m_stored_column;
 	this->m_stored_lines  = other.m_stored_lines;
-	this->m_stored_column  = other.m_stored_column;
+	this->m_lines 				= other.m_lines;
+	this->m_columns 			= other.m_columns;
+	this->m_block_width 	= other.m_block_width;
+	this->m_block_heigth 	= other.m_block_heigth;
+
+	if(this->m_data) delete[] this->m_data;
+	
 	this->m_data = new f32[this->m_stored_lines*this->m_stored_column];
+
 	std::copy(other.m_data, other.m_data + (other.m_stored_lines * other.m_stored_column), this->m_data);
+
 	return *this;
 }

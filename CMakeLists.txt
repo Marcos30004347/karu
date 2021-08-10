@@ -67,7 +67,8 @@ add_library(
     src/algebra/compute/lib/Commom.cpp
     src/algebra/compute/lib/kernels/kernels.cpp
     src/camera/Camera.cpp
-    src/camera/codegen/cameraModel.cpp
+    src/camera/codegen/CameraModel.cpp
+    src/bundle/codegen/Homography.cpp
     src/algebra/vector/Vector.cpp
     src/algebra/matrix/Matrix.cpp
     src/algebra/matrix/MatrixData.cpp

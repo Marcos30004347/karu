@@ -7,7 +7,7 @@ using namespace karu::algebra;
 
 int main()
 {
-	algebra::compute::Context::initContext();
+	// algebra::compute::Context::initContext();
 
 	// 1 2 3
 	// 4 5 6
@@ -32,7 +32,7 @@ int main()
 	Matrix B(9, 1, { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
 
 	Matrix C = A*B;
-
+	// printMatrix(C);
 	assert(C[0][0] == 64);
 	assert(C[1][0] == 154);
 	assert(C[2][0] == 244);
@@ -74,7 +74,38 @@ int main()
 	assert(F[7][0] == 154);
 	assert(F[8][0] == 244);
 
-	algebra::compute::Context::stopContext();
+	// algebra::compute::Context::stopContext();
 	
+	SpMatrix G(
+		8,9, 2,3,
+		{
+			0, 2, 3, 5 // rows ptr
+		},
+		{
+			0, 6, 3, 0, 6 // columns idx
+		},
+		{
+			1, 4, 7, 2, 5, 8, // block0
+			1, 4, 7, 2, 5, 8, // block1
+			1, 4, 7, 2, 5, 8, // block2
+			1, 4, 7, 2, 5, 8, // block3
+			1, 4, 7, 2, 5, 8, // block3
+		}
+	);
+
+	Matrix H(9, 1, { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, 3, 3);
+	
+
+	Matrix I = G*H;
+
+	assert(I[0][0] == 138);
+	assert(I[1][0] == 148);
+	assert(I[2][0] == 69);
+	assert(I[3][0] == 74);
+	assert(I[4][0] == 138);
+	assert(I[5][0] == 148);
+	assert(I[6][0] == 0);
+	assert(I[7][0] == 0);
+
 	return 0;
 }

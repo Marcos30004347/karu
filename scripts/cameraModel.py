@@ -48,7 +48,7 @@ proj = Matrix(K*Matrix([x__, y__, 1]))
 u_ = proj[0]/proj[2]
 v_ = proj[1]/proj[2]
 
-f = open("src/camera/codegen/cameraModel.cpp", "a")
+f = open("src/camera/codegen/CameraModel.cpp", "a")
 
 f.truncate(0)
 
@@ -100,7 +100,7 @@ f.write("double v_dr3(double fx, double fy, double cx, double cy, double Cx, dou
 
 f.close()
 
-f = open("src/camera/codegen/cameraModel.hpp", "a")
+f = open("src/camera/codegen/CameraModel.hpp", "a")
 f.truncate(0)
 
 f.write("double u(double fx, double fy, double cx, double cy, double Cx, double Cy, double Cz, double r1, double r2, double r3, double k1, double k2, double k3, double p1, double p2, double X, double Y, double Z);\n")

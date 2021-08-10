@@ -24,14 +24,15 @@ SpMatrix::SpMatrix(
 	} {}
 
 
-Matrix SpMatrix::operator*(const Matrix& other)
+Matrix SpMatrix::operator*(Matrix& other)
 {
 	if(other.columns() == 1)
 	{
-		Matrix y = Matrix(other.rows(), other.columns(), other.m_data.blockWidth(), other.m_data.blockHeight());
-		SparseMatrixMultiplayer::sparseMVMultiplyGPU(
+		Matrix y = Matrix(this->m_data.lines(), other.columns(), other.m_data.blockWidth(), other.m_data.blockHeight());
+
+		SparseMatrixMultiplayer::sparseMVMultiplyCPU(
 			&this->m_data,
-			(MatrixData*)&other.m_data,
+			&other.m_data,
 			&y.m_data
 		);
 		return y;

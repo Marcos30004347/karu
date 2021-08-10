@@ -52,12 +52,12 @@ class SparseMatrixData {
 		return this->bcsr_data.data();
 	}
 
-	inline std::vector<u64> rowPtr()
+	inline std::vector<u64>& rowPtr()
 	{
 		return this->bcsr_row_ptr;
 	}
 
-	inline std::vector<u64> columnsIdx()
+	inline std::vector<u64>& columnsIdx()
 	{
 		return this->bcsr_col_idx;
 	}

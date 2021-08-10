@@ -15,9 +15,7 @@ Program::Program(const char* src)
 	this->cp_src = src;
 
 	this->cp_program = clCreateProgramWithSource(karu_core_global_ctx->getComputeContext(), 1, (const char **)&src, NULL, &err);
-	
 	clHandleError(err);
-
 	err = clBuildProgram(this->cp_program, 0, NULL, NULL, NULL, NULL);
 	if(err != CL_SUCCESS)
 	{

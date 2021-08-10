@@ -54,14 +54,14 @@ __kernel void bsMV_kernel(
       }
     }
 
-    unsigned long int pos = target_block_row + t_idx;
-    unsigned long int block_y = pos/x_block_heigth;
-    unsigned long int by      = pos - block_y*x_block_heigth;
-    unsigned long int block_x = 0;
-    unsigned long int bx      = 0 - block_x*x_block_width;
-    unsigned long int blocks_per_block_line = x_stored_column/x_block_width;
-    unsigned long int x_block_size = x_block_heigth * x_block_width;
-    unsigned long int stride = block_y*blocks_per_block_line*x_block_size + block_x*x_block_size;
+    // unsigned long int pos = target_block_row + t_idx;
+    // unsigned long int block_y = pos/x_block_heigth;
+    // unsigned long int by      = pos - block_y*x_block_heigth;
+    // unsigned long int block_x = 0;
+    // unsigned long int bx      = 0 - block_x*x_block_width;
+    // unsigned long int blocks_per_block_line = x_stored_column/x_block_width;
+    // unsigned long int x_block_size = x_block_heigth * x_block_width;
+    // unsigned long int stride = block_y*blocks_per_block_line*x_block_size + block_x*x_block_size;
     
     y[target_block_row * bs + r] = local_out;
 

@@ -21,7 +21,7 @@ public:
 		std::vector<f32> data
 	);
 
-	Matrix operator*(const Matrix& other);
+	Matrix operator*(Matrix& other);
 };
 
 void printMatrix(SpMatrix& mat);

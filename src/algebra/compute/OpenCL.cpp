@@ -86,7 +86,7 @@ void clHandleError(cl_int result) {
 	if(result != CL_SUCCESS)
 	{
     std::cerr << "OpenCL Error: "<< getErrorString(result) << std::endl;
-    std::cerr << "This can be due to a missing driver, please check if the right openCL drivers are installed for your CPU and GPU!" << std::endl;
+    // std::cerr << "This can be due to a missing driver, please check if the right openCL drivers are installed for your CPU and GPU!" << std::endl;
 		abort();
 	}
 
