@@ -1,3 +1,4 @@
+#pragma once
 double u(double fx, double fy, double cx, double cy, double Cx, double Cy, double Cz, double r1, double r2, double r3, double k1, double k2, double k3, double p1, double p2, double X, double Y, double Z);
 double u_dfx(double fx, double fy, double cx, double cy, double Cx, double Cy, double Cz, double r1, double r2, double r3, double k1, double k2, double k3, double p1, double p2, double X, double Y, double Z);
 double u_dfy(double fx, double fy, double cx, double cy, double Cx, double Cy, double Cz, double r1, double r2, double r3, double k1, double k2, double k3, double p1, double p2, double X, double Y, double Z);

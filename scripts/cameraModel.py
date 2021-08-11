@@ -53,6 +53,7 @@ f = open("src/camera/codegen/CameraModel.cpp", "a")
 f.truncate(0)
 
 f.write("#include <cmath>\n")
+f.write("#include \"CameraModel.hpp\"\n")
 
 f.write("double u(double fx, double fy, double cx, double cy, double Cx, double Cy, double Cz, double r1, double r2, double r3, double k1, double k2, double k3, double p1, double p2, double X, double Y, double Z)\n{\n return %s;\n}\n\n" % cxxcode(u_))
 f.write("double v(double fx, double fy, double cx, double cy, double Cx, double Cy, double Cz, double r1, double r2, double r3, double k1, double k2, double k3, double p1, double p2, double X, double Y, double Z)\n{\n return %s;\n}\n\n"% cxxcode(v_))
@@ -102,6 +103,7 @@ f.close()
 
 f = open("src/camera/codegen/CameraModel.hpp", "a")
 f.truncate(0)
+f.write("#pragma once\n")
 
 f.write("double u(double fx, double fy, double cx, double cy, double Cx, double Cy, double Cz, double r1, double r2, double r3, double k1, double k2, double k3, double p1, double p2, double X, double Y, double Z);\n")
 f.write("double u_dfx(double fx, double fy, double cx, double cy, double Cx, double Cy, double Cz, double r1, double r2, double r3, double k1, double k2, double k3, double p1, double p2, double X, double Y, double Z);\n")

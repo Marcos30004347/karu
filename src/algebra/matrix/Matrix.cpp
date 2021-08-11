@@ -5,6 +5,8 @@
 #include "algebra/matrix/MatrixTransposer.hpp"
 #include "algebra/matrix/MatrixDivider.hpp"
 #include "algebra/matrix/MatrixLU.hpp"
+#include "algebra/matrix/MatrixEchelonForm.hpp"
+#include "algebra/matrix/MatrixNullSpace.hpp"
 #include "algebra/linear/Linear.hpp"
 #include <cmath>
 #include <iomanip>
@@ -206,9 +208,18 @@ f32 LUPDeterminant(const Matrix& A, const Matrix& P)
 	return MatrixLU::LUPDeterminant(&A.m_data, &P.m_data);
 }
 
+Matrix echelonForm(Matrix matrix)
+{
+	MatrixEchelonForm::toEchelonForm(&matrix.m_data);
+	return matrix;
+}
 
-
-
+Matrix nullspace(Matrix matrix)
+{
+	MatrixData null;
+	MatrixNullSpace::nullSpace(&matrix.m_data, null);
+	return Matrix(null);
+}
 
 
 void printMatrixWithMargin(Matrix* A, unsigned precision)

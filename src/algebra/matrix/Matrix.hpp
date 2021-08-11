@@ -1,8 +1,9 @@
 #pragma once
 
+#include <vector>
+#include <initializer_list>
 #include "algebra/matrix/MatrixData.hpp"
 #include "algebra/vector/Vector.hpp"
-#include <initializer_list>
 
 namespace karu::algebra {
 
@@ -45,6 +46,9 @@ public:
 
 	MatrixLineGetter operator[](const unsigned int idx);
 };
+
+Matrix echelonForm(Matrix matrix);
+Matrix nullspace(Matrix matrix);
 
 Matrix transpose(Matrix& matrix);
 Matrix transpose(Matrix* matrix);

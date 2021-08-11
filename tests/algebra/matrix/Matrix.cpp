@@ -1,20 +1,145 @@
 #include <assert.h>
 #include <iostream>
+#include <chrono>
 
 #include "algebra/matrix/Matrix.hpp"
+#include "algebra/linear/SingularValueDecomposition.hpp"
 
 using namespace karu::algebra;
 
-void print(Matrix* A)
+
+void echelonFormTests()
 {
-	for(int i=0;i<A->m_data.m_stored_lines; i++)
-	{
-		for(int j=0; j<A->m_data.m_stored_column;j++)
-		{
-			std::cout << A->m_data.get(i,j) << " ";
-		}
-		std::cout << std::endl;
-	}
+	Matrix A = Matrix(3, 4, {
+		1, 2, -1, -4,
+		2, 3, -1, -11,
+		-2, 0, -3, 22
+	});
+	Matrix A_echelon = echelonForm(A);
+
+	assert(A_echelon[0][0] == 1.f);
+	assert(A_echelon[1][0] == 0.f);
+	assert(A_echelon[2][0] == 0.f);
+
+	assert(A_echelon[0][1] == 0.f);
+	assert(A_echelon[1][1] == 1.f);
+	assert(A_echelon[2][1] == 0.f);
+
+	assert(A_echelon[0][2] == 0.f);
+	assert(A_echelon[1][2] == 0.f);
+	assert(A_echelon[2][2] == 1.f);
+
+	assert(A_echelon[0][3] == -8.f);
+	assert(A_echelon[1][3] == 1.f);
+	assert(A_echelon[2][3] == -2.f);
+}
+
+void nullspaceTests()
+{
+	Matrix A = Matrix(3, 4, {
+		1, 2, 3, 4,
+		1, 3, 5, 6,
+		2, 5, 8, 10
+	});
+
+	Matrix A_space = nullspace(A);
+
+	assert(A_space[0][0] == 1);
+	assert(A_space[0][1] == -2);
+	assert(A_space[0][2] == 1);
+	assert(A_space[0][3] == 0);
+
+	assert(A_space[1][0] == 0);
+	assert(A_space[1][1] == -2);
+	assert(A_space[1][2] == 0);
+	assert(A_space[1][3] == 1);
+
+	Matrix B = Matrix(2, 4, {
+		-1, 1, 2, 4,
+		2, 0, 1, -7,
+	});
+
+	Matrix B_space = nullspace(B);
+
+	assert(B_space[0][0] == -0.5);
+	assert(B_space[0][1] == -2.5);
+	assert(B_space[0][2] == 1);
+	assert(B_space[0][3] == 0);
+
+	assert(B_space[1][0] == 3.5);
+	assert(B_space[1][1] == -0.5);
+	assert(B_space[1][2] == 0);
+	assert(B_space[1][3] == 1);
+
+	Matrix C = Matrix(2, 2, {
+		2, 1,
+		1, 2,
+	});
+
+	Matrix C_space = nullspace(C);
+
+	assert(C_space[0][0] == 0);
+	assert(C_space[0][1] == 0);
+}
+
+void svdTests()
+{
+	std::chrono::steady_clock::time_point begin;
+	std::chrono::steady_clock::time_point end;
+
+	float* w = vector(1, 3);
+
+	float** m = matrix(1, 2, 1, 3);
+	float** v = matrix(1, 3, 1, 3);
+	
+	m[1][1] = 3; m[1][2] = 2; m[1][3] = 2;
+	m[2][1] = 2; m[2][2] = 3; m[2][3] = -2;
+	
+	std::cout << m[1][1] << " "; std::cout << m[1][2] << " "; std::cout << m[1][3] << "\n";
+	std::cout << m[2][1] << " "; std::cout << m[2][2] << " "; std::cout << m[2][3] << "\n";
+
+	begin = std::chrono::steady_clock::now();
+	svdcmp(m, 2, 3, w, v);
+	end = std::chrono::steady_clock::now();
+
+	std::cout << "Naive Total: " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "µs" << std::endl;
+	std::cout << "Naive Total: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
+
+	std::cout << "\n";
+	std::cout << m[1][1] << " "; std::cout << m[1][2] << " "; std::cout << m[1][3] << "\n";
+	std::cout << m[2][1] << " "; std::cout << m[2][2] << " "; std::cout << m[2][3] << "\n";
+	std::cout << "\n";
+	
+	std::cout << w[1] << " "; std::cout << 0 << " "; std::cout <<  0 << "\n";
+	std::cout << 0 << " "; std::cout << w[2] << " "; std::cout <<  0 << "\n";
+	std::cout << 0 << " "; std::cout << 0 << " "; std::cout << w[3] << "\n";
+	std::cout << "\n";
+
+	std::cout << v[1][1] << " "; std::cout << v[2][1] << " "; std::cout << v[3][1] << "\n";
+	std::cout << v[1][2] << " "; std::cout << v[2][2] << " "; std::cout << v[3][2] << "\n";
+	std::cout << v[1][3] << " "; std::cout << v[2][3] << " "; std::cout << v[3][3] << "\n";
+	std::cout << "\n";
+
+
+	Matrix U(2,3, {
+		m[1][1], m[1][2], m[1][3],
+		m[2][1], m[2][2], m[2][3],
+	});
+
+	Matrix W(3,3, {
+		w[1], 0, 0,
+		0, w[2], 0,
+		0, 0, w[3],
+	});
+
+	Matrix V(3,3, {
+		v[1][1], v[1][2], v[1][3],
+		v[2][1], v[2][2], v[2][3],
+		v[3][1], v[3][2], v[3][3],
+	});
+
+	Matrix A = U*W*transpose(V);
+	printMatrix(A);
 }
 
 int main()
@@ -231,5 +356,9 @@ int main()
 	karu::f32 System_det = LUPDeterminant(System_Permutation.first, System_Permutation.second);
 	assert(System_det == 14);
 	
+
+	echelonFormTests();
+	nullspaceTests();
+	svdTests();
 	return 0;
 }

@@ -37,7 +37,6 @@ MatrixData::MatrixData(u32 lines, u32 columns, u32 block_width, u32 block_heigth
 	m_block_width = block_width;
 	this->m_stored_lines  = std::ceil(this->m_lines/(f32)this->m_block_heigth) * this->m_block_heigth;
 	this->m_stored_column = std::ceil(this->m_columns/(f32)this->m_block_width) * this->m_block_width;
-	
 	this->m_data = new f32[this->m_stored_column*this->m_stored_lines];
 	std::fill(this->m_data, this->m_data + this->m_stored_column*this->m_stored_lines, 0);
 	

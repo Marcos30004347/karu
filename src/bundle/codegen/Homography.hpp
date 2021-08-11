@@ -1,5 +1,6 @@
-double beta(double* c, double* b, double* d, double* p1, double* p2, double* p3, double* p4, double* a);
-double gamma(double* c, double* b, double* d, double* p1, double* p2, double* p3, double* p4, double* a);
+#pragma once
+double beta(double* b, double* c, double* d, double* p11, double* p21, double* p12, double* p22, double* a);
+double gamma(double* b, double* c, double* d, double* p11, double* p21, double* p12, double* p22, double* a);
 double nullSpaceVecB0(double* p1, double* p2, double* p3, double* p4, double* p5, double* p6);
 double nullSpaceVecB1(double* p1, double* p2, double* p3, double* p4, double* p5, double* p6);
 double nullSpaceVecB2(double* p1, double* p2, double* p3, double* p4, double* p5, double* p6);

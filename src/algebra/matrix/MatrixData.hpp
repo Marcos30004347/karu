@@ -3,6 +3,7 @@
 #include "algebra/core/types.hpp"
 #include <initializer_list>
 #include <iostream>
+
 namespace karu {
 namespace algebra {
 

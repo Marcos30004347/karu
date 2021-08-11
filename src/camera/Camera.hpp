@@ -4,7 +4,7 @@
 #include "algebra/vector/Vector.hpp"
 #include "algebra/matrix/Matrix.hpp"
 #include "algebra/linear/Linear.hpp"
-#include "camera/codegen/cameraModel.hpp"
+#include "camera/codegen/CameraModel.hpp"
 
 namespace karu {
 

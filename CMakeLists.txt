@@ -71,6 +71,8 @@ add_library(
     src/bundle/codegen/Homography.cpp
     src/algebra/vector/Vector.cpp
     src/algebra/matrix/Matrix.cpp
+    src/algebra/matrix/MatrixEchelonForm.cpp
+    src/algebra/matrix/MatrixNullSpace.cpp
     src/algebra/matrix/MatrixData.cpp
     src/algebra/matrix/MatrixMultiplayer.cpp
     src/algebra/matrix/MatrixAdder.cpp
