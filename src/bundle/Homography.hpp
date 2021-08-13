@@ -106,6 +106,7 @@ Matrix coplanarThreePointHomography(Matrix image0[3], Matrix image1[3], f32 angl
 }
 
 
+
 void fundamentalMatrixEstimation(Matrix& H, Matrix image0[2], Matrix image1[2])
 {
 	Matrix p1[7] = {
@@ -149,5 +150,6 @@ void fundamentalMatrixEstimation(Matrix& H, Matrix image0[2], Matrix image1[2])
 	Matrix e(9,1, {Dns[0][0], Dns[0][1], Dns[0][2], Dns[0][3], Dns[0][4], Dns[0][5], Dns[0][6], Dns[0][7], Dns[0][8]});
 	Matrix g(9,1, {Dns[1][0], Dns[1][1], Dns[1][2], Dns[1][3], Dns[1][4], Dns[1][5], Dns[1][6], Dns[1][7], Dns[1][8]});
 
-	F = x*e + (1-x)*g;
+	// F = x*e + (1-x)*g;
+
 }

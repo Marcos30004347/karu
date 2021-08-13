@@ -5,7 +5,7 @@ namespace karu {
 
 typedef char            i8;
 typedef unsigned long   u64;
-typedef long            i64;
+typedef long long       i64;
 typedef unsigned        u32;
 typedef int             i32;
 typedef double          f32;

@@ -82,65 +82,100 @@ void nullspaceTests()
 	assert(C_space[0][1] == 0);
 }
 
-void svdTests()
+// void svdTests()
+// {
+// 	std::chrono::steady_clock::time_point begin;
+// 	std::chrono::steady_clock::time_point end;
+
+// 	float* w = vector(1, 3);
+
+// 	float** m = matrix(1, 2, 1, 3);
+// 	float** v = matrix(1, 3, 1, 3);
+	
+// 	m[1][1] = 3; m[1][2] = 2; m[1][3] = 2;
+// 	m[2][1] = 2; m[2][2] = 3; m[2][3] = -2;
+	
+// 	std::cout << m[1][1] << " "; std::cout << m[1][2] << " "; std::cout << m[1][3] << "\n";
+// 	std::cout << m[2][1] << " "; std::cout << m[2][2] << " "; std::cout << m[2][3] << "\n";
+
+// 	begin = std::chrono::steady_clock::now();
+// 	svdcmp(m, 2, 3, w, v);
+// 	end = std::chrono::steady_clock::now();
+
+// 	std::cout << "Naive Total: " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "µs" << std::endl;
+// 	std::cout << "Naive Total: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
+
+// 	std::cout << "\n";
+// 	std::cout << m[1][1] << " "; std::cout << m[1][2] << " "; std::cout << m[1][3] << "\n";
+// 	std::cout << m[2][1] << " "; std::cout << m[2][2] << " "; std::cout << m[2][3] << "\n";
+// 	std::cout << "\n";
+	
+// 	std::cout << w[1] << " "; std::cout << 0 << " "; std::cout <<  0 << "\n";
+// 	std::cout << 0 << " "; std::cout << w[2] << " "; std::cout <<  0 << "\n";
+// 	std::cout << 0 << " "; std::cout << 0 << " "; std::cout << w[3] << "\n";
+// 	std::cout << "\n";
+
+// 	std::cout << v[1][1] << " "; std::cout << v[2][1] << " "; std::cout << v[3][1] << "\n";
+// 	std::cout << v[1][2] << " "; std::cout << v[2][2] << " "; std::cout << v[3][2] << "\n";
+// 	std::cout << v[1][3] << " "; std::cout << v[2][3] << " "; std::cout << v[3][3] << "\n";
+// 	std::cout << "\n";
+
+
+// 	Matrix U(2,3, {
+// 		m[1][1], m[1][2], m[1][3],
+// 		m[2][1], m[2][2], m[2][3],
+// 	});
+
+// 	Matrix W(3,3, {
+// 		w[1], 0, 0,
+// 		0, w[2], 0,
+// 		0, 0, w[3],
+// 	});
+
+// 	Matrix V(3,3, {
+// 		v[1][1], v[1][2], v[1][3],
+// 		v[2][1], v[2][2], v[2][3],
+// 		v[3][1], v[3][2], v[3][3],
+// 	});
+
+// 	Matrix A = U*W*transpose(V);
+// 	printMatrix(A);
+// }
+
+
+
+void _svdTests()
 {
-	std::chrono::steady_clock::time_point begin;
-	std::chrono::steady_clock::time_point end;
-
-	float* w = vector(1, 3);
-
-	float** m = matrix(1, 2, 1, 3);
-	float** v = matrix(1, 3, 1, 3);
-	
-	m[1][1] = 3; m[1][2] = 2; m[1][3] = 2;
-	m[2][1] = 2; m[2][2] = 3; m[2][3] = -2;
-	
-	std::cout << m[1][1] << " "; std::cout << m[1][2] << " "; std::cout << m[1][3] << "\n";
-	std::cout << m[2][1] << " "; std::cout << m[2][2] << " "; std::cout << m[2][3] << "\n";
-
-	begin = std::chrono::steady_clock::now();
-	svdcmp(m, 2, 3, w, v);
-	end = std::chrono::steady_clock::now();
-
-	std::cout << "Naive Total: " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "µs" << std::endl;
-	std::cout << "Naive Total: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
-
-	std::cout << "\n";
-	std::cout << m[1][1] << " "; std::cout << m[1][2] << " "; std::cout << m[1][3] << "\n";
-	std::cout << m[2][1] << " "; std::cout << m[2][2] << " "; std::cout << m[2][3] << "\n";
-	std::cout << "\n";
-	
-	std::cout << w[1] << " "; std::cout << 0 << " "; std::cout <<  0 << "\n";
-	std::cout << 0 << " "; std::cout << w[2] << " "; std::cout <<  0 << "\n";
-	std::cout << 0 << " "; std::cout << 0 << " "; std::cout << w[3] << "\n";
-	std::cout << "\n";
-
-	std::cout << v[1][1] << " "; std::cout << v[2][1] << " "; std::cout << v[3][1] << "\n";
-	std::cout << v[1][2] << " "; std::cout << v[2][2] << " "; std::cout << v[3][2] << "\n";
-	std::cout << v[1][3] << " "; std::cout << v[2][3] << " "; std::cout << v[3][3] << "\n";
-	std::cout << "\n";
-
-
-	Matrix U(2,3, {
-		m[1][1], m[1][2], m[1][3],
-		m[2][1], m[2][2], m[2][3],
+	Matrix M(2,3, {
+		3, 2, 2,
+		2, 3, -2
 	});
+	
+	Matrix U(2,3);
+	Matrix V(3,3);
+	Matrix D(3,1);
+	
+	svd(M, U, D, V);
 
 	Matrix W(3,3, {
-		w[1], 0, 0,
-		0, w[2], 0,
-		0, 0, w[3],
-	});
-
-	Matrix V(3,3, {
-		v[1][1], v[1][2], v[1][3],
-		v[2][1], v[2][2], v[2][3],
-		v[3][1], v[3][2], v[3][3],
+		D[0][0], 0, 0,
+		0, D[1][0], 0,
+		0, 0, D[2][0],
 	});
 
 	Matrix A = U*W*transpose(V);
-	printMatrix(A);
+	
+
+	assert(fabs(A[0][0] - M[0][0]) < 0.000009);
+	assert(fabs(A[0][1] - M[0][1]) < 0.000009);
+	assert(fabs(A[0][2] - M[0][2]) < 0.000009);
+	assert(fabs(A[1][0] - M[1][0]) < 0.000009);
+	assert(fabs(A[1][1] - M[1][1]) < 0.000009);
+	assert(fabs(A[1][2] - M[1][2]) < 0.000009);
+
+
 }
+
 
 int main()
 {
@@ -359,6 +394,6 @@ int main()
 
 	echelonFormTests();
 	nullspaceTests();
-	svdTests();
+	_svdTests();
 	return 0;
 }

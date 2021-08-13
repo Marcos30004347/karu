@@ -4,6 +4,7 @@ project(karu)
 
 set (CMAKE_CXX_STANDARD 11)
 
+
 add_subdirectory(vendor/glfw)
 find_package(OpenGL REQUIRED)
 
@@ -70,6 +71,7 @@ add_library(
     src/camera/codegen/CameraModel.cpp
     src/bundle/codegen/Homography.cpp
     src/algebra/vector/Vector.cpp
+    src/algebra/polynomial/Polynomial.cpp
     src/algebra/matrix/Matrix.cpp
     src/algebra/matrix/MatrixEchelonForm.cpp
     src/algebra/matrix/MatrixNullSpace.cpp

@@ -182,10 +182,17 @@ F = Matrix([
 ])
 
 d = det(F)
+d = Poly(expand(d), Symbol("x"))
+coeffs = d.coeffs()
+print(factor(d))
+print(coeffs[0])
+print(coeffs[1])
+print(coeffs[2])
+print(coeffs[3])
 
-print(solve(d))
-print(roots(d))
- 
+# print(len(d.coeffs()))
+# rts = roots(d)
+# print(rts)
 f = open("src/bundle/codegen/Homography.cpp", "a")
 
 f.truncate(0)
