@@ -14,6 +14,14 @@ GaussianBlur::GaussianBlur(float sigma, u64 numOfChannels, algebra::compute::Buf
     this->colSize = colSize;
 }
 
+GaussianBlur::GaussianBlur(float sigma, Buffer *pixels, Image* img) {
+    this->sigma = sigma;
+    this->numOfChannels = img->channels;
+    this->pixels = pixels;
+    this->rowsSize = img->height;
+    this->colSize = img->width;
+}
+
 GaussianBlur::~GaussianBlur(){}
 
 void GaussianBlur::calculateKernel(f32 *GKernel) {

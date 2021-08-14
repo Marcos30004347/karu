@@ -11,32 +11,32 @@ __kernel void blur(
 )
 {
     int idx = get_global_id(0);
-    int currentRow = (idx/(numOfChannels))/ (cols);
-    int currentCol = (idx/(numOfChannels)) % (cols);
-    int colorOffset = idx%(numOfChannels);
-    float acc=0;
+    // int currentRow = (idx/(numOfChannels))/ (cols);
+    // int currentCol = (idx/(numOfChannels)) % (cols);
+    // int colorOffset = idx%(numOfChannels);
+    // float acc=0;
  
-    if (colorOffset != 3) {
-        int i, j;
+    // if (colorOffset != 3) {
+    //     int i, j;
         
-        for(j=0;j <=cKernelDimension; j++) {
+    //     for(j=0;j <=cKernelDimension; j++) {
             
-            int y =currentRow + (j-(cKernelDimension/2));
-            if(y < 0 || y >= rows) y = currentRow; 
+    //         int y =currentRow + (j-(cKernelDimension/2));
+    //         if(y < 0 || y >= rows) y = currentRow; 
 
-            for(i=0;i <= cKernelDimension; i++) {
+    //         for(i=0;i <= cKernelDimension; i++) {
                 
-                int x = currentCol +(i-(cKernelDimension/2));
-                if(x < 0 || x > cols) x = currentCol;
-                acc += (float) ((float)(pixels[((y*(cols)+x))*numOfChannels + colorOffset])* ckernel[(j*(cKernelDimension))+i]);
-            }
-        }
+    //             int x = currentCol +(i-(cKernelDimension/2));
+    //             if(x < 0 || x > cols) x = currentCol;
+    //             acc += (float) ((float)(pixels[((y*(cols)+x))*numOfChannels + colorOffset])* ckernel[(j*(cKernelDimension))+i]);
+    //         }
+    //     }
  
-        if(acc >= 255) acc = 255;
-        out[idx] = (unsigned char)acc;
-    }  
-    else {
-        out[idx] = 255;
-    }
-    //out[idx] = pixels[idx];
+    //     if(acc >= 255) acc = 255;
+    //     out[idx] = (unsigned char)acc;
+    // }  
+    // else {
+    //     out[idx] = 255;
+    // }
+    out[idx] = pixels[idx];
 }

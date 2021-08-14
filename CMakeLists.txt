@@ -97,6 +97,8 @@ add_library(
     
     src/gaussian/GaussianBlur.cpp
     src/gaussian/kernels/kernels.cpp
+
+    src/image/Image.cpp
 )
 
 set_property(TARGET karu PROPERTY
