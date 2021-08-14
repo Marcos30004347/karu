@@ -78,3 +78,7 @@ add_executable(PolynomialTests algebra/polynomial/Polynomial.cpp)
 target_link_libraries(PolynomialTests karu)
 add_test(NAME PolynomialTests COMMAND PolynomialTests)
 
+project(GaussianTests)
+add_executable(GaussianTests gaussian/test1.cpp)
+target_link_libraries(GaussianTests karu)
+add_test(NAME GaussianTests COMMAND GaussianTests)

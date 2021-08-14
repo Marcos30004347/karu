@@ -1,6 +1,7 @@
 #include "algebra/compute/Context.hpp"
 #include "algebra/compute/lib/kernels/kernels.hpp"
 #include "algebra/sparse/lib/kernels/kernels.hpp"
+#include "gaussian/kernels/kernels.hpp"
 
 #include <iostream>
 #include <string.h>
@@ -16,6 +17,7 @@ Context* Context::initContext()
 	karu_core_global_ctx = new Context();
 	create_algebra_lib_kernels();
 	create_sparse_matrix_kernels();
+	create_blur_kernels();
 	return karu_core_global_ctx;
 }
 
@@ -23,6 +25,7 @@ void Context::stopContext()
 {
 	destroy_algebra_lib_kernels();
 	destroy_sparse_matrix_kernels();
+	destroy_blur_kernels();
 	delete karu_core_global_ctx;
 }
 
