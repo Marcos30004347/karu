@@ -41,6 +41,8 @@ float* GaussianBlur::calculateKernel() {
     }
     
     this->kernelDimension = kernelDimension;
+
+    return ckernel;
 }
 
 unsigned char* GaussianBlur::run() {

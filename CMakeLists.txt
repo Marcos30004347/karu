@@ -89,6 +89,7 @@ add_library(
     src/algebra/sparse/lib/HashMap.cpp
     src/algebra/linear/Linear.cpp
     src/renderer/Renderer.cpp
+    src/gaussian/GaussianBlur.cpp
 )
 
 set_property(TARGET karu PROPERTY

@@ -6,13 +6,13 @@ __kernel void blur(
     __global float* ckernel,
     __constant int *rows,
     __constant int *cols,
-    __constant int *cKernelDimension
+    __constant int *cKernelDimension,
 )
 {
     int idx = get_global_id(0);
-    int currentRow = (idx/4)/ (*cols);
-    int currentCol = (idx/4) % (*cols);
-    int colorOffset = idx%4;
+    int currentRow = (idx/(*channels))/ (*cols);
+    int currentCol = (idx/(*channels)) % (*cols);
+    int colorOffset = idx%(*channels);
     float acc=0;
  
     if (colorOffset != 3) {
