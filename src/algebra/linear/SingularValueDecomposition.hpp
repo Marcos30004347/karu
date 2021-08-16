@@ -17,13 +17,14 @@ float pythag(float a, float b)
 	return (absb == 0.0 ? 0.0 : absb * sqrt(1.0+(absa/absb)*(absa/absb)));
 }
 
-void svd(Matrix& M, Matrix& U, Matrix& D, Matrix& V) {
+void svd(Matrix& M, Matrix& U, Matrix& D, Matrix& V) 
+{
 
 	int m = M.rows();
 	int n = M.columns();
 
 	U = Matrix(M);
-	D = Matrix(n, 1);
+	D = Matrix(m, 1);
 	V = Matrix(n, n);
 
 	int flag, i, its, j, jj, k, l, nm;

@@ -78,3 +78,9 @@ add_executable(PolynomialTests algebra/polynomial/Polynomial.cpp)
 target_link_libraries(PolynomialTests karu)
 add_test(NAME PolynomialTests COMMAND PolynomialTests)
 
+
+project(SVDTests)
+add_executable(SVDTests algebra/linear/SingularValueDecomposition.cpp)
+target_link_libraries(SVDTests karu)
+add_test(NAME SVDTests COMMAND SVDTests)
+

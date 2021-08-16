@@ -74,8 +74,6 @@ int main()
 			projections.push_back(projection);
 		}
 
-		Bundle b;
-	
 		Matrix position = positions[i] + position_noises[i];
 		Matrix rotation = rotations[i] + rotation_noises[i];
 		
