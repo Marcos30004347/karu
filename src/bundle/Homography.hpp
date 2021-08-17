@@ -383,10 +383,67 @@ void fundamentalMatrixEstimation(Matrix& H, Matrix image0[2], Matrix image1[2])
 }
 
 
+Matrix normalizePoints(Matrix* p, u64 n)
+{
+	f32 tx, ty, sx, sy, s, msd;
 
+	tx = 0.0;
+	ty = 0.0;
+
+	for(int j=0; j<n; j++)
+	{
+		tx += p[j][0][0];
+		ty += p[j][1][0];
+	}
+	
+	tx = tx/(n);
+	ty = ty/(n);
+
+	// for(int j=0; j<n; j++)
+	// {
+	// 	p[j][0][0] = (p[j][0][0] - tx);
+	// 	p[j][1][0] = (p[j][1][0] - ty);
+	// }
+
+	sx = 0.0;
+	sy = 0.0;
+
+	s = 0.0;
+
+	for(int j=0; j<n; j++)
+	{
+		sx = pow(p[j][0][0] - tx,2);
+		sy = pow(p[j][1][0] - ty,2);
+		s += sx+sy;
+	}
+
+	s /= 2*n;
+	s = sqrt(s);
+
+	Matrix T(3,3, {
+		1./s, 0, -tx/s,
+		0, 1./s, -ty/s,
+		0, 0, 1
+	});
+
+	for(int j=0; j<n; j++)
+		p[j] = T*p[j];
+
+	msd = 0.0;
+	for(int j=0; j<n; j++)
+		msd += pow(p[j][0][0],2) + pow(p[j][1][0],2);
+	msd /= n;
+	msd = sqrt(msd);
+
+	std::cout <<"msd^2: " << (msd*msd) << "\n";
+
+	return T;
+}
 
 Matrix eightPointAlgorithm(Matrix image0[8], Matrix image1[8])
 {
+
+	
 	Matrix p[8] = {
 		Matrix(3,1, {image0[0][0][0], 	 image0[0][1][0], 1}),
 		Matrix(3,1, {image0[1][0][0], 	 image0[1][1][0], 1}),
@@ -408,6 +465,10 @@ Matrix eightPointAlgorithm(Matrix image0[8], Matrix image1[8])
 		Matrix(3,1, {image1[6][0][0], 	 image1[6][1][0], 1}),
 		Matrix(3,1, {image1[7][0][0], 	 image1[7][1][0], 1}),
 	};
+
+	// normalize points
+	Matrix Tinv = normalizePoints(p, 8);
+	Matrix T_inv = normalizePoints(p_, 8);
 
 	// Matrix A(8, 9, {
 	// 	p_[0][0][0]*p[0][0][0], p_[0][0][0]*p[0][1][0], p_[0][0][0], p_[0][1][0]*p[0][0][0], p_[0][1][0]*p[0][1][0], p_[0][1][0], p[0][0][0], p[0][1][0], 1,
@@ -433,26 +494,34 @@ Matrix eightPointAlgorithm(Matrix image0[8], Matrix image1[8])
 	});
 
 	printMatrix(A);
+
 	Matrix e = nullspace(A);
 
-	Matrix t = A*transpose(e);
+	// Matrix e(1,9, {
+	// 	5.75847835e-06, -4.89616994e-02, -2.99975254e-02, -2.25252426e-02, -3.97668935e-01,  6.33640632e-01, -1.39388810e-02, -6.43866539e-01, 1.47634919e-01
+	// });
 
-	printMatrix(t);
-	Matrix F = Matrix(3,3, {
+	printMatrix(A*transpose(e));
+
+	Matrix Fnorm = Matrix(3,3, {
 		e[0][0], e[0][1], e[0][2],
 		e[0][3], e[0][4], e[0][5],
 		e[0][6], e[0][7], e[0][8],
 	});
 	// printMatrix(e);
 
-	printMatrix(F);
+	printMatrix(Fnorm);
 
 	for(i64 i=0; i<8; i++)
 	{
-		Matrix err = transpose(p[i])*F*p_[i];
+		Matrix err = transpose(p[i])*Fnorm*p_[i];
 		printMatrix(err);
 	}
 
+	Matrix F = transpose(Tinv)*Fnorm*T_inv;
+	// return F;
+	std::cout <<"det: " <<  det3x3(Fnorm) << "\n";
+	std::cout <<"det: " <<  det3x3(F) << "\n";
 	return F;
 	// Matrix S,V,D;
 	// svd(A, S, D, V);

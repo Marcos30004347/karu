@@ -51,19 +51,24 @@ Matrix echelonForm(Matrix matrix);
 Matrix nullspace(Matrix matrix);
 
 Matrix transpose(Matrix& matrix);
+Matrix transpose(Matrix&& matrix);
 Matrix transpose(Matrix* matrix);
 
 std::pair<Matrix, Matrix> LUDecomposition(const Matrix* const A);
 std::pair<Matrix, Matrix> LUDecomposition(const Matrix& A);
 
 std::pair<Matrix, Matrix> LUPDecomposition(const Matrix& A);
+
 Matrix LUPSolve(const Matrix& A, const Matrix& P, const Matrix& b);
 Matrix LUPInverse(const Matrix& A, const Matrix& P);
+
 f32 LUPDeterminant(const Matrix& A, const Matrix& P);
 
 void printMatrixWithMargin(Matrix& A, unsigned precision = 3);
 void printMatrixWithMargin(Matrix* A, unsigned precision = 3);
+
 void printMatrix(Matrix& A, unsigned precision = 3);
+void printMatrix(Matrix&& A, unsigned precision = 3);
 void printMatrix(Matrix* A, unsigned precision = 3);
 
 }

@@ -158,6 +158,13 @@ Matrix transpose(Matrix& other)
 	return C;
 }
 
+Matrix transpose(Matrix&& other)
+{
+	Matrix C(other.columns(), other.rows(),  other.m_data.blockHeight(), other.m_data.blockWidth());
+	MatrixTransposer::transpose(&C.m_data, &other.m_data);
+	return C;
+}
+
 Matrix transpose(Matrix* other)
 {
 	Matrix C(other->columns(), other->rows(),  other->m_data.blockHeight(), other->m_data.blockWidth());
@@ -277,5 +284,21 @@ void printMatrix(Matrix& A, unsigned precision)
 		std::cout << std::endl;
 	}
 }
+
+void printMatrix(Matrix&& A, unsigned precision)
+{
+	std::cout.precision(3);
+
+	for(int i=0;i<A.m_data.m_lines; i++)
+	{
+		for(int j=0; j<A.m_data.m_columns;j++)
+		{
+			std::cout << std::scientific << std::setw(5) << std::setprecision(precision) << A.m_data.get(i,j) << "\t";
+		}
+		std::cout << std::endl;
+	}
+}
+
+
 }
 

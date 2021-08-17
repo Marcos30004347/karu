@@ -1,0 +1,19 @@
+#include "algebra/compute/lib/kernels/kernels.hpp"
+
+karu::algebra::compute::Program* blur_program = nullptr;
+
+karu::algebra::compute::Kernel* blur_kernel = nullptr;
+
+void create_blur_kernels() {
+    const char* blur_src = ${BLUR_CL_KERNEL_SRC};
+
+    blur_program = new karu::algebra::compute::Program(blur_src);
+
+    blur_kernel = new karu::algebra::compute::Kernel(blur_program, "blur");
+}
+
+void destroy_blur_kernels() {
+    if(blur_kernel)
+        delete blur_kernel;
+}
+

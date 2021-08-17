@@ -1,9 +1,29 @@
 // #include <assert.h>
 
-// #include "algebra/linear/svd.hpp"
+#include "algebra/linear/svd.hpp"
+#include "algebra/linear/SingularValueDecomposition.hpp"
 // #include <iostream>
 int main()
 {
+	Matrix M(3,3, {
+		1.115e-13,       4.677e-06,       -2.342e-03,
+		1.119e-05,       -9.764e-05,      3.015e-02,
+		-5.584e-03,      7.979e-02,       -3.060e+01,
+	});
+
+	Matrix w,s;
+	Matrix U,D,V;
+
+	squareSvd(M, 3, 3, w, s);
+
+	// svd(M, U, D, V);
+	// printMatrix(U);
+	// printMatrix(D);
+	// printMatrix(V);
+	// dsvd(M, M.rows(), M.columns(), D, V);
+	// printMatrix(M);
+	// printMatrix(D);
+	// printMatrix(V);
 // 	double a_[7][9] = {
 //     {3.788e+04, 1.288e+05, 1.667e+02, 1.894e+05, 6.439e+05, 8.333e+02, 2.273e+02, 8.333e+02, 1.000e+00},
 //     {1.389e+05, 6.944e+05, 8.333e+02, 1.389e+05, 6.944e+05, 8.333e+02, 1.667e+02, 8.333e+02, 1.000e+00},

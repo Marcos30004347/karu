@@ -84,3 +84,7 @@ add_executable(SVDTests algebra/linear/SingularValueDecomposition.cpp)
 target_link_libraries(SVDTests karu)
 add_test(NAME SVDTests COMMAND SVDTests)
 
+project(GaussianTests)
+add_executable(GaussianTests gaussian/test1.cpp)
+target_link_libraries(GaussianTests karu)
+add_test(NAME GaussianTests COMMAND GaussianTests)
