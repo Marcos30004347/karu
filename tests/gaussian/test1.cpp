@@ -20,7 +20,7 @@ int main() {
 
     pixels.upload();
 
-    GaussianBlur *gaussian = new GaussianBlur(1.0, &pixels, grayImg);
+    GaussianBlur *gaussian = new GaussianBlur(25.0, &pixels, grayImg);
     gaussian->run(&out);
     
     unsigned char* new_img = (unsigned char*)out.download();

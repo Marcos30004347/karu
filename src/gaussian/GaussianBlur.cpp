@@ -3,6 +3,8 @@
 #include "algebra/compute/Buffer.hpp"
 #include <math.h>
 
+#define debug(x) std::cout << #x << " = " << x << std::endl;
+
 using namespace karu;
 using namespace algebra::compute;
 
@@ -24,11 +26,75 @@ GaussianBlur::GaussianBlur(float sigma, Buffer *pixels, Image* img) {
 
 GaussianBlur::~GaussianBlur(){}
 
+f32 erfCustom(f32 x) {
+    const f32 a1 = 0.254829592;
+    const f32 a2 = -0.284496736;
+    const f32 a3 = 1.421413741;
+    const f32 a4 = -1.453152027;
+    const f32 a5 = 1.061405429;
+    const f32 p = 0.3275911;
+
+    // A&S formula 7.1.26
+    const f32 t = 1.0 / (1.0 + p * abs(x));
+    const f32 y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * exp(-x * x);
+
+    debug(t);
+    debug(y);
+
+    if (x > 0) {
+        x = 1;
+    } else if (x < 0) {
+        x = -1;
+    } else {
+        x = 0;
+    }
+
+    return x * y;
+}
+
+f32 defIntGaussian(f32 x, f32 mu, f32 sigma) {
+    const f32 SQRT2 = 1.414;
+    return 0.5 * erfCustom((x - mu) / (SQRT2 * sigma));
+}
+
+void gaussianKernel(f32 *coeff, u64 kernelSize, f32 sigma) {
+    kernelSize = kernelSize*kernelSize;
+    f32 mu = 0;
+    f32 step = 1;
+    
+    const f32 end = 0.5 * kernelSize;
+    const f32 start = -end;
+
+    f32 sum = 0;
+    f32 x = start;
+    f32 lastInt = defIntGaussian(x, mu, sigma);
+    f32 acc = 0;
+
+    int idx = 0;
+
+    while (x < end) {
+        x += step;
+        f32 newInt = defIntGaussian(x, mu, sigma);
+        f32 c = newInt - lastInt;
+        
+        coeff[idx] = c;
+        
+        sum += c;
+        lastInt = newInt;
+        idx++;
+    }
+
+    // normalize
+    sum = 1/sum;
+    for (int i=0; i<idx+1; i++) {
+        coeff[i] *= sum;
+    }
+}
+
+
 void GaussianBlur::calculateKernel(f32 *GKernel) {
     // float sigma = this->sigma;
-    // u64 kernelDimension = (u64)ceilf(6 * sigma);
     
-    // if (kernelDimension % 2 == 0) kernelDimension++;
     // int cKernelSize = pow(kernelDimension, 2);
     // float *ckernel = new float[kernelDimension*kernelDimension];
  
@@ -82,11 +148,22 @@ void GaussianBlur::run(Buffer *out) {
 
 
     std::cout << "INIT" << std::endl;
-    
-    f32 kernel[25];
-    calculateKernel(kernel);
+
+    u64 kernelDimension = 7;
+    if (kernelDimension % 2 == 0) kernelDimension++;
+
+    this->kernelDimension = kernelDimension;
+
+    f32 kernel[kernelDimension * kernelDimension];
+    gaussianKernel(kernel, kernelDimension, this->sigma);
     Buffer new_kernel(kernel, (u64)(this->kernelDimension * this->kernelDimension), Buffer::READ_WRITE, false);
+    
     new_kernel.upload();
+
+    std::cout << "kernel dimension: " << kernelDimension << std::endl;
+    for (int i=0; i<kernelDimension*kernelDimension; i++) {
+        std::cout << kernel[i] << ", " << std::endl;
+    }
 
     std::cout << "CALC" << std::endl;
 
