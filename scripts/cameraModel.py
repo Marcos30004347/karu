@@ -23,9 +23,9 @@ C = Matrix([Symbol("Cx"), Symbol("Cy"), Symbol("Cz")])
 
 X = Matrix([Symbol("X"), Symbol("Y"), Symbol("Z"), 1])
 
-# t = Matrix(R.T*-1*C)
+t = Matrix(R.T*-1*C)
 
-Extrinsics = Matrix(R.T)*Matrix(Identity(3)).row_join(-1*C)
+Extrinsics = Matrix(R.T).row_join(t)
 
 P = Matrix(Extrinsics*X)
 

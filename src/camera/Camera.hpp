@@ -112,7 +112,7 @@ public:
 			pos[2][0]
 		);
 	
-		return algebra::Matrix(2,1, {x, y});
+		return algebra::Matrix(3,1, {x, y, 1});
 	}
 };
 
