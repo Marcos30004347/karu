@@ -165,7 +165,7 @@ void GaussianBlur::run(Buffer *out) {
         std::cout << kernel[i] << ", " << std::endl;
     }
 
-    std::cout << "CALC" << std::endl;
+    std::cout << "CALC: " << this->numOfChannels << std::endl;
 
     blur_kernel->setKernelArgument(0, this->pixels);
     std::cout << "A" << std::endl;
@@ -188,6 +188,8 @@ void GaussianBlur::run(Buffer *out) {
     blur_kernel->setKernelArgument(6, sizeof(int), &this->numOfChannels);
     std::cout << "G" << std::endl;
 
+    debug(rowsSize);
+    debug(colSize);
     blur_kernel->enqueue({(u64)this->rowsSize * this->colSize * this->numOfChannels}, {1});
     
     out->download();

@@ -15,6 +15,13 @@ int main() {
     Image *img = new Image("../tests/assets/Karoo.png");
     Image *grayImg = img->getGrayImage();
 
+    // unsigned char *pixelsss = grayImg->getImage();
+    // for (int i=0; i<grayImg->imageSize; i++) {
+    //     std::cout << (int)pixelsss[i] << ", ";
+    // }
+
+    std::cout << std::endl;
+
     Buffer pixels = grayImg->createBuffer();
     Buffer out = grayImg->createEmptyBuffer();
 
