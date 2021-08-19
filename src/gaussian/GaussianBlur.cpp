@@ -149,21 +149,24 @@ void GaussianBlur::run(Buffer *out) {
 
     std::cout << "INIT" << std::endl;
 
-    u64 kernelDimension = 7;
+    u64 kernelDimension = (u64)ceilf(6 * sigma);
     if (kernelDimension % 2 == 0) kernelDimension++;
 
     this->kernelDimension = kernelDimension;
 
     f32 kernel[kernelDimension * kernelDimension];
     gaussianKernel(kernel, kernelDimension, this->sigma);
-    Buffer new_kernel(kernel, (u64)(this->kernelDimension * this->kernelDimension), Buffer::READ_WRITE, false);
+    Buffer new_kernel(kernel, sizeof(f32) * (this->kernelDimension * this->kernelDimension), Buffer::READ_WRITE, false);
     
     new_kernel.upload();
 
-    std::cout << "kernel dimension: " << kernelDimension << std::endl;
-    for (int i=0; i<kernelDimension*kernelDimension; i++) {
-        std::cout << kernel[i] << ", " << std::endl;
-    }
+    // std::cout << "kernel dimension: " << kernelDimension << std::endl;
+    // for (int i=0; i<kernelDimension*kernelDimension; i++) {
+    //     //std::cout << kernel[i] << ", " << std::endl;
+    //     u64 aux =  i/kernelDimension;
+    //     u64 aux_2 = i%kernelDimension;
+    //     printf("%ld, %ld, %f\n ", aux, aux_2, kernel[aux * kernelDimension + aux_2]);
+    // }
 
     std::cout << "CALC: " << this->numOfChannels << std::endl;
 
