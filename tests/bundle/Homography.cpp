@@ -12,15 +12,6 @@ int main()
 {
 	std::vector<Matrix> points;
 
-	// points.push_back(Matrix(3,1,{ 1.0, 1.0, 0.0 }));
-	// points.push_back(Matrix(3,1,{ -1.0, 1.0, 0.0 }));
-	// points.push_back(Matrix(3,1,{ -1.0, -1.0, 0.0 }));
-	// points.push_back(Matrix(3,1,{ 1.0, -1.0, 0.0 }));
-	// points.push_back(Matrix(3,1,{ 1.0, 1.0, 1.0 }));
-	// points.push_back(Matrix(3,1,{ -1.0, 1.0, 1.0 }));
-	// points.push_back(Matrix(3,1,{ -1.0, -1.0, 1.0 }));
-	// points.push_back(Matrix(3,1,{ 1.0, -1.0, 1.0 }));
-
 	points.push_back(Matrix(3,1,{ -1.0, -1.5, 0.0 }));
 	points.push_back(Matrix(3,1,{ 1.7, 1., 0.0 }));
 	points.push_back(Matrix(3,1,{ .7, .5, 0.0 }));
@@ -35,15 +26,19 @@ int main()
 	std::vector<Matrix> positions = {
 		Matrix(3,1, { 0.0, -15.0, 1.0 }),
 		Matrix(3,1, { 15.0, 0.0, 1.0 }),
+		Matrix(3,1, { 15.0, -15.0, 1.0 }),
+		Matrix(3,1, { 0.0, 0.0, 15.0 }),
 	};
 
 	std::vector<Matrix> rotations = {
 		Matrix(3,1, { 1.5707963 , 0.0, 0.0 }),
 		Matrix(3,1, { 1.2091996, 1.2091996, 1.2091996 }),
+		Matrix(3,1, { 1.4821898, 0.6139431, 0.6139431 }),
+		Matrix(3,1, { 0, 0, 1.5707963 }),
 	};
 
 
-	for(u64 i=0; i<2; i++)
+	for(u64 i=0; i<4; i++)
 	{
 		Camera camera(
 			1600,
@@ -66,8 +61,8 @@ int main()
 			point_idx.push_back(j);
 			projections.push_back(projection);
 		}
-		Renderer r(1000,1000);
-		r.draw2dPoints(camera, pixels);
+		// Renderer r(1000,1000);
+		// r.draw2dPoints(camera, pixels);
 
 		bundles.push_back({camera, projections, point_idx});
 	}
@@ -100,19 +95,19 @@ int main()
 
 	Matrix p1[8] = { p11, p21, p31, p41, p51, p61, p71, p81 };
 	Matrix p2[8] = { p12, p22, p32, p42, p52, p62, p72, p82 };
-	for(i64 i=0;i<8; i++)
-	{
-		std::cout <<"[\n";
-		printMatrix(p1[i]);
-		std::cout <<"]\n";
-	}
-	std::cout <<"\n";
-	for(i64 i=0;i<8; i++)
-	{
-		std::cout <<"[\n";
-		printMatrix(p2[i]);
-		std::cout <<"]\n";
-	}
+	// for(i64 i=0;i<8; i++)
+	// {
+	// 	std::cout <<"[\n";
+	// 	printMatrix(p1[i]);
+	// 	std::cout <<"]\n";
+	// }
+	// std::cout <<"\n";
+	// for(i64 i=0;i<8; i++)
+	// {
+	// 	std::cout <<"[\n";
+	// 	printMatrix(p2[i]);
+	// 	std::cout <<"]\n";
+	// }
 	Matrix F = eightPointAlgorithm(p1, p2);
 
 	std::cout << "Fundamental:\n";
@@ -122,26 +117,25 @@ int main()
 	for(i64 i=0;i<8; i++)
 		printMatrix(transpose(p1[i])*F*p2[i]);
 
-	std::cout << "lines Essential:\n";
+	// std::cout << "lines Essential:\n";
 
-	for(i64 i=0;i<8; i++)
-	{
-		printMatrix(F*p1[i]);
-		printf("\n");
-	}
+	// for(i64 i=0;i<8; i++)
+	// {
+	// 	printMatrix(F*p1[i]);
+	// 	printf("\n");
+	// }
 
 
 	Matrix E = transpose(K)*F*K;
 
-	std::pair<Matrix,Matrix> KLU = LUPDecomposition(K);
-	Matrix K_inv = LUPInverse(KLU.first, KLU.second);
+	// std::pair<Matrix,Matrix> KLU = LUPDecomposition(K);
+	// Matrix K_inv = LUPInverse(KLU.first, KLU.second);
 	std::cout << "Essential:\n";
-
 	printMatrix(E);
 
-	std::cout << "errors Essential:\n";
-	for(i64 i=0;i<8; i++)
-		printMatrix(transpose(K_inv*p1[i])*E*K_inv*p2[i]);
+	// std::cout << "errors Essential:\n";
+	// for(i64 i=0;i<8; i++)
+	// 	printMatrix(transpose(K_inv*p1[i])*E*K_inv*p2[i]);
 
 
 

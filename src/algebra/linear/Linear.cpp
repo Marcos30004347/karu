@@ -1,9 +1,20 @@
 #include "algebra/linear/Linear.hpp"
 
-
-
-
 namespace karu::algebra {
+
+Matrix outerProduct(Matrix& v0, Matrix& v1)
+{
+	Matrix o(v0.rows(), v1.rows());
+
+	for(i32 i=0; i<v0.rows(); i++)
+	{
+		for(i32 j=0; j<v1.rows(); j++)
+		{
+			o[i][j] = v0[i][0] * v1[j][0];
+		}
+	}
+	return o;
+}	
 
 Matrix cross(Matrix A, Matrix B)
 {
@@ -37,7 +48,7 @@ f32 norm(Matrix A){
 
 f32 radians(f32 degrees)
 {
-	return ( degrees * pi) / 180.0 ;
+	return ( degrees * PI) / 180.0 ;
 }
 
 

@@ -80,7 +80,7 @@ add_test(NAME PolynomialTests COMMAND PolynomialTests)
 
 
 project(SVDTests)
-add_executable(SVDTests algebra/linear/SingularValueDecomposition.cpp)
+add_executable(SVDTests algebra/SVD/SVD.cpp)
 target_link_libraries(SVDTests karu)
 add_test(NAME SVDTests COMMAND SVDTests)
 

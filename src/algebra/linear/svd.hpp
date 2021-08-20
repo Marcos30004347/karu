@@ -10,7 +10,7 @@
 
 #include "algebra/matrix/Matrix.hpp"
 
-#define epsilon 1.e-8
+// #define epsilon 1.e-8
 
 using namespace std;
 using namespace karu::algebra;
@@ -387,7 +387,8 @@ int dsvd(Matrix& a, int m, int n, Matrix& w, Matrix& v)
         }
         anorm = MAX(anorm, (fabs((double)w[i][0]) + fabs(rv1[i])));
     }
-  
+	
+	
     /* accumulate the right-hand transformation */
     for (i = n - 1; i >= 0; i--) 
     {
@@ -575,7 +576,7 @@ template <typename T> double sgn(T val)
     return (val > T(0)) - (val < T(0));
 }
 
-int squareSvd (Matrix a, int M, int N, Matrix& w, Matrix& v){
+int squareSvd (Matrix&	 a, int M, int N, Matrix& w, Matrix& v){
   string T,P,Db;
 
   double elapsedTime,elapsedTime2;
@@ -647,7 +648,7 @@ int squareSvd (Matrix a, int M, int N, Matrix& w, Matrix& v){
   //  gettimeofday(&start, NULL);
 
    double conv;
-   while(converge > epsilon){ 		//convergence
+   while(converge > 1.e-8){ 		//convergence
     converge = 0.0;	
    		
     acum++;				//counter of loops
@@ -729,6 +730,9 @@ int squareSvd (Matrix a, int M, int N, Matrix& w, Matrix& v){
 	printMatrix(U);
 	printMatrix(S);
 	printMatrix(V);
+	a = U;
+	w = S;
+	v = V;
   //Output time and iterations
 
 

@@ -135,7 +135,7 @@ void Renderer::draw2dPoints(Camera& cam, std::vector<algebra::Matrix> points)
 
 	mat4x4_identity(m);
 
-  mat4x4_ortho(p, 0, this->width, this->heigth, 0.f, -1.f, 1.f);
+  mat4x4_ortho(p, this->width, 0, this->heigth, 0.f, -1.f, 1.f);
 
 	mat4x4_mul(mvp, p, m);
 

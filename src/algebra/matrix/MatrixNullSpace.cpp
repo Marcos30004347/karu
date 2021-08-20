@@ -9,10 +9,10 @@ namespace karu::algebra  {
 void MatrixNullSpace::nullSpace(MatrixData* M, MatrixData& ns) {
 	
 	MatrixEchelonForm::toEchelonForm(M);
-	std::cout << M->lines() << " " << M->columns() << "\n";
-	Matrix _m(*M);
-	printMatrix(_m);
-	std::cout << _m.rows() << " " << _m.columns() << "\n";
+	// std::cout << M->lines() << " " << M->columns() << "\n";
+	// Matrix _m(*M);
+	// printMatrix(_m);
+	// std::cout << _m.rows() << " " << _m.columns() << "\n";
 
 	u64 columns = M->columns();
 	u64 lead = 0;

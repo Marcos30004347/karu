@@ -29,7 +29,7 @@ public:
 
 	Camera()
 	{
-		this->R = algebra::Matrix(3,1, {0,0,2*pi});
+		this->R = algebra::Matrix(3,1, {0,0,2*PI});
 		this->P = algebra::Matrix(3,1, {0,0,0});
 	
 		this->fx = 3000;

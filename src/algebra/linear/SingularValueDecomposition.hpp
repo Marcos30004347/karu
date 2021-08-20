@@ -370,6 +370,152 @@ void svd(Matrix& M, Matrix& U, Matrix& D, Matrix& V)
 }
 
 
+void reorderDecomposition(Matrix& s, Matrix* matrices[2])
+{
+	const int n_vals = s.rows();
+	for (int i = 0; i < n_vals; ++i) 
+	{
+		double s_last = s[i][0];
+		int i_last = i;
+	
+		for (int j = i + 1; j < n_vals; ++j)
+		{
+			if (s[j][0] >  s_last)
+			{
+				s_last = s[j][0];
+				i_last = j;
+			}
+		}
+		
+		if (i_last != i)
+		{
+			double tmp;
+			tmp = s[i][0];
+			s[i][0] = s[i_last][0];
+			s[i_last][0] = tmp;
+
+			for (int j = 0; j < 2; ++j)
+			{
+				int rows = matrices[j]->rows();
+				int cols = matrices[j]->columns();
+			
+				Matrix* M = matrices[j];
+			
+				for (int k = 0; k < rows; ++k) 
+				{
+					tmp = M->m_data.get(k, i);
+					M->m_data.set(k, i, M->m_data.get(k, i_last));
+					M->m_data.set(k, i_last, tmp);
+				}
+			}
+		}
+	}
+}
+
+double sgn(double val)
+{
+    return (val > 0.0) - (val < 0.0);
+}
+
+void jacobiSVD(Matrix& X, Matrix& s, Matrix& U, Matrix& V, size_t n_iter)
+{
+	const size_t m = X.rows();
+	const size_t n = X.columns();
+
+	V = Matrix(n, n);
+	U = Matrix(X);
+
+	s = Matrix((m < n) ? m : n, 1);
+
+	const size_t n_singular_vals = s.rows();
+
+	for (size_t i = 0; i < n; ++i)
+	{
+		V[i][i] = 1.0;
+	}
+
+	for (size_t iter = 0; iter < n_iter; ++iter)
+	{
+		for (size_t i = 0; i < n - 1; ++i) {
+			for (size_t j = i + 1; j < n; ++j)
+			{
+
+				double cosine, sine;
+	
+				double dot_ii = 0, dot_jj = 0, dot_ij = 0;
+			
+				for (size_t k = 0; k < m; ++k)
+				{
+					dot_ii += U[k][i] * U[k][i];
+					dot_ij += U[k][i] * U[k][j];
+					dot_jj += U[k][j] * U[k][j];
+				}
+
+				double eps = 2.2204460492503131e-16;
+
+				if (!(fabs(dot_ij - 0) <= eps * fabs(dot_ij + 0)))
+				{
+					long double tau, t, out_c;
+					tau = (dot_jj - dot_ii) / (2 * dot_ij);
+					if (tau >= 0)
+					{
+							t = 1.0 / (tau + sqrt(1 + tau * tau));
+					} else 
+					{
+							t = -1.0 / (-tau + sqrt(1 + tau * tau));
+					}
+					out_c = 1.0 / sqrt(1 + t * t);
+					cosine = out_c;
+					sine = t * out_c;
+
+				} 
+				else 
+				{
+					cosine = 1.0;
+					sine = 0.0;
+				}
+
+				for (size_t k = 0; k < m; ++k)
+				{
+					U[k][i] = cosine * U[k][i] - sine * U[k][j];
+					U[k][j] = sine * U[k][i] + cosine * U[k][j];
+				}
+			
+				for (size_t k = 0; k < n; ++k)
+				{
+					V[k][i] = cosine * V[k][i] - sine * V[k][j];
+					V[k][j] = sine * V[k][i] + cosine * V[k][j];
+				}
+			}
+		}
+	}
+
+	for (size_t i = 0; i < n; ++i)
+	{
+		double sigma = 0.0;
+		for (size_t k = 0; k < m; ++k)
+		{
+			sigma += U[k][i] * U[k][i];
+		}
+
+		sigma = sqrt(sigma);
+		
+		if (i < n_singular_vals)
+		{
+			s[i][0] = sigma;
+		}
+
+		for (size_t k = 0; k < m; ++k)
+		{
+			U[k][i] /= sigma;
+		}
+	}
+
+	Matrix* matrices[2] = {&U, &V};
+
+	reorderDecomposition(s, matrices);
+}
+
 
 }
 
