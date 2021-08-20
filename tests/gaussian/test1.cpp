@@ -15,12 +15,19 @@ int main() {
     Image *img = new Image("../tests/assets/Karoo.png");
     Image *grayImg = img->getGrayImage();
 
+    // unsigned char *pixelsss = grayImg->getImage();
+    // for (int i=0; i<grayImg->imageSize; i++) {
+    //     std::cout << (int)pixelsss[i] << ", ";
+    // }
+
+    std::cout << std::endl;
+
     Buffer pixels = grayImg->createBuffer();
     Buffer out = grayImg->createEmptyBuffer();
 
     pixels.upload();
 
-    GaussianBlur *gaussian = new GaussianBlur(1.0, &pixels, grayImg);
+    GaussianBlur *gaussian = new GaussianBlur(5.0, &pixels, grayImg);
     gaussian->run(&out);
     
     unsigned char* new_img = (unsigned char*)out.download();

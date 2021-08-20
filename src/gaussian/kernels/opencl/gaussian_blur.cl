@@ -3,40 +3,43 @@
 __kernel void blur(
     __global unsigned char *pixels,
     __global unsigned char *out,
-    __global float* ckernel,
+    __global double* gaussian,
     const int rows,
     const int cols,
-    const int cKernelDimension,
+    const int k,
     const int numOfChannels
 )
 {
     int idx = get_global_id(0);
-    // int currentRow = (idx/(numOfChannels))/ (cols);
-    // int currentCol = (idx/(numOfChannels)) % (cols);
-    // int colorOffset = idx%(numOfChannels);
-    // float acc=0;
- 
-    // if (colorOffset != 3) {
-    //     int i, j;
-        
-    //     for(j=0;j <=cKernelDimension; j++) {
-            
-    //         int y =currentRow + (j-(cKernelDimension/2));
-    //         if(y < 0 || y >= rows) y = currentRow; 
+    int y = (idx/(numOfChannels))/ (cols);
+    int x = (idx/(numOfChannels)) % (cols);
+    int colorOffset = idx%(numOfChannels);
+    float acc=0;
 
-    //         for(i=0;i <= cKernelDimension; i++) {
-                
-    //             int x = currentCol +(i-(cKernelDimension/2));
-    //             if(x < 0 || x > cols) x = currentCol;
-    //             acc += (float) ((float)(pixels[((y*(cols)+x))*numOfChannels + colorOffset])* ckernel[(j*(cKernelDimension))+i]);
-    //         }
-    //     }
- 
-    //     if(acc >= 255) acc = 255;
-    //     out[idx] = (unsigned char)acc;
-    // }  
-    // else {
-    //     out[idx] = 255;
-    // }
-    out[idx] = pixels[idx];
+    int i, j;
+
+    for (int c = 0; c < numOfChannels-1; c++) {
+
+        int rowStart = max(0, y - k/2);
+        int rowEnd = min(rows, y + k/2);
+
+        int colStart = max(0, x - k/2);
+        int colEnd = min(cols, x + k/2);
+
+        int kernelColStart = min(x, k/2);
+        int kernelColEnd = min(cols - x, k/2);
+
+        int kernelRowStart = min(y, k/2);
+        int kernelRowEnd = min(rows - y, k/2);
+
+        for (int row= k/2 - kernelRowStart; row < k/2 + kernelRowEnd; row++) {
+            for (int col= k/2 - kernelColStart; col < k/2 + kernelColEnd; col++) {
+                acc += gaussian[row*k+col] * pixels[((y-kernelRowStart + row) * cols + (x-kernelColStart + col)) * numOfChannels + c];
+            }
+        }
+        out[(y * cols + x) * numOfChannels + c] = (unsigned char)acc;
+    }
+
+    out[(y * cols + x) * numOfChannels + numOfChannels - 1] = 255;
+
 }
