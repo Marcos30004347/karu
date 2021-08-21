@@ -47,6 +47,14 @@ public:
 	MatrixLineGetter operator[](const unsigned int idx);
 };
 
+Matrix diag(f32* diag, u32 m, u32 n);
+Matrix diag(Matrix& diag, u32 m, u32 n);
+Matrix diag(Matrix&& diag, u32 m, u32 n);
+
+Matrix diag(f32* diag, u32 n);
+Matrix diag(Matrix& diag);
+Matrix diag(Matrix&& diag);
+
 Matrix echelonForm(Matrix matrix);
 Matrix nullspace(Matrix matrix);
 

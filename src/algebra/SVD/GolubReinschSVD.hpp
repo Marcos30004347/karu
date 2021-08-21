@@ -21,23 +21,18 @@ f32 pythag(f32 a,f32 b)
 	}
 }
 
-void golubReinschSVD(Matrix& A, Matrix& u, f32* q, Matrix& v,f32 tol, f32 eps)
+void golubReinschBidiabonalSVD(f32* gamma, f32*phi, i32 m, i32 n, Matrix& u, f32* q, Matrix& v, f32 tol, f32 eps, f32 x)
 {
-	i32 it, m, n, i, j, k, l, l1;
-	// f32 c, f, g, h, s, x, y, z;
+	i32 it, i, j, k, l, l1;
 
-	f32 *e, s, c, f, g, h, x, y, z;
+	f32 s, c, f, g, h, y, z;
 
 	bool goto_test_f_convergence;
-
-	m = A.rows();
-	n = A.columns();
-
-	e = (f32*)malloc(sizeof(f32)*n);
 	
-	// Step 1: Get B, U, V', so that B is upper bidiagonal,
-	// U and V are products of Householder matrices and A = U*B*V'
-	householderBidiagonalForm(A, q, e, u, v, tol, &c, &f, &g, &h, &l, &x, &y, &z);
+	for(i=0; i<n; i++)
+	{
+		q[i] = gamma[i];
+	}
 
 	eps = eps * x;
 
@@ -46,23 +41,21 @@ void golubReinschSVD(Matrix& A, Matrix& u, f32* q, Matrix& v,f32 tol, f32 eps)
 		while(true)
 		{
 			// test f splitting:
+			goto_test_f_convergence = false;
 			for(l=k; l>=0; l--)
 			{
-				goto_test_f_convergence = false;
-				
-				if(fabs(e[l]) <= eps)
+				if(fabs(phi[l]) <= eps)
 				{
 					goto_test_f_convergence = true;
 					break;
 				}
-
 				if(fabs(q[l-1]) <= eps)
 				{
 					goto_test_f_convergence = false;
 					break;
 				}
 			}
-
+		
 			// cancelation
 			if(!goto_test_f_convergence)
 			{
@@ -70,17 +63,17 @@ void golubReinschSVD(Matrix& A, Matrix& u, f32* q, Matrix& v,f32 tol, f32 eps)
 				c = 0.0;
 				s = 1.0;
 				l1 = l-1;
-
 				for(i=l; i<=k; i++)
 				{
-					f = s * e[i];
-					e[i] = c * e[i];
+					f = s * phi[i];
+
+					phi[i] = c * phi[i];
 
 					if(fabs(f) <= eps) break;
 	
 					g = q[i];
 
-					h = pythag(f,g);//sqrt(f*f + g*g);
+					h = pythag(f,g);
 
 					q[i] = h;
 
@@ -116,10 +109,10 @@ void golubReinschSVD(Matrix& A, Matrix& u, f32* q, Matrix& v,f32 tol, f32 eps)
       // shift from bottom 2x2 minor
 			x = q[l];
 			y = q[k-1];
-			g = e[k-1];
-			h = e[k];
+			g = phi[k-1];
+			h = phi[k];
 			f = ((y - z) * (y + z) + (g - h) * (g + h)) / (2.0 * h * y);
-			g = pythag(f, 1.0); //sqrt(f*f + 1);
+			g = pythag(f, 1.0);
 
 			if(f < 0)
 			{
@@ -132,18 +125,17 @@ void golubReinschSVD(Matrix& A, Matrix& u, f32* q, Matrix& v,f32 tol, f32 eps)
 	
 			c = 1.0;
 			s = 1.0;
-	
 			for(i=l+1; i<=k; i++)
 			{
-				g = e[i];
+				g = phi[i];
 				y = q[i];
 
 				h = s * g;
 				g = c * g;
 
-				z = pythag(f, h);//sqrt(f*f + h*h);
+				z = pythag(f, h);
 
-				e[i-1] = z;
+				phi[i-1] = z;
 
 				c = f / z;
 				s = h / z;
@@ -157,12 +149,11 @@ void golubReinschSVD(Matrix& A, Matrix& u, f32* q, Matrix& v,f32 tol, f32 eps)
 				{
 					x = v[j][i-1];
 					z = v[j][i];
-
 					v[j][i-1] = x * c + z * s;
 					v[j][i] = -x * s + z * c;
 				}
 			
-				z = pythag(f, h); //sqrt(f*f + h*h);
+				z = pythag(f, h);
 				q[i-1] = z;
 				c = f / z;
 				s = h / z;
@@ -177,16 +168,13 @@ void golubReinschSVD(Matrix& A, Matrix& u, f32* q, Matrix& v,f32 tol, f32 eps)
 					u[j][i-1] = y * c + z * s;
 					u[j][i] = -y * s + z * c;
 				}
-				
 			}
 
-			e[l] = 0;
-			e[k] = f;
+			phi[l] = 0;
+			phi[k] = f;
 			q[k] = x;
 		}
 	}
-
-	delete e;
 }
 
 }

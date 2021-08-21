@@ -45,9 +45,9 @@ pts1 = np.reshape(pts1, (8, 2))
 pts2 = np.reshape(pts2, (8, 2))
 
 E = [
-4.99385063e-03,  5.29261816e+00,  2.22620135e-03,
-5.14175214e+00, -1.71877801e-01,  5.21694750e+00,
--2.78153851e-03, -5.20788924e+00, -2.70497572e-05,
+1.221e-07,  5.120e+00,  1.221e-07,
+5.120e+00,  -3.813e-07, 5.120e+00,
+2.593e-07,  -5.120e+00,  -2.593e-07,
 ]
 
 E = np.reshape(E, (3,3))
@@ -150,12 +150,16 @@ def chooseRealizableSolution(Rotations, Translations, K0, K1, pts1, pts2):
         triangulate([pts1[i][0], pts1[i][1]], [pts2[i][0], pts2[i][1]], cam0, cam1)
     print()
 
+
+
 def isRotationMatrix(R) :
     Rt = np.transpose(R)
     shouldBeIdentity = np.dot(Rt, R)
     I = np.identity(3, dtype = R.dtype)
     n = np.linalg.norm(I - shouldBeIdentity)
     return n < 1e-6
+
+
 
 def rotationMatrixToEulerAngles(R) :
     sy = math.sqrt(R[0,0] * R[0,0] +  R[1,0] * R[1,0])
@@ -191,7 +195,9 @@ R4 = [ 1.88248688e-08,  1.46553336e-05, -1.00000000e+00,
  1.21329510e-05,  1.00000000e+00,  1.46553338e-05,
  1.00000000e+00, -1.21329513e-05,  1.86470562e-08]
 R4 = np.reshape(R4,(3,3))
+
 print(np.linalg.det(R4))
+
 R3 = [-7.85501760e-04,  8.49057726e-03, -9.99963646e-01,
   8.47538912e-03,  9.99928095e-01,  8.48361773e-03,
   9.99963775e-01, -8.46841711e-03, -8.57406225e-04]
@@ -202,22 +208,22 @@ print("this")
 rotationMatrixToEulerAngles(R4)
 rotationMatrixToEulerAngles(R3)
 
-chooseRealizableSolution([R1,R2], [t1, t2], K, K, pts1, pts2)
+# chooseRealizableSolution([R1,R2], [t1, t2], K, K, pts1, pts2)
 
-t = [ 
-    7.01373374e-01,
-    -2.95597654e-04,
-    7.12794011e-01
-]
-t = np.reshape(t, (1,3))
+# t = [ 
+#     7.01373374e-01,
+#     -2.95597654e-04,
+#     7.12794011e-01
+# ]
+# t = np.reshape(t, (1,3))
 
-cam0 = np.dot(K, np.concatenate((np.eye(3), np.zeros((1,3)).T), axis=1))
+# cam0 = np.dot(K, np.concatenate((np.eye(3), np.zeros((1,3)).T), axis=1))
 
-cam1 = np.dot(K, np.concatenate((R2.T, t.T), axis=1))
+# cam1 = np.dot(K, np.concatenate((R2.T, t.T), axis=1))
 
-for i in range(8):
-    triangulate([pts1[i][0], pts1[i][1]], [pts2[i][0], pts2[i][1]], cam0, cam1)
-print()
+# for i in range(8):
+#     triangulate([pts1[i][0], pts1[i][1]], [pts2[i][0], pts2[i][1]], cam0, cam1)
+# print()
 
 # cam1 = np.dot(K, np.concatenate((R2.T, -t.T), axis=1))
 # for i in range(8):

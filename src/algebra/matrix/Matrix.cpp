@@ -8,6 +8,7 @@
 #include "algebra/matrix/MatrixEchelonForm.hpp"
 #include "algebra/matrix/MatrixNullSpace.hpp"
 #include "algebra/linear/Linear.hpp"
+#include <assert.h>
 #include <cmath>
 #include <iomanip>
 
@@ -228,6 +229,57 @@ Matrix nullspace(Matrix matrix)
 	return Matrix(null);
 }
 
+Matrix diag(Matrix&& diag) 
+{
+	Matrix a(diag.rows(),diag.rows());
+	for(i32 i=0; i<diag.rows(); i++)
+		a[i][i] = diag[i][0];
+	return a;
+}
+
+Matrix diag(Matrix& diag) 
+{
+	Matrix a(diag.rows(),diag.rows());
+	for(i32 i=0; i<diag.rows(); i++)
+		a[i][i] = diag[i][0];
+	return a;
+}
+
+Matrix diag(f32* diag, u32 n) 
+{
+	Matrix a(n,n);
+	for(i32 i=0; i<n; i++)
+		a[i][i] = diag[i];
+	return a;
+}
+
+Matrix diag(f32* diag, u32 m, u32 n) 
+{
+	Matrix a(m,n);
+
+	for(i32 i=0; i<n; i++)
+		a[i][i] = diag[i];
+
+	return a;
+}
+Matrix diag(Matrix&& diag, u32 m, u32 n) 
+{
+	assert(diag.rows() == n);
+	Matrix a(m,n);
+	for(i32 i=0; i<n; i++)
+		a[i][i] = diag[i][0];
+	return a;
+}
+
+Matrix diag(Matrix& diag, u32 m, u32 n) 
+{
+	assert(diag.rows() == n);
+
+	Matrix a(m,n);
+	for(i32 i=0; i<n; i++)
+		a[i][i] = diag[i][0];
+	return a;
+}
 
 void printMatrixWithMargin(Matrix* A, unsigned precision)
 {

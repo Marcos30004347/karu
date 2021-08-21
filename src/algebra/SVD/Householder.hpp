@@ -157,49 +157,8 @@ void housegen(f32* x, f32* u, f32* a, i32 n, f32 tol)
 }
 
 
-// Given x[0:n] this function computes a = alpha 
-// and the vector u[0:n] such that (I - u*u')x = alpha [1,0...0]
-// void housegen(f32* x, f32* u, f32* a, i32 n, f32 tol)
-// {
-// 	i32 i;
-
-// 	f32 v;
-
-// 	for(i=0; i<n; i++)
-// 		u[i] = x[i];
-	
-// 	v = norm(x, n, tol);
-
-// 	if(v == 0)
-// 	{
-// 		u[0] = sqrt(2);
-// 		*a = v;
-// 		return;
-// 	}
-
-// 	for(i=0; i<n; i++)
-// 		u[i] = x[i]/v;
-
-// 	if(u[0] >= 0.0)
-// 	{
-// 		u[0] = u[0] + 1.0;
-// 		v = -v;
-// 	}
-// 	else
-// 	{
-// 		u[0] = u[0] - 1;
-// 	}
-
-// 	f32 s = sqrt(u[0]);
-
-// 	for(i=0; i<n; i++)
-// 		u[i] = u[i]/s;
-	
-// 	*a = v;
-// }
-
 // Calculate X[:, k:n]*H given that H*z = -alhpa*e1
-void applyHouseholderRight(Matrix& X, f32* z, i32 k, i32 n, i32 m, f32* Vk, f32 tol)
+f32 applyHouseholderRight(Matrix& X, f32* z, i32 k, i32 n, i32 m, f32* Vk, f32 tol)
 {
 	i32 i, j, q;
 
@@ -261,28 +220,29 @@ void applyHouseholderRight(Matrix& X, f32* z, i32 k, i32 n, i32 m, f32* Vk, f32 
 	}
 
 
-	Matrix zk(n-k, 1, z);
-	Matrix Vkk(n-k, n-k, Vk);
+	// Matrix zk(n-k, 1, z);
+	// Matrix Vkk(n-k, n-k, Vk);
 	// Vkk = Vkk*-1;
-	std::cout << "***\n";
-	std::cout << "alpha: "<< alpha << "\n\n";
-	std::cout << "P*z: [\n";
-	printMatrix(Vkk*zk);
-	std::cout << "]\n";
-
+	// std::cout << "***\n";
+	// std::cout << "alpha: "<< alpha << "\n\n";
+	// std::cout << "P*z: [\n";
+	// printMatrix(Vkk*zk);
+	// std::cout << "]\n";
 	delete u;
+
+	return alpha;
 }
 
 
-
-void barlowBidiagonalization(Matrix& X, Matrix& u, Matrix& v, f32 tol = 2.22e-16)
+void barlowBidiagonalization(Matrix X, f32* gamma, f32* phi, Matrix& u, Matrix& v, f32 tol, f32* p_)
 {
 	i32 i, j, k, q;
 	i32 m = X.rows();
 	i32 n = X.columns();
 	
-	f32* phi = (f32*)malloc(sizeof(f32)* n);
-	f32* gamma = (f32*)malloc(sizeof(f32)* n);
+	f32 t, p;
+	// f32* phi = (f32*)malloc(sizeof(f32)* n);
+	// f32* gamma = (f32*)malloc(sizeof(f32)* n);
 
 	f32* y = (f32*)malloc(sizeof(f32)* m);
 	f32* z = (f32*)malloc(sizeof(f32)* m);
@@ -324,10 +284,9 @@ void barlowBidiagonalization(Matrix& X, Matrix& u, Matrix& v, f32 tol = 2.22e-16
 
 	if(phi[1] != 0)
 	{
-		applyHouseholderRight(X, z, 1, n, m, Vk, tol);
+		phi[1] = applyHouseholderRight(X, z, 1, n, m, Vk, tol);
 
 		// accumulate V[k]
-
 		// columns 0 is unnaltered
 		for(j=0; j<1; j++)
 		{
@@ -354,6 +313,8 @@ void barlowBidiagonalization(Matrix& X, Matrix& u, Matrix& v, f32 tol = 2.22e-16
 		v = tmp;
 	}
 
+	t = 0;
+
 	for(k=1; k < n - 2; k++)
 	{
 	
@@ -376,7 +337,6 @@ void barlowBidiagonalization(Matrix& X, Matrix& u, Matrix& v, f32 tol = 2.22e-16
 
 		for(i=0; i < m; i++)
 		{
-			std::cout << y[i] << ",\n";
 			u[i][k] = y[i]/gamma[k];
 		}
 
@@ -394,7 +354,10 @@ void barlowBidiagonalization(Matrix& X, Matrix& u, Matrix& v, f32 tol = 2.22e-16
 	
 		if(phi[k+1] != 0.0)
 		{
-			applyHouseholderRight(X, z, k + 1, n, m, Vk, tol);
+			phi[k+1] = applyHouseholderRight(X, z, k + 1, n, m, Vk, tol);
+			
+			// Multiply V by {I(k), 0; 0, Vk
+
 			// columns 0:k+1 is unnaltered
 			for(j=0; j<k+1; j++)
 			{
@@ -422,6 +385,9 @@ void barlowBidiagonalization(Matrix& X, Matrix& u, Matrix& v, f32 tol = 2.22e-16
 		{
 			phi[k+1] = 0;
 		}
+
+		t = fabs(phi[k+1]) + fabs(gamma[k+1]);
+		if(t > p) p = t;
 	}
 
 	if(n > 2)
@@ -436,6 +402,9 @@ void barlowBidiagonalization(Matrix& X, Matrix& u, Matrix& v, f32 tol = 2.22e-16
 
 		for(i=0;i<m;i++)
 			u[i][n-2] = y[i]/gamma[n-2];
+		
+		t = fabs(phi[n-2]) + fabs(gamma[n-2]);
+		if(t > p) p = t;
 	}
 
 	if(n > 1)
@@ -450,52 +419,30 @@ void barlowBidiagonalization(Matrix& X, Matrix& u, Matrix& v, f32 tol = 2.22e-16
 
 		for(i=0;i<m;i++)
 			u[i][n-1] = y[i]/gamma[n-1];
+
+		t = fabs(phi[n-2]) + fabs(gamma[n-2]);
+		if(t > p) p = t;
 	}
 
-	std::cout << "n: " << n << "\n";
-	for(i=0; i<n; i++)
-		std::cout << "gamma[i]: " << gamma[i] << "\n";
-
-	for(i=0; i<n; i++)
-		std::cout << "phi[i]: " << phi[i] << "\n";
-
-	Matrix B(n,n, {
-		gamma[0], phi[1], 0,
-		0, gamma[1], phi[2],
-		0, 		0, 	 gamma[2],
-	});
-
-	std::cout << "B:\n";
-	printMatrix(B);
-	std::cout << "U:\n";
-	printMatrix(u);
-	std::cout << "V:\n";
-	printMatrix(v);
-
-	std::cout << "U*B*V':\n";
-	printMatrix(u*B*transpose(v));
+	if(p_) *p_ = p;
+	
 	delete x;
 	delete y;
 	delete z;
+	delete Vk;
 }
+
 
 // arrays e and q are gonna hold the values of the diagonals
 // e is the upper diagonal and q the lower.
-void householderBidiagonalForm(
+void golubReinschHouseholderBidiagonalization(
 	Matrix& a,
 	f32* q,
 	f32* e,
 	Matrix& u,
 	Matrix& v,
 	f32 tol = 2.22e-16,
-	f32* c_ = nullptr, 
-	f32* f_ = nullptr,
-	f32* g_ = nullptr,
-	f32* h_ = nullptr,
-	i32* l_ = nullptr,
-	f32* x_ = nullptr,
-	f32* y_ = nullptr,
-	f32* z_ = nullptr
+	f32* x_ = nullptr
 )
 {
 	i32 i, j, k, l, l1;
@@ -506,8 +453,8 @@ void householderBidiagonalForm(
 	i32 n = a.columns();
 
 	// Copy matrix a into u
-	u = Matrix(m, m);
 	// u = Matrix(a);
+	u = Matrix(m, m);
 
 	for(i=0; i<m; i++)
 		for(j=0; j<n; j++)
@@ -626,7 +573,6 @@ void householderBidiagonalForm(
 
 		l = i;
 	}
-
 	// accumulation of the left-hand transformations.
 	for(i=n; i<m; i++)
 	{
@@ -671,14 +617,7 @@ void householderBidiagonalForm(
 		u[i][i] = u[i][i] + 1;
 	}
 
-	if(c_) *c_ = c;
-	if(g_) *g_ = g;
-	if(h_) *h_ = h;
-	if(f_) *f_ = f;
-	if(l_) *l_ = l;
 	if(x_) *x_ = x;
-	if(y_) *y_ = y;
-	if(z_) *z_ = z;
 }
 
 }

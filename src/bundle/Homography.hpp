@@ -5,10 +5,10 @@
 #include "algebra/matrix/Matrix.hpp"
 #include "algebra/polynomial/Polynomial.hpp"
 #include "algebra/linear/Linear.hpp"
-#include "algebra/linear/SingularValueDecomposition.hpp"
-#include "algebra/linear/svd.hpp"
-
-#include "algebra/linear/Eigen/SVD"
+// #include "algebra/linear/SingularValueDecomposition.hpp"
+// #include "algebra/linear/svd.hpp"
+#include "algebra/SVD/SVD.hpp"
+// #include "algebra/linear/Eigen/SVD"
 
 using namespace karu;
 using namespace karu::algebra;
@@ -138,144 +138,144 @@ f32 gammaP(f32* b, f32* c, f32* d, f32* p11, f32* p21, f32* p12, f32* p22, f32* 
 	return -gama0 / gama1;
 }
 
-Matrix coplanarThreePointHomography(Matrix image0[3], Matrix image1[3], f32 angles[3])
-{
-	f32 p1[2] = { image0[0][0][0], image0[0][1][0] };
-	f32 p2[2] = { image1[0][0][0], image1[0][1][0] };
+// Matrix coplanarThreePointHomography(Matrix image0[3], Matrix image1[3], f32 angles[3])
+// {
+// 	f32 p1[2] = { image0[0][0][0], image0[0][1][0] };
+// 	f32 p2[2] = { image1[0][0][0], image1[0][1][0] };
 
-	f32 p3[2] = { image0[1][0][0], image0[1][1][0] };
-	f32 p4[2] = { image1[1][0][0], image1[1][1][0] };
+// 	f32 p3[2] = { image0[1][0][0], image0[1][1][0] };
+// 	f32 p4[2] = { image1[1][0][0], image1[1][1][0] };
 
-	f32 p5[2] = { image0[2][0][0], image0[2][1][0] };
-	f32 p6[2] = { image1[2][0][0], image1[2][1][0] };
+// 	f32 p5[2] = { image0[2][0][0], image0[2][1][0] };
+// 	f32 p6[2] = { image1[2][0][0], image1[2][1][0] };
 
-	Matrix K = Matrix(6, 9, {
-    p1[0], p1[1], 1, 0,0,0,-1*p1[0]*p2[0], -1*p1[1]*p2[0], -p2[0],
-    0,0,0,p1[0], p1[1], 1, -1*p1[0]*p2[1], -1*p1[1]*p2[1], -p2[1],
-    p3[0], p3[1], 1, 0,0,0,-1*p3[0]*p4[0], -1*p3[1]*p4[0], -p4[0],
-    0,0,0,p3[0], p3[1], 1, -1*p3[0]*p4[1], -1*p3[1]*p4[1], -p4[1],
-    p5[0], p5[1], 1, 0,0,0,-1*p5[0]*p6[0], -1*p5[1]*p6[0], -p6[0],
-    0,0,0,p5[0], p5[1], 1, -1*p5[0]*p6[1], -1*p5[1]*p6[1], -p6[1],
-	});
+// 	Matrix K = Matrix(6, 9, {
+//     p1[0], p1[1], 1, 0,0,0,-1*p1[0]*p2[0], -1*p1[1]*p2[0], -p2[0],
+//     0,0,0,p1[0], p1[1], 1, -1*p1[0]*p2[1], -1*p1[1]*p2[1], -p2[1],
+//     p3[0], p3[1], 1, 0,0,0,-1*p3[0]*p4[0], -1*p3[1]*p4[0], -p4[0],
+//     0,0,0,p3[0], p3[1], 1, -1*p3[0]*p4[1], -1*p3[1]*p4[1], -p4[1],
+//     p5[0], p5[1], 1, 0,0,0,-1*p5[0]*p6[0], -1*p5[1]*p6[0], -p6[0],
+//     0,0,0,p5[0], p5[1], 1, -1*p5[0]*p6[1], -1*p5[1]*p6[1], -p6[1],
+// 	});
 
-	Matrix T = nullspace(K);
+// 	Matrix T = nullspace(K);
 
-	Matrix U, S, V;
+// 	Matrix U, S, V;
 
-	printMatrix(T);
-	svd(K, U, S, V);
-	std::cout << "V:\n";
-	printMatrix(V);
-	std::cout << "S:\n";
-	printMatrix(S);
+// 	printMatrix(T);
+// 	svd(K, U, S, V);
+// 	std::cout << "V:\n";
+// 	printMatrix(V);
+// 	std::cout << "S:\n";
+// 	printMatrix(S);
 
-	f32 B[9] = {
-		nullSpaceVecB0(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecB1(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecB2(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecB3(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecB4(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecB5(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecB6(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecB7(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecB8(p1, p2, p3, p4, p5, p6)
-	};
+// 	f32 B[9] = {
+// 		nullSpaceVecB0(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecB1(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecB2(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecB3(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecB4(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecB5(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecB6(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecB7(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecB8(p1, p2, p3, p4, p5, p6)
+// 	};
 
-	f32 C[9] = {
-		nullSpaceVecC0(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecC1(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecC2(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecC3(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecC4(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecC5(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecC6(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecC7(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecC8(p1, p2, p3, p4, p5, p6)
-	};
+// 	f32 C[9] = {
+// 		nullSpaceVecC0(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecC1(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecC2(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecC3(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecC4(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecC5(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecC6(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecC7(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecC8(p1, p2, p3, p4, p5, p6)
+// 	};
 
-	f32 D[9] = {
-		nullSpaceVecD0(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecD1(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecD2(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecD3(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecD4(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecD5(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecD6(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecD7(p1, p2, p3, p4, p5, p6),
-		nullSpaceVecD8(p1, p2, p3, p4, p5, p6)
-	};
+// 	f32 D[9] = {
+// 		nullSpaceVecD0(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecD1(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecD2(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecD3(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecD4(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecD5(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecD6(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecD7(p1, p2, p3, p4, p5, p6),
+// 		nullSpaceVecD8(p1, p2, p3, p4, p5, p6)
+// 	};
 
-	for(i64 i=0; i<9; i++)
-	{
-		std::cout << B[i] << " ";
-	}
-	std::cout <<"\n";
+// 	for(i64 i=0; i<9; i++)
+// 	{
+// 		std::cout << B[i] << " ";
+// 	}
+// 	std::cout <<"\n";
 
-	for(i64 i=0; i<9; i++)
-	{
-		std::cout << C[i] << " ";
-	}
-	std::cout <<"\n";
+// 	for(i64 i=0; i<9; i++)
+// 	{
+// 		std::cout << C[i] << " ";
+// 	}
+// 	std::cout <<"\n";
 
-	for(i64 i=0; i<9; i++)
-	{
-		std::cout << D[i] << " ";
-	}
-	std::cout <<"\n";
+// 	for(i64 i=0; i<9; i++)
+// 	{
+// 		std::cout << D[i] << " ";
+// 	}
+// 	std::cout <<"\n";
 
-	f32 dist = 10000000000;
+// 	f32 dist = 10000000000;
 
-	u64 best_i = 0;
-	u64 best_j = 1;
+// 	u64 best_i = 0;
+// 	u64 best_j = 1;
 
-	for(i64 i=0; i<3; i++)
-	{
-		for(i64 j=i; j<3; j++)
-		{
-			f32 k = norm(image0[i] - image0[j]);
+// 	for(i64 i=0; i<3; i++)
+// 	{
+// 		for(i64 j=i; j<3; j++)
+// 		{
+// 			f32 k = norm(image0[i] - image0[j]);
 
-			if(dist > k)
-			{
-				dist = k;
-				best_i = i;
-				best_j = j;
-			}
-		}
-	}
+// 			if(dist > k)
+// 			{
+// 				dist = k;
+// 				best_i = i;
+// 				best_j = j;
+// 			}
+// 		}
+// 	}
 
-	f32 pa1[2] = { image0[best_i][0][0], image0[best_i][1][0] };
-	f32 pa2[2] = { image1[best_i][0][0], image1[best_i][1][0] };
+// 	f32 pa1[2] = { image0[best_i][0][0], image0[best_i][1][0] };
+// 	f32 pa2[2] = { image1[best_i][0][0], image1[best_i][1][0] };
 
-	f32 pb1[2] = { image0[best_j][0][0], image0[best_j][1][0] };
-	f32 pb2[2] = { image1[best_j][0][0], image1[best_j][1][0] };
+// 	f32 pb1[2] = { image0[best_j][0][0], image0[best_j][1][0] };
+// 	f32 pb2[2] = { image1[best_j][0][0], image1[best_j][1][0] };
 
-	f32 a[2] = {angles[best_i], angles[best_j]};
+// 	f32 a[2] = {angles[best_i], angles[best_j]};
 
 
-	f32 b = betaP(B,C,D, pa1, pa2, pb1, pb2, a);
-	f32 y = gammaP(B,C,D, pa1, pa2, pb1, pb2, a);
+// 	f32 b = betaP(B,C,D, pa1, pa2, pb1, pb2, a);
+// 	f32 y = gammaP(B,C,D, pa1, pa2, pb1, pb2, a);
 
-	std::cout << a[0] << "\n";
-	std::cout << a[1] << "\n";
-	std::cout << b << "\n";
-	std::cout << y << "\n";
+// 	std::cout << a[0] << "\n";
+// 	std::cout << a[1] << "\n";
+// 	std::cout << b << "\n";
+// 	std::cout << y << "\n";
 
-	f32 h0 = b*B[0] + y*C[0] + 1*D[0];
-	f32 h1 = b*B[1] + y*C[1] + 1*D[1];
-	f32 h2 = b*B[2] + y*C[2] + 1*D[2];
-	f32 h3 = b*B[3] + y*C[3] + 1*D[3];
-	f32 h4 = b*B[4] + y*C[4] + 1*D[4];
-	f32 h5 = b*B[5] + y*C[5] + 1*D[5];
-	f32 h6 = b*B[6] + y*C[6] + 1*D[6];
-	f32 h7 = b*B[7] + y*C[7] + 1*D[7];
-	f32 h8 = b*B[8] + y*C[8] + 1*D[8];
+// 	f32 h0 = b*B[0] + y*C[0] + 1*D[0];
+// 	f32 h1 = b*B[1] + y*C[1] + 1*D[1];
+// 	f32 h2 = b*B[2] + y*C[2] + 1*D[2];
+// 	f32 h3 = b*B[3] + y*C[3] + 1*D[3];
+// 	f32 h4 = b*B[4] + y*C[4] + 1*D[4];
+// 	f32 h5 = b*B[5] + y*C[5] + 1*D[5];
+// 	f32 h6 = b*B[6] + y*C[6] + 1*D[6];
+// 	f32 h7 = b*B[7] + y*C[7] + 1*D[7];
+// 	f32 h8 = b*B[8] + y*C[8] + 1*D[8];
 
-	return Matrix(3,3, {
-		h0, h1, h2,
-		h3, h4, h5,
-		h6, h7, h8
-	});
-}
+// 	return Matrix(3,3, {
+// 		h0, h1, h2,
+// 		h3, h4, h5,
+// 		h6, h7, h8
+// 	});
+// }
 
 f32 det3x3(Matrix& M)
 {
@@ -487,17 +487,27 @@ Matrix eightPointAlgorithm(Matrix image0[8], Matrix image1[8])
 	// 	p[7][0][0]*p_[7][0][0], p[7][1][0]*p_[7][0][0], p_[7][0][0], p[7][0][0]*p_[7][1][0], p[7][1][0]*p_[7][1][0], p_[7][1][0], p[7][0][0],  p[7][1][0], 1,
 	// });
 	
-	Eigen::MatrixXf A(8,9);
+	// Eigen::MatrixXf A(8,9);
 
-	A << p_[0][0][0]*p[0][0][0], p_[0][0][0]*p[0][1][0], p_[0][0][0], p[0][0][0]*p_[0][1][0], p[0][1][0]*p_[0][1][0], p_[0][1][0], p[0][0][0],  p[0][1][0], 1,
-	p_[1][0][0]*p[1][0][0], p_[1][0][0]*p[1][1][0], p_[1][0][0], p[1][0][0]*p_[1][1][0], p[1][1][0]*p_[1][1][0], p_[1][1][0], p[1][0][0],  p[1][1][0], 1,
-	p_[2][0][0]*p[2][0][0], p_[2][0][0]*p[2][1][0], p_[2][0][0], p[2][0][0]*p_[2][1][0], p[2][1][0]*p_[2][1][0], p_[2][1][0], p[2][0][0],  p[2][1][0], 1,
-	p_[3][0][0]*p[3][0][0], p_[3][0][0]*p[3][1][0], p_[3][0][0], p[3][0][0]*p_[3][1][0], p[3][1][0]*p_[3][1][0], p_[3][1][0], p[3][0][0],  p[3][1][0], 1,
-	p_[4][0][0]*p[4][0][0], p_[4][0][0]*p[4][1][0], p_[4][0][0], p[4][0][0]*p_[4][1][0], p[4][1][0]*p_[4][1][0], p_[4][1][0], p[4][0][0],  p[4][1][0], 1,
-	p_[5][0][0]*p[5][0][0], p_[5][0][0]*p[5][1][0], p_[5][0][0], p[5][0][0]*p_[5][1][0], p[5][1][0]*p_[5][1][0], p_[5][1][0], p[5][0][0],  p[5][1][0], 1,
-	p_[6][0][0]*p[6][0][0], p_[6][0][0]*p[6][1][0], p_[6][0][0], p[6][0][0]*p_[6][1][0], p[6][1][0]*p_[6][1][0], p_[6][1][0], p[6][0][0],  p[6][1][0], 1,
-	p_[7][0][0]*p[7][0][0], p_[7][0][0]*p[7][1][0], p_[7][0][0], p[7][0][0]*p_[7][1][0], p[7][1][0]*p_[7][1][0], p_[7][1][0], p[7][0][0],  p[7][1][0], 1;
-
+	// A << p_[0][0][0]*p[0][0][0], p_[0][0][0]*p[0][1][0], p_[0][0][0], p[0][0][0]*p_[0][1][0], p[0][1][0]*p_[0][1][0], p_[0][1][0], p[0][0][0],  p[0][1][0], 1,
+	// p_[1][0][0]*p[1][0][0], p_[1][0][0]*p[1][1][0], p_[1][0][0], p[1][0][0]*p_[1][1][0], p[1][1][0]*p_[1][1][0], p_[1][1][0], p[1][0][0],  p[1][1][0], 1,
+	// p_[2][0][0]*p[2][0][0], p_[2][0][0]*p[2][1][0], p_[2][0][0], p[2][0][0]*p_[2][1][0], p[2][1][0]*p_[2][1][0], p_[2][1][0], p[2][0][0],  p[2][1][0], 1,
+	// p_[3][0][0]*p[3][0][0], p_[3][0][0]*p[3][1][0], p_[3][0][0], p[3][0][0]*p_[3][1][0], p[3][1][0]*p_[3][1][0], p_[3][1][0], p[3][0][0],  p[3][1][0], 1,
+	// p_[4][0][0]*p[4][0][0], p_[4][0][0]*p[4][1][0], p_[4][0][0], p[4][0][0]*p_[4][1][0], p[4][1][0]*p_[4][1][0], p_[4][1][0], p[4][0][0],  p[4][1][0], 1,
+	// p_[5][0][0]*p[5][0][0], p_[5][0][0]*p[5][1][0], p_[5][0][0], p[5][0][0]*p_[5][1][0], p[5][1][0]*p_[5][1][0], p_[5][1][0], p[5][0][0],  p[5][1][0], 1,
+	// p_[6][0][0]*p[6][0][0], p_[6][0][0]*p[6][1][0], p_[6][0][0], p[6][0][0]*p_[6][1][0], p[6][1][0]*p_[6][1][0], p_[6][1][0], p[6][0][0],  p[6][1][0], 1,
+	// p_[7][0][0]*p[7][0][0], p_[7][0][0]*p[7][1][0], p_[7][0][0], p[7][0][0]*p_[7][1][0], p[7][1][0]*p_[7][1][0], p_[7][1][0], p[7][0][0],  p[7][1][0], 1;
+	
+	Matrix S(8,9, {
+		p_[0][0][0]*p[0][0][0], p_[0][0][0]*p[0][1][0], p_[0][0][0], p[0][0][0]*p_[0][1][0], p[0][1][0]*p_[0][1][0], p_[0][1][0], p[0][0][0],  p[0][1][0], 1,
+		p_[1][0][0]*p[1][0][0], p_[1][0][0]*p[1][1][0], p_[1][0][0], p[1][0][0]*p_[1][1][0], p[1][1][0]*p_[1][1][0], p_[1][1][0], p[1][0][0],  p[1][1][0], 1,
+		p_[2][0][0]*p[2][0][0], p_[2][0][0]*p[2][1][0], p_[2][0][0], p[2][0][0]*p_[2][1][0], p[2][1][0]*p_[2][1][0], p_[2][1][0], p[2][0][0],  p[2][1][0], 1,
+		p_[3][0][0]*p[3][0][0], p_[3][0][0]*p[3][1][0], p_[3][0][0], p[3][0][0]*p_[3][1][0], p[3][1][0]*p_[3][1][0], p_[3][1][0], p[3][0][0],  p[3][1][0], 1,
+		p_[4][0][0]*p[4][0][0], p_[4][0][0]*p[4][1][0], p_[4][0][0], p[4][0][0]*p_[4][1][0], p[4][1][0]*p_[4][1][0], p_[4][1][0], p[4][0][0],  p[4][1][0], 1,
+		p_[5][0][0]*p[5][0][0], p_[5][0][0]*p[5][1][0], p_[5][0][0], p[5][0][0]*p_[5][1][0], p[5][1][0]*p_[5][1][0], p_[5][1][0], p[5][0][0],  p[5][1][0], 1,
+		p_[6][0][0]*p[6][0][0], p_[6][0][0]*p[6][1][0], p_[6][0][0], p[6][0][0]*p_[6][1][0], p[6][1][0]*p_[6][1][0], p_[6][1][0], p[6][0][0],  p[6][1][0], 1,
+		p_[7][0][0]*p[7][0][0], p_[7][0][0]*p[7][1][0], p_[7][0][0], p[7][0][0]*p_[7][1][0], p[7][1][0]*p_[7][1][0], p_[7][1][0], p[7][0][0],  p[7][1][0], 1
+	});
 	// A << p[0][0][0]*p_[0][0][0], p[0][1][0]*p_[0][0][0], p_[0][0][0], p[0][0][0]*p_[0][1][0], p[0][1][0]*p_[0][1][0], p_[0][1][0], p[0][0][0],  p[0][1][0], 1,
 	// p[1][0][0]*p_[1][0][0], p[1][1][0]*p_[1][0][0], p_[1][0][0], p[1][0][0]*p_[1][1][0], p[1][1][0]*p_[1][1][0], p_[1][1][0], p[1][0][0],  p[1][1][0], 1,
 	// p[2][0][0]*p_[2][0][0], p[2][1][0]*p_[2][0][0], p_[2][0][0], p[2][0][0]*p_[2][1][0], p[2][1][0]*p_[2][1][0], p_[2][1][0], p[2][0][0],  p[2][1][0], 1,
@@ -507,13 +517,47 @@ Matrix eightPointAlgorithm(Matrix image0[8], Matrix image1[8])
 	// p[6][0][0]*p_[6][0][0], p[6][1][0]*p_[6][0][0], p_[6][0][0], p[6][0][0]*p_[6][1][0], p[6][1][0]*p_[6][1][0], p_[6][1][0], p[6][0][0],  p[6][1][0], 1,
 	// p[7][0][0]*p_[7][0][0], p[7][1][0]*p_[7][0][0], p_[7][0][0], p[7][0][0]*p_[7][1][0], p[7][1][0]*p_[7][1][0], p_[7][1][0], p[7][0][0],  p[7][1][0], 1;
 
-	Eigen::JacobiSVD<Eigen::MatrixXf> svd(A, Eigen::ComputeFullU | Eigen::ComputeFullV);
+	Matrix U, V;
+
+	f32* s = new f32[8];
+
+	svd(S, U, s, V);
+
+	// printMatrix(S);
+	// printMatrix(S - U*transpose(diag(s, 9, 8))*transpose(V));
+
+	std::cout << "\n";
+
+	for(i32 i=0; i<8; i++)
+	{
+		std::cout << s[i] << " ";
+	}
+	std::cout << "\n";
+	std::cout << "\n";
 
 	Matrix Fnorm = Matrix(3,3, {
-		svd.matrixV()(0,8), svd.matrixV()(1,8), svd.matrixV()(2,8),
-		svd.matrixV()(3,8), svd.matrixV()(4,8), svd.matrixV()(5,8),
-		svd.matrixV()(6,8), svd.matrixV()(7,8), svd.matrixV()(8,8),
+		V[0][8], V[1][8], V[2][8],
+		V[3][8], V[4][8], V[5][8],
+		V[6][8], V[7][8], V[8][8],
 	});
+	
+	printMatrix(Fnorm);
+
+	svd(Fnorm, U, s, V);
+	
+	s[2] = 0;
+	
+	Fnorm = U*diag(s, 3, 3)*transpose(V);
+	
+	printMatrix(Fnorm);
+	
+	// Eigen::JacobiSVD<Eigen::MatrixXf> svd(A, Eigen::ComputeFullU | Eigen::ComputeFullV);
+
+	// Matrix Fnorm = Matrix(3,3, {
+	// 	svd.matrixV()(0,8), svd.matrixV()(1,8), svd.matrixV()(2,8),
+	// 	svd.matrixV()(3,8), svd.matrixV()(4,8), svd.matrixV()(5,8),
+	// 	svd.matrixV()(6,8), svd.matrixV()(7,8), svd.matrixV()(8,8),
+	// });
 
 	// Eigen::MatrixXf U = svd.matrixU();
 	// Eigen::MatrixXf D = svd.singularValues().matrix().asDiagonal();
