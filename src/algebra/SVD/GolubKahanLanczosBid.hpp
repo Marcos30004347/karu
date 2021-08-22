@@ -13,22 +13,19 @@ f32 norm2(f32* v, i32 n, f32 tol)
 	return sqrt(norm);
 }
 
-void golubKahanLanczosBidiagonalization(Matrix& A)
+
+void golubKahanLanczosBidiagonalization(Matrix& A, f32* gamma, f32* phi, Matrix& u, Matrix& v)
 {
-	f32 *b, *a;
 	i32 i, j, k, m, n;
 	
 	m = A.rows();
 	n = A.columns();
 
-	Matrix v(n+1,n+1);
-	Matrix u(m+1,n+1);
+	v = Matrix(n,n);
+	u = Matrix(m,n);
 
-	a = new f32[n+1];
-	b = new f32[n+1];
-
-	b[0] = 0;
-	a[0] = 0;
+	phi[0] = 0;
+	gamma[0] = 0;
 
 	// choose v[0] so that it is unit 2-norm
 	v[0][0] = 1;
@@ -42,43 +39,60 @@ void golubKahanLanczosBidiagonalization(Matrix& A)
 	
 		if(k>0)
 		for(i=0; i<m; i++)
-				u[i][k] = u[i][k] - b[k-1]*u[i][k-1];
+				u[i][k] = u[i][k] - phi[k-1]*u[i][k-1];
 
-		a[k] = 0;
+		gamma[k] = 0;
 		for(i=0; i<m; i++)
-			a[k] = a[k] + (u[i][k] * u[i][k]);
-		a[k] = sqrt(a[k]);
+			gamma[k] = gamma[k] + (u[i][k] * u[i][k]);
+		gamma[k] = sqrt(gamma[k]);
 
 		for(i=0; i<m; i++)
-			u[i][k] = u[i][k]/a[k];
+			u[i][k] = u[i][k]/gamma[k];
 		
-		// v[i][k+1] = A'*u[i][k] - a[k]*v[k]
-		for(i=0; i<n; i++)
-			for(j=0; j<m; j++)
-				v[i][k+1] = v[i][k+1] + A[j][i]*u[j][k];
+		if(k < n-1)
+		{
+			for(i=0; i<n; i++)
+				for(j=0; j<m; j++)
+					v[i][k+1] = v[i][k+1] + A[j][i]*u[j][k];
 
-		for(i=0; i<m; i++)
-				v[i][k+1] = v[i][k+1] - a[k]*v[i][k];
-	
-		b[k] = 0;
-		for(i=0; i<m; i++)
-			b[k] = b[k] + (v[i][k+1] * v[i][k+1]);
-		b[k] = sqrt(b[k]);
+			for(i=0; i<n; i++)
+					v[i][k+1] = v[i][k+1] - gamma[k]*v[i][k];
+		
+			phi[k] = 0;
+			for(i=0; i<n; i++)
+				phi[k] = phi[k] + (v[i][k+1] * v[i][k+1]);
+			phi[k] = sqrt(phi[k]);
 
-		for(i=0; i<m; i++)
-			v[i][k+1] = v[i][k+1]/b[k];
+			for(i=0; i<n; i++)
+				v[i][k+1] = v[i][k+1]/phi[k];
+		}
 	}
 
-	for(i=0; i<n; i++)
-		std::cout << a[i] << " ";
-	std::cout << "\n";
+	// for(i=0; i<n; i++)
+	// 	std::cout << gamma[i] << " ";
+	// std::cout << "\n";
 
-	for(i=0; i<n-1; i++)
-		std::cout << b[i] << " ";
-	std::cout << "\n";
+	// for(i=0; i<n-1; i++)
+	// 	std::cout << phi[i] << " ";
+	// std::cout << "\n";
 
-	printMatrix(u);
-	printMatrix(v);
+	// printMatrix(u);
+	// std::cout << "\n";
+	// printMatrix(v);
+
+	// Matrix B(n,n, {
+	// 	gamma[0], phi[0],    0,
+	// 	0,    gamma[1], phi[1],
+	// 	0,    0, 	    gamma[2],
+	// });
+	// std::cout << "\n";
+	// std::cout << "\n";
+
+	// printMatrix(u*B*transpose(v));
+	// std::cout << "\n";
+	// std::cout << "\n";
+
+	// printMatrix(A - u*B*transpose(v));
 
 }
 

@@ -120,7 +120,26 @@ void bidiagonalGolubKahanLaczosTests()
 	f32 gamma[3];
 	f32 phi[3];
 
-	golubKahanLanczosBidiagonalization(a);
+	golubKahanLanczosBidiagonalization(a, gamma, phi, u, v);
+	// std::cout << "SDSAD\n";
+	// golubReinschBidiabonalSVD(gamma, phi, a.rows(), a.columns(), u, s, v, tol, eps, 1);
+	// std::cout << "SDSAD\n";
+
+	Matrix b(3,3, {
+		gamma[0], phi[1],  0,
+		0,	gamma[1], phi[2],
+		0,		0, 	  gamma[2],
+	});
+
+	printMatrix(u);
+	std::cout << "\n";
+	printMatrix(b);
+	std::cout << "\n";
+	printMatrix(v);
+	std::cout << "\n";
+	printMatrix(u*diag(s, 3)*transpose(v));
+
+	// std::cout << s[0] << " " << s[1] << " " << s[2] << "\n";
 }
 
 void bidiagonalGloubReinschSVDTests()
@@ -143,14 +162,14 @@ void bidiagonalGloubReinschSVDTests()
 
 	// To bidiagonal form
 	golubReinschHouseholderBidiagonalization(a, gamma, phi, u, v, tol, &x);
-	golubReinschBidiabonalSVD(gamma, phi, a.rows(), a.columns(), u, s, v, tol, eps, x);
+	// golubReinschBidiabonalSVD(gamma, phi, a.rows(), a.columns(), u, s, v, tol, eps, 1);
 
 	std::cout << "B\n";
 	Matrix b(4, 3, {
-		s[0], 0, 0,
-		0, s[1], 0,
-		0, 0,  s[2],
-		0, 0,    0,
+		gamma[0], phi[1], 0,
+		0, gamma[1], phi[2],
+		0, 	  0,   gamma[2],
+		0,    0,          0,
 	});
 	printMatrix(b);
 	std::cout << "U\n";
@@ -165,37 +184,37 @@ void bidiagonalGloubReinschSVDTests()
 	printMatrix(u*b*transpose(v) - a);
 	std::cout << "\n";
 
-	barlowBidiagonalization(a, gamma, phi, u, v, tol, &x);
-	printMatrix(a);
+	// barlowBidiagonalization(a, gamma, phi, u, v, tol, &x);
+	// printMatrix(a);
 	
-	golubReinschBidiabonalSVD(gamma, phi, a.rows(), a.columns(), u, s, v, tol, eps, x);
+	// golubReinschBidiabonalSVD(gamma, phi, a.rows(), a.columns(), u, s, v, tol, eps, 1);
 
-	b = Matrix(3, 3, {
-		s[0], 0, 0,
-		0, s[1], 0,
-		0, 0,  s[2],
-	});
+	// b = Matrix(3, 3, {
+	// 	s[0], 0, 0,
+	// 	0, s[1], 0,
+	// 	0, 0,  s[2],
+	// });
 
-	std::cout << "B\n";
-	printMatrix(b);
-	std::cout << "U\n";
-	printMatrix(u);
-	std::cout << "V'\n";
-	printMatrix(v);
-	std::cout << "\n";
+	// std::cout << "B\n";
+	// printMatrix(b);
+	// std::cout << "U\n";
+	// printMatrix(u);
+	// std::cout << "V'\n";
+	// printMatrix(v);
+	// std::cout << "\n";
 
-	Matrix ubv = u*b*transpose(v);
-	std::cout << "U*B*V':\n";
-	printMatrix(ubv);
-	std::cout << "residual:\n";
-	printMatrix(ubv - a);
+	// Matrix ubv = u*b*transpose(v);
+	// std::cout << "U*B*V':\n";
+	// printMatrix(ubv);
+	// std::cout << "residual:\n";
+	// printMatrix(ubv - a);
 
-	f32 n = v[0][2]*v[0][2] + v[1][2]*v[1][2] + v[2][2]*v[2][2];
-	n = sqrt(n);
-	std::cout << n << "\n";
+	// f32 n = v[0][2]*v[0][2] + v[1][2]*v[1][2] + v[2][2]*v[2][2];
+	// n = sqrt(n);
+	// std::cout << n << "\n";
 
-	f32 t = 1*v[0][2]*v[0][2] + 2*v[1][2]*v[1][2] + 3*v[2][2]*v[2][2];
-	std::cout << t << "\n";
+	// f32 t = 1*v[0][2]*v[0][2] + 2*v[1][2]*v[1][2] + 3*v[2][2]*v[2][2];
+	// std::cout << t << "\n";
 
 }
 
@@ -234,9 +253,9 @@ int main()
 {
 	
 	// householderTests();
-	// bidiagonalGloubReinschSVDTests();
 	// bidiagonalTests();
-	bidiagonalGolubKahanLaczosTests();
+	bidiagonalGloubReinschSVDTests();
+	// bidiagonalGolubKahanLaczosTests();
 	// svdTests();
 	return 0;
 }

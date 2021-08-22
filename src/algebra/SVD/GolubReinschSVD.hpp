@@ -20,7 +20,9 @@ f32 pythag(f32 a,f32 b)
 			else return d*sqrt(1.0 + ((c/d) * (c/d)));
 	}
 }
-
+// Handbook Series Linear Algebra
+// Singular Value Decomposition and Least Squares Solutions*
+// Contributed by G. H. GOLUB and C. REINSCH
 void golubReinschBidiabonalSVD(f32* gamma, f32*phi, i32 m, i32 n, Matrix& u, f32* q, Matrix& v, f32 tol, f32 eps, f32 x)
 {
 	i32 it, i, j, k, l, l1;
@@ -35,8 +37,7 @@ void golubReinschBidiabonalSVD(f32* gamma, f32*phi, i32 m, i32 n, Matrix& u, f32
 	}
 
 	eps = eps * x;
-
-	for(k = n-1; k>=0; k--)
+	for(k = n-1; k >= 0; k--)
 	{
 		while(true)
 		{
@@ -51,7 +52,6 @@ void golubReinschBidiabonalSVD(f32* gamma, f32*phi, i32 m, i32 n, Matrix& u, f32
 				}
 				if(fabs(q[l-1]) <= eps)
 				{
-					goto_test_f_convergence = false;
 					break;
 				}
 			}
@@ -62,7 +62,9 @@ void golubReinschBidiabonalSVD(f32* gamma, f32*phi, i32 m, i32 n, Matrix& u, f32
 				// cancelation of e[l] if l > 0
 				c = 0.0;
 				s = 1.0;
-				l1 = l-1;
+
+				l1 = l - 1;
+
 				for(i=l; i<=k; i++)
 				{
 					f = s * phi[i];
@@ -125,6 +127,7 @@ void golubReinschBidiabonalSVD(f32* gamma, f32*phi, i32 m, i32 n, Matrix& u, f32
 	
 			c = 1.0;
 			s = 1.0;
+
 			for(i=l+1; i<=k; i++)
 			{
 				g = phi[i];
@@ -144,6 +147,7 @@ void golubReinschBidiabonalSVD(f32* gamma, f32*phi, i32 m, i32 n, Matrix& u, f32
 				g = -x * s + g * c;
 				h = y * s;
 				y = y * c;
+				
 
 				for(j=0; j < n; j++)
 				{

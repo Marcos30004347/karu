@@ -78,6 +78,11 @@ add_executable(PolynomialTests algebra/polynomial/Polynomial.cpp)
 target_link_libraries(PolynomialTests karu)
 add_test(NAME PolynomialTests COMMAND PolynomialTests)
 
+project(HouseholderTests)
+add_executable(HouseholderTests algebra/SVD/Householder.cpp)
+target_link_libraries(HouseholderTests karu)
+add_test(NAME HouseholderTests COMMAND HouseholderTests)
+
 
 project(SVDTests)
 add_executable(SVDTests algebra/SVD/SVD.cpp)

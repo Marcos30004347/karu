@@ -317,7 +317,7 @@ void printMatrix(Matrix* A, unsigned precision)
 	{
 		for(int j=0; j<A->m_data.m_columns;j++)
 		{
-			std::cout << std::scientific << std::setw(5) << std::setprecision(precision) << A->m_data.get(i,j) << "\t";
+			std::cout << std::scientific << std::setw(5) << std::setprecision(precision) << A->m_data.get(i,j) << ",\t";
 		}
 		std::cout << std::endl;
 	}
@@ -331,7 +331,7 @@ void printMatrix(Matrix& A, unsigned precision)
 	{
 		for(int j=0; j<A.m_data.m_columns;j++)
 		{
-			std::cout << std::scientific << std::setw(5) << std::setprecision(precision) << A.m_data.get(i,j) << "\t";
+			std::cout << std::scientific << std::setw(5) << std::setprecision(precision) << A.m_data.get(i,j) << ",\t";
 		}
 		std::cout << std::endl;
 	}
@@ -345,7 +345,7 @@ void printMatrix(Matrix&& A, unsigned precision)
 	{
 		for(int j=0; j<A.m_data.m_columns;j++)
 		{
-			std::cout << std::scientific << std::setw(5) << std::setprecision(precision) << A.m_data.get(i,j) << "\t";
+			std::cout << std::scientific << std::setw(5) << std::setprecision(precision) << A.m_data.get(i,j) << ",\t";
 		}
 		std::cout << std::endl;
 	}
