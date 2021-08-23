@@ -12,6 +12,57 @@ i32 sign(f32 v)
 	return -1;
 }
 
+void sortUV(f32* s, u32 n, Matrix& u, Matrix& v)
+{
+	i32 i, k, rows, cols, j, i_last;
+	f32 s_last, tmp;
+
+	for (i = 0; i < n; ++i) 
+	{
+		s_last = s[i];
+		i_last = i;
+	
+		for (j = i + 1; j < n; ++j)
+		{
+			if (s[j] >  s_last)
+			{
+				s_last = s[j];
+				i_last = j;
+			}
+		}
+		
+		if (i_last != i)
+		{
+			tmp;
+			tmp = s[i];
+
+			s[i] = s[i_last];
+			s[i_last] = tmp;
+
+			rows = u.rows();
+			cols = u.columns();
+		
+			for (k = 0; k < rows; ++k) 
+			{
+				tmp = u[k][i];
+				u[k][i] = u[k][i_last];
+				u[k][i_last] = tmp;
+			}
+			rows = v.rows();
+			cols = v.columns();
+		
+			for (k = 0; k < rows; ++k) 
+			{
+				tmp = v[k][i];
+				v[k][i] = v[k][i_last];
+				v[k][i_last] = tmp;
+			}
+
+
+		}
+	}
+}
+
 // GvL pg. 216 : algo 5.1.3
 void givens(f32 a, f32 b, f32* c, f32* s, f32 tol)
 {
@@ -85,6 +136,7 @@ void leftGivens(Matrix& A, f32 c, f32 s, i32 i, i32 k, f32 tol)
 // should also be zero
 void diagLeftGivens(f32* d[5], i32 m, i32 n, f32 c, f32 s, i32 i, i32 k, f32 tol)
 {
+	// std::cout << i << " " << k << "\n";
 
 	i32 col = 0;
 	f32 t1, t2;
@@ -109,21 +161,28 @@ void diagLeftGivens(f32* d[5], i32 m, i32 n, f32 c, f32 s, i32 i, i32 k, f32 tol
 		if(fabs(d[i][col]) <= tol)
 			d[i][col] = 0.0;
 
+		// std::cout << i << " " << "*" << " " << col << "\n";
+		
 		i = i - 1;
 		k = k - 1;
 	
 		col++;
 	}
-	// d[0][0],       0,       0,
-	// d[1][0], d[0][1], 			 0,
-	// d[2][0], d[1][1], d[0][2],
-	// d[3][0], d[2][1], d[1][2],
-	// d[4][0], d[3][1], d[2][2]
-	//      0,  d[4][1], d[3][2]
-	// 			0,				0, d[4][2]
+	// d[0][0],       0,       0, 			0,
+	// d[1][0], d[0][1], 			 0, 			0,
 
-	for(; i >= 0; col++)
+
+	// d[2][0], d[1][1], d[0][2], 			0,
+	// d[3][0], d[2][1], d[1][2], d[0][3],
+	// d[4][0], d[3][1], d[2][2], d[1][3],
+	//      0,  d[4][1], d[3][2], d[2][3],
+
+
+	// 			0,				0, d[4][2],	d[3][3],
+
+	for(; col < n && i >= 0; col++)
 	{
+		// std::cout << i << " " << k << " " << col << "\n";
 		t1 = d[i][col];
 		t2 = d[k][col];
 		
@@ -139,6 +198,21 @@ void diagLeftGivens(f32* d[5], i32 m, i32 n, f32 c, f32 s, i32 i, i32 k, f32 tol
 		i = i - 1;
 		k = k - 1;
 	}
+
+	if(col < n)
+	{
+		t1 = 0;
+		t2 = d[k][col];
+		
+		d[k][col] = s * t1 + c * t2;
+
+		if(fabs(d[k][col]) <= tol)
+			d[k][col] = 0.0;
+		
+		// std::cout << "*" << " " << k << " " << col << "\n";
+	}
+
+	// std::cout << "\n";
 }
 
 
@@ -190,7 +264,7 @@ void diagRightGivens(f32* d[5], i32 m, i32 n, f32 c, f32 s, i32 i, i32 k, f32 to
 	
 	d[0][i] = c * t1 - s * t2;
 
-	for(q=0; q<4; q++)
+	for(q=0; q < 4; q++)
 	{
 		t1 = d[q+1][i];
 		t2 = d[q][k];
@@ -232,9 +306,9 @@ f32** buildDiagMatrix(f32* diag, f32* sdiag, i32 m , i32 n)
 	diags[3] = new f32[n];
 	diags[4] = new f32[n];
 
-	std::fill(&diags[0][0], &diags[0][n-1] + 1, 0);
-	std::fill(&diags[3][0],  &diags[3][n-1]  + 1, 0);
-	std::fill(&diags[4][0], &diags[4][n-1] + 1, 0);
+	std::fill(diags[0], diags[0] + n, 0);
+	std::fill(diags[3], diags[3] + n, 0);
+	std::fill(diags[4], diags[4] + n, 0);
 	
 	return diags;
 }
@@ -244,9 +318,13 @@ f32** buildDiagMatrix(f32* diag, f32* sdiag, i32 m , i32 n)
 // stays allocated
 void freeDiagMatrix(f32** diags)
 {
-	delete diags[0];
-	delete diags[3];
-	delete diags[4];
+	diags[1] = nullptr;
+	diags[2] = nullptr;
+	
+	delete[] diags[0];
+	delete[] diags[3];
+	delete[] diags[4];
+	
 	delete[] diags;
 }
 
@@ -264,21 +342,17 @@ f32 trailing2x2Eigenvalue(f32* b_diag, f32* b_sdiag, i32 m, i32 n, f32 tol)
 	c = b_diag[n - 2];
 	d = b_diag[n - 1];
 
+	std::cout << n << "\n";
+	std::cout << d << "\n";
+
 	t11 = a*a + c*c;
 	t12 = c*b;
 	t21 = b*c;
 	t22 = b*b + d*d;
 
-	// std::cout << a << " " << b << "\n";
-	// std::cout << c << " " << d << "\n";
-	// std::cout << "\n";
-	// std::cout << t11 << " " << t12 << "\n";
-	// std::cout << t21 << " " << t22 << "\n";
-
 	// compute wilkinson shift value "µ" ("mu")
 	d = (t11 - t22) / 2.0;
 	mu = t22 - (sign(d) * (t21 * t21)) / (fabs(d) + sqrt((d * d) + (t21 * t21)));
-	// mu = t22 - (t21 * t21) / (d * sign(d) * sqrt((d * d) + (t21 * t21)));
 	
 	return mu;
 }
@@ -311,7 +385,7 @@ void debugPrintDiagMatrix(f32** diag, i32 m, i32 n)
 	
 		d = d - j;
 	
-		while(d <= 3)
+		while(d < n)
 		{
 			std::cout << std::fixed << std::setprecision(5) << std::setw(8) << 0.000 << ", ";
 			d++;
@@ -334,29 +408,17 @@ void golubKahanStep(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix 
 	// B[0:m-1, 0:n-1] = bidiag(b_diag, b_sdiag)
 	i32 i, k;
 	f32 y, z, c, s, mu, t11, t12;
-	
-	// uT = identity(m,m); 
-	// v  = identity(n,n); 
 
 	t11 = b_diag[0] * b_diag[0];
 	t12 = b_diag[0] * b_sdiag[1];
 
-	// std::cout << t11 << " " << t12  << "\n";
-
 	mu = trailing2x2Eigenvalue(b_diag, b_sdiag, m, n, tol);
-
-	// std::cout << "mu: " << mu << "\n";
 
 	y = t11 - mu;
 	z = t12;
 	
 	f32** diags = buildDiagMatrix(b_diag, b_sdiag, m, n);
 
-		// Debug
-		// std::cout << "\n";
-		// debugPrintDiagMatrix(diags, m, n);
-		// std::cout << "\n";
-		
 	bool gather_rotations = true;
 
 	// for(k = from /* 0 */ ; k < to /* n - 1 */; k++)
@@ -364,126 +426,45 @@ void golubKahanStep(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix 
 	{
 		givens(y, z, &c, &s, tol);
 		diagRightGivens(diags, m, n, c, s, k, k + 1, tol);
-	
-			// Debug
-			// std::cout << "B * G(" << k << ", " << k+1 << ", theta)\n";
-			// debugPrintDiagMatrix(diags, m, n);
+		rightGivens(v, c, s, k, k + 1, tol);
 
 		y = diags[2][k]; z = diags[3][k];
-
-		// if(gather_rotations)
-		// {
-		rightGivens(v, c, s, k, k + 1, tol);
-		// }
-
-		// gather_rotations = true;
 	
 		givens(y, z, &c, &s, tol);
 		diagLeftGivens(diags, m, n, c, s, k, k + 1, tol);
-
-			// Debug
-			// std::cout << "G(" << k << ", " << k+1 << ", theta).T * B\n";
-			// debugPrintDiagMatrix(diags, m, n);
-
-		// if(gather_rotations)
-		// {
-		// Save U.T
 		leftGivens(uT, c, s, k, k+1, tol);
-		// }
 
 		if(k < n - 2)
 		{
 			y = diags[1][k+1]; z = diags[0][k+2];
 		}
 	}
-	// std::cout << std::scientific << std::numeric_limits<f32>::epsilon() << "\n";
-	// std::cout << "\n";	
-	// std::cout << "uT:\n";
-	// printMatrix(uT);
-	// std::cout << "\n";
-	// std::cout << "v:\n";
-	// printMatrix(v);
-	// std::cout << "\n";
-	
-	// Matrix b(4,4, {
-	// 	1, 1, 0, 0,
-	// 	0, 2, 1, 0,
-	// 	0, 0, 3, 1,
-	// 	0, 0, 0, 4.
-	// });
-	// std::cout << "b:\n";
-	// printMatrix(b);
-	// std::cout << "\n";
-	// printMatrix(transpose(uT)*uT*b*v*transpose(v));
-	// std::cout << "\n";
-	// debugPrintDiagMatrix(diags, m, n);
 
-
-	// for(i=0; i<n; i++)
-	// 	std::cout << b_sdiag[i] << " ";
-	// std::cout << "\n";
-	// for(i=0; i<n; i++)
-	// 	std::cout << b_diag[i] << " ";
-	// std::cout << "\n";
-
-
-	// freeDiagMatrix(diags);
-
+	freeDiagMatrix(diags);
 }
 
 void findLimits(f32* b_diag, f32* b_sdiag, i32 m, i32 n, i32* p, i32 *q, f32 tol)
 {
 	i32 i;
 	
-	*q = -1;
+	*q = n;
 	*p = 0;
 
 	for(i = n - 1; i>=1; i--)
 	{
-		// pick largest q such that B33 is diagonal
-		if(*q == -1 && fabs(b_sdiag[i]) >= tol)
+		// Pick largest q such that B33 is diagonal
+		if(*q == n && fabs(b_sdiag[i]) >= tol)
 		{
 			*q = n - (i + 1);
 		}
 
-		// pick smalest p such that B22 has nonzero on superdiagonal
-		if(*q != -1 && fabs(b_sdiag[i]) <= tol)
+		// Pick smalest p such that B22 has nonzero on superdiagonal
+		if(*q != n && fabs(b_sdiag[i]) <= tol)
 		{
 			*p = i;
 			break;
 		}
 	}
-
-	// bool found_start = false;
-	// i32 i;
-
-	// for(i = n-1; i>=0; i--)
-	// {
-	// 	if(found_start)
-	// 	{
-	// 		if(fabs(b_sdiag[i]) <= tol)
-	// 		{
-	// 			*p = i;
-	// 			break;
-	// 		}
-	// 	}
-	// 	else
-	// 	{
-	// 		if(fabs(b_sdiag[i]) <= tol)
-	// 		{
-	// 			*p = *q = i;
-	// 			found_start = true;
-	// 		}
-	// 	}
-	// }
-
-	// if(!found_start)
-	// {
-	// 	*p = 0;
-	// 	*q = 0;
-	// }
-
-	// *q = *q + 1;
 }
 
 void clearDiag(f32* b_diag, f32* b_sdiag, i32 m, i32 n, f32 tol)
@@ -500,12 +481,24 @@ void clearDiag(f32* b_diag, f32* b_sdiag, i32 m, i32 n, f32 tol)
 
 void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &v, f32 tol)
 {
-	i32 i, j, q = 0, p = -1;
+	i32 i, j, q = 0, p = 0;
 	
-	while(q != n - q)
-	{
-		std::cout << p << " " << n - p - q << " " << q << "\n";
+	// Matrix BB(4,4, {
+	// 	b_diag[0], b_sdiag[1], 0, 0,
+	// 	0, b_diag[1], b_sdiag[2], 0,
+	// 	0, 0, b_diag[2], b_sdiag[3],
+	// 	0,     0,      0, b_diag[3],
+	// });
 
+	while(q != n)
+	{
+		std::cout << "\n\n";
+
+		f32** b22 = buildDiagMatrix(b_diag, b_sdiag, n - p - q + 1, n - p - q + 1);
+		debugPrintDiagMatrix(b22, n - p - q, n - p - q);
+		freeDiagMatrix(b22);
+		std::cout << "\n";
+			
 		// Remove elements that are less that the tolerance
 		clearDiag(b_diag, b_sdiag, m, n, tol);
 		
@@ -513,16 +506,11 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 		// B = [B11, 0, 0; 0, B22, 0; 0, 0, B33] then B33 is diagonal
 		// and B22 has nonzero superdiagonal
 		findLimits(b_diag, b_sdiag, m, n, &p, &q, tol);
+		std::cout << p << " " << q << " " << n << "\n";
 
 		// B11 = B[0:p-1, 0:p-1]
 		// B22 = B[p:n - q - 1, p:n - q - 1]
 		// B33 = B[n - q:n, n - q:n]
-
-		std::cout << p << " " << n - p - q << " " << q << "\n";
-
-		f32** b = buildDiagMatrix(b_diag, b_sdiag, m, n);
-		debugPrintDiagMatrix(b, m, n);
-		freeDiagMatrix(b);
 
 		if(q < n)
 		{
@@ -544,29 +532,106 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 				f32* b22_diag  = new f32[n - p - q];
 				f32* b22_sdiag = new f32[n - p - q];
 
-				// Matrix ut_ = identity(n - p - q, n - p - q);
-				// Matrix v_  = identity(n - p - q, n - p - q);
+				Matrix uT_ = identity(n - p - q, n - p - q);
+				Matrix v_  = identity(n - p - q, n - p - q);
 
-				for(i = p; i < n - p - q; i++)
+				for(i = 0; i < n - p - q; i++)
 				{
-					b22_diag[i - p] = b_diag[i];
-					b22_sdiag[i - p] = b_sdiag[i];
+					b22_diag[i]  = b_diag[i + p];
+					b22_sdiag[i] = b_sdiag[i + p];
 				}
-		
-				golubKahanStep(b22_diag, b22_sdiag, n - p - q, n - p - q, uT, v, tol);
 
+				golubKahanStep(b22_diag, b22_sdiag, n - p - q, n - p - q, uT_, v_, tol);
+
+				b22 = buildDiagMatrix(b22_diag, b22_sdiag, n - p - q, n - p - q);
+				debugPrintDiagMatrix(b22, n - p - q, n - p - q);
+				freeDiagMatrix(b22);
+
+				Matrix Iu = identity(p + (n - p - q) + (q + m - n), p + (n - p - q) + (q + m - n));
+				Matrix Iv = identity(p + (n - p - q) + q, p + (n - p - q) + q);
+				
+				for(i=p; i<n - p - q; i++)
+				{
+					for(j=p; j<n - p - q; j++)
+					{
+						Iu[i][j] = uT_[i - p][j - p];
+					}
+				}
+
+				for(i=p; i<n - p - q; i++)
+				{
+					for(j=p; j<n - p - q; j++)
+					{
+						Iv[i][j] = v_[i][j];
+					}
+				}
+
+				uT = Iu*uT; v  = v*Iv;
+				
 				for(i = p; i < n - p - q; i++)
 				{
 					b_diag[i] = b22_diag[i - p];
 					b_sdiag[i] = b22_sdiag[i - p];
 				}
 
-				// delete b22_diag;
-				// delete b22_sdiag;
-		
+				delete[] b22_diag;
+				delete[] b22_sdiag;
 			}
 		}
 	}
+
+	uT  = transpose(uT);
+
+	sortUV(b_diag, n, uT, v);
+
+	for(i=0; i<m; i++)
+	{
+		uT[i][1] = -uT[i][1];
+	}
+
+	for(i=0; i<n; i++)
+	{
+		v[i][1] = -v[i][1];
+	}
+
+	// uT[1][1] = -uT[1][1];
+	// uT[2][1] = -uT[2][1];
+	// uT[3][1] = -uT[3][1];
+	// uT[4][1] = -uT[4][1];
+
+	// v[0][1] = -v[0][1];
+	// v[1][1] = -v[1][1];
+	// v[2][1] = -v[2][1];
+	// v[3][1] = -v[3][1];
+	// v[4][1] = -v[4][1];
+
+	// v[1][0] = -v[1][0];
+	// v[1][1] = -v[1][1];
+	// v[1][2] = -v[1][2];
+	// v[1][3] = -v[1][3];
+
+	// uT = Matrix(4,4, {
+	// 	0.01354261, -0.13543488,  0.54263795,  0.82886552,
+	// 	0.10934067, -0.51841867,  0.66734542, -0.52338971,
+	// 	0.47016281, -0.71422935, -0.48196219,  0.19114341,
+	// 	0.87567582,  0.45030645,  0.16705266, -0.05009358,
+	// });
+
+	// v = Matrix(4,4, {
+	// 	0.00317901,  0.05451258,  0.35676684,  0.93259621,
+	// 	-0.04358535, -0.37725804, -0.85639145,  0.34981478,
+	// 	0.25695706,  0.88897741, -0.36866505,  0.08819481,
+	// 	0.96543425, -0.25381867,  0.05828548, -0.01075186,
+	// });
+
+	std::cout << "#############################\n\n";
+	printMatrix(uT, 8);
+	std::cout << "#############################\n\n";
+	printMatrix(transpose(v), 8);
+	std::cout << "#############################\n\n";
+	printMatrix(diag(b_diag, n), 8);
+	std::cout << "#############################\n\n";
+	printMatrix(uT*diag(b_diag, n)*transpose(v), 8);
 
 }
 

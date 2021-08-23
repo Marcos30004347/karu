@@ -7,20 +7,20 @@ using namespace karu::algebra;
 
 int main()
 {
-	f32 diag[4] = {
-		1, 2, 3, 4
+	f32 diag[5] = {
+		1, 2, 3, 4, 7,
 	};
 
-	f32 sup_diag[4] = {
-		0, 1, 1, 1
+	f32 sup_diag[5] = {
+		0, 1, 1, 1, 2,
 	};
 
-	Matrix uT = identity(4,4);
-	Matrix v = identity(4,4);
+	Matrix uT = identity(5,5);
+	Matrix v = identity(5,5);
 
-	// golubKahanStep(diag, sup_diag, 4, 4, uT, v, 2.22045e-16);
+	// golubKahanStep(diag, sup_diag, 5, 5, uT, v, 2.22045e-16);
 
-	golubKahanSVD(diag, sup_diag, 4, 4, uT, v, 2.22045e-16);
+	golubKahanSVD(diag, sup_diag, 5, 5, uT, v, 2.22045e-16);
 
 	return 0;
 }
