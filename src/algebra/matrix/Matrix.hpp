@@ -62,6 +62,10 @@ Matrix transpose(Matrix& matrix);
 Matrix transpose(Matrix&& matrix);
 Matrix transpose(Matrix* matrix);
 
+Matrix identity(u32 m, u32 n);
+void identity(Matrix& I);
+void identity(Matrix* I);
+
 std::pair<Matrix, Matrix> LUDecomposition(const Matrix* const A);
 std::pair<Matrix, Matrix> LUDecomposition(const Matrix& A);
 
@@ -75,8 +79,8 @@ f32 LUPDeterminant(const Matrix& A, const Matrix& P);
 void printMatrixWithMargin(Matrix& A, unsigned precision = 3);
 void printMatrixWithMargin(Matrix* A, unsigned precision = 3);
 
-void printMatrix(Matrix& A, unsigned precision = 3);
-void printMatrix(Matrix&& A, unsigned precision = 3);
-void printMatrix(Matrix* A, unsigned precision = 3);
+void printMatrix(Matrix& A, unsigned precision = 5);
+void printMatrix(Matrix&& A, unsigned precision = 5);
+void printMatrix(Matrix* A, unsigned precision = 5);
 
 }

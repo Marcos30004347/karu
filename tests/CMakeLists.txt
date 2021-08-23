@@ -83,6 +83,10 @@ add_executable(HouseholderTests algebra/SVD/Householder.cpp)
 target_link_libraries(HouseholderTests karu)
 add_test(NAME HouseholderTests COMMAND HouseholderTests)
 
+project(GolubKahanTests)
+add_executable(GolubKahanTests algebra/SVD/GolubKahan.cpp)
+target_link_libraries(GolubKahanTests karu)
+add_test(NAME GolubKahanTests COMMAND GolubKahanTests)
 
 project(SVDTests)
 add_executable(SVDTests algebra/SVD/SVD.cpp)
