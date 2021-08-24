@@ -2,6 +2,8 @@
 
 
 #include "algebra/SVD/GolubReinschSVD.hpp"
+#include "algebra/SVD/Householder.hpp"
+#include "algebra/SVD/GolubKahan.hpp"
 
 namespace karu::algebra {
 
@@ -93,5 +95,74 @@ void svd(Matrix& a, Matrix& u, f32* s, Matrix& v)
 	vecs[1] = &v;
 	reorder(s, n, vecs);
 }
+
+
+void gsvd(Matrix& a, Matrix& u, f32* s, Matrix& v, f32 tol = 2.22e-15)
+{
+	f32 x, eps = 2.22e-16;
+
+	Matrix A;
+
+
+	if(a.columns() > a.rows())
+	{
+		A = transpose(a);
+	}
+	else
+	{
+		A = Matrix(a);
+	}
+
+	u32 m = A.rows();
+	u32 n = A.columns();
+
+	u = identity(m,m);
+	v = identity(n,n);
+
+	f32* gamma = new f32[n];
+
+	f32* phi   = new f32[n];
+
+	phi[0] = 0;
+
+	householderBidiagonalization(A, gamma, phi, u, v, tol);
+
+	printMatrix(u);
+	std::cout << "\n";
+	printMatrix(v);
+	std::cout << "\n";
+	
+	for(i32 i=0; i<n; i++)
+		std::cout << gamma[i] << " ";
+	std::cout << "\n";
+
+	for(i32 i=0; i<n; i++)
+		std::cout << phi[i] << " ";
+	std::cout << "\n";
+
+	Matrix B(4,4, {
+		gamma[0], phi[1], 0, 0,
+		0, gamma[1], phi[2], 0,
+		0, 0, gamma[2], phi[3],
+		0, 0, 0, gamma[3]
+	});
+
+	printMatrix(u * B * transpose(v));
+	// golubKahanSVD(gamma, phi, m, n, u, v, tol);
+
+	// for(i32 i=0; i<n; i++)
+	// 	s[i] = gamma[i];
+
+	// if(A.rows() == a.columns() && A.columns() == a.rows())
+	// {
+	// 	Matrix& tmp = u;
+	// 	u = v;
+	// 	v = tmp;
+	// }
+
+	delete[] phi;
+	delete[] gamma;
+}
+
 
 }

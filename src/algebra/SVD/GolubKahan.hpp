@@ -342,9 +342,6 @@ f32 trailing2x2Eigenvalue(f32* b_diag, f32* b_sdiag, i32 m, i32 n, f32 tol)
 	c = b_diag[n - 2];
 	d = b_diag[n - 1];
 
-	std::cout << n << "\n";
-	std::cout << d << "\n";
-
 	t11 = a*a + c*c;
 	t12 = c*b;
 	t21 = b*c;
@@ -492,12 +489,12 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 
 	while(q != n)
 	{
-		std::cout << "\n\n";
+		// std::cout << "\n\n";
 
-		f32** b22 = buildDiagMatrix(b_diag, b_sdiag, n - p - q + 1, n - p - q + 1);
-		debugPrintDiagMatrix(b22, n - p - q, n - p - q);
-		freeDiagMatrix(b22);
-		std::cout << "\n";
+		// f32** b22 = buildDiagMatrix(b_diag, b_sdiag, n - p - q + 1, n - p - q + 1);
+		// debugPrintDiagMatrix(b22, n - p - q, n - p - q);
+		// freeDiagMatrix(b22);
+		// std::cout << "\n";
 			
 		// Remove elements that are less that the tolerance
 		clearDiag(b_diag, b_sdiag, m, n, tol);
@@ -506,7 +503,8 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 		// B = [B11, 0, 0; 0, B22, 0; 0, 0, B33] then B33 is diagonal
 		// and B22 has nonzero superdiagonal
 		findLimits(b_diag, b_sdiag, m, n, &p, &q, tol);
-		std::cout << p << " " << q << " " << n << "\n";
+
+		// std::cout << p << " " << q << " " << n << "\n";
 
 		// B11 = B[0:p-1, 0:p-1]
 		// B22 = B[p:n - q - 1, p:n - q - 1]
@@ -543,9 +541,9 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 
 				golubKahanStep(b22_diag, b22_sdiag, n - p - q, n - p - q, uT_, v_, tol);
 
-				b22 = buildDiagMatrix(b22_diag, b22_sdiag, n - p - q, n - p - q);
-				debugPrintDiagMatrix(b22, n - p - q, n - p - q);
-				freeDiagMatrix(b22);
+				// b22 = buildDiagMatrix(b22_diag, b22_sdiag, n - p - q, n - p - q);
+				// debugPrintDiagMatrix(b22, n - p - q, n - p - q);
+				// freeDiagMatrix(b22);
 
 				Matrix Iu = identity(p + (n - p - q) + (q + m - n), p + (n - p - q) + (q + m - n));
 				Matrix Iv = identity(p + (n - p - q) + q, p + (n - p - q) + q);
@@ -594,44 +592,13 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 		v[i][1] = -v[i][1];
 	}
 
-	// uT[1][1] = -uT[1][1];
-	// uT[2][1] = -uT[2][1];
-	// uT[3][1] = -uT[3][1];
-	// uT[4][1] = -uT[4][1];
-
-	// v[0][1] = -v[0][1];
-	// v[1][1] = -v[1][1];
-	// v[2][1] = -v[2][1];
-	// v[3][1] = -v[3][1];
-	// v[4][1] = -v[4][1];
-
-	// v[1][0] = -v[1][0];
-	// v[1][1] = -v[1][1];
-	// v[1][2] = -v[1][2];
-	// v[1][3] = -v[1][3];
-
-	// uT = Matrix(4,4, {
-	// 	0.01354261, -0.13543488,  0.54263795,  0.82886552,
-	// 	0.10934067, -0.51841867,  0.66734542, -0.52338971,
-	// 	0.47016281, -0.71422935, -0.48196219,  0.19114341,
-	// 	0.87567582,  0.45030645,  0.16705266, -0.05009358,
-	// });
-
-	// v = Matrix(4,4, {
-	// 	0.00317901,  0.05451258,  0.35676684,  0.93259621,
-	// 	-0.04358535, -0.37725804, -0.85639145,  0.34981478,
-	// 	0.25695706,  0.88897741, -0.36866505,  0.08819481,
-	// 	0.96543425, -0.25381867,  0.05828548, -0.01075186,
-	// });
-
-	std::cout << "#############################\n\n";
 	printMatrix(uT, 8);
-	std::cout << "#############################\n\n";
-	printMatrix(transpose(v), 8);
-	std::cout << "#############################\n\n";
-	printMatrix(diag(b_diag, n), 8);
-	std::cout << "#############################\n\n";
-	printMatrix(uT*diag(b_diag, n)*transpose(v), 8);
+	std::cout << "\n\n";
+	printMatrix(transpose(v), 8, 7.22e-16);
+	std::cout << "\n\n";
+	printMatrix(diag(b_diag, m, n), 8, 7.22e-16);
+	std::cout << "\n\n";
+	printMatrix(uT*diag(b_diag,  m, n)*transpose(v), 8, 7.22e-16);
 
 }
 

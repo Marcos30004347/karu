@@ -76,11 +76,11 @@ Matrix LUPInverse(const Matrix& A, const Matrix& P);
 
 f32 LUPDeterminant(const Matrix& A, const Matrix& P);
 
-void printMatrixWithMargin(Matrix& A, unsigned precision = 3);
-void printMatrixWithMargin(Matrix* A, unsigned precision = 3);
+void printMatrixWithMargin(Matrix& A, unsigned precision = 3, f32 eps = 2.22045e-16);
+void printMatrixWithMargin(Matrix* A, unsigned precision = 3, f32 eps = 2.22045e-16);
 
-void printMatrix(Matrix& A, unsigned precision = 5);
-void printMatrix(Matrix&& A, unsigned precision = 5);
-void printMatrix(Matrix* A, unsigned precision = 5);
+void printMatrix(Matrix& A, unsigned precision = 5, f32 eps = 2.22045e-16);
+void printMatrix(Matrix&& A, unsigned precision = 5, f32 eps = 2.22045e-16);
+void printMatrix(Matrix* A, unsigned precision = 5, f32 eps = 2.22045e-16);
 
 }

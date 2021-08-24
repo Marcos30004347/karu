@@ -96,7 +96,7 @@ void householderBidiagonalizationTests()
 	f32 sdiag[3];
 	f32 trash;
 
-	householderBidiagonalization(A, diag, sdiag, U, V);
+	householderBidiagonalization(A, diag, sdiag, U, V, 2.22e-15);
 
 	Matrix B(4, 3, {
 		diag[0], sdiag[1], 0,

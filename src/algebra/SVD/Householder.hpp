@@ -4,6 +4,7 @@
 #include "algebra/linear/Linear.hpp"
 
 #include <cmath>
+#include <string.h>
 
 namespace karu::algebra {
 
@@ -434,11 +435,11 @@ f32 house(f32* x, f32* v, i32 n)
 	}
 
 	v[0] = 1;
+
 	for(i = 1; i < n; i++)
 	{
 		v[i] = x[i];
 	}
-
 
 	if(sigma == 0 && x[0] >= 0)
 	{
@@ -451,7 +452,7 @@ f32 house(f32* x, f32* v, i32 n)
 	else
 	{
 		mu = sqrt((x[0] * x[0]) + sigma);
-		
+
 		if(x[0] <= 0)
 		{
 			v[0] = x[0] - mu;
@@ -460,10 +461,11 @@ f32 house(f32* x, f32* v, i32 n)
 		{
 			v[0] = -sigma/(x[0] + mu);
 		}
-
+	
 		beta = (2 * (v[0] * v[0])) / (sigma + (v[0] * v[0]));
 
 		v0 = v[0];
+
 		for(i = 0; i < n; i++)
 		{
 			v[i] = v[i]/v0;
@@ -504,14 +506,17 @@ f32 houseCol(Matrix& A, i32 m, i32 n, i32 j, i32 p, f32* v)
 {
 	i32 i;
 	f32 beta;
-	f32* x = (f32*)malloc(sizeof(f32)*(m-j));
-	
-	for(i=0; i<m-j; i++)
-		x[i] = A[j+i][p];	
 
-	beta = house(x, v, m-j);
+	f32* x = new f32[m - j];// (f32*)malloc(sizeof(f32)*(m-j));
 
-	delete x;
+	for(i = 0; i < m - j; i++)
+	{
+		x[i] = A[j + i][p];	
+	}
+
+	beta = house(x, v, m - j);
+
+	delete[] x;
 
 	return beta;
 }
@@ -523,15 +528,19 @@ f32 houseRow(Matrix& A, i32 m, i32 n, i32 p, i32 j, f32* v)
 
 	f32 beta;
 
-	f32* x = (f32*)malloc(sizeof(f32)*(n-j));
+	f32* x = new f32[n - j];
 	
-	for(i=0; i<n-j; i++)
+	for(i = 0; i < n - j; i++)
+		x[i] = 0;
+
+	for(i = 0; i < n - j; i++)
+	{
 		x[i] = A[p][i + j];	
+	}
 
-	beta = house(x, v, n-j);
+	beta = house(x, v, n - j);
 
-
-	delete x;
+	delete[] x;
 
 	return beta;
 }
@@ -549,7 +558,7 @@ f32 preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 k
 	f32* uA;
 	i32 i, j;	
 	
-	uA = (f32*)malloc(sizeof(f32)*(n - k));
+	uA = new f32[n - k];// (f32*)malloc(sizeof(f32)*(n - k));
 
 	// uA[1:n - k] = u[1:m - p]' * A[p:m][k:n]
 	for(i = 0; i < n - k; i++)
@@ -577,7 +586,7 @@ f32 preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 k
 		A[i + (p + 1)][k] = u[i + 1];
 	}
 
-	delete uA;
+	delete[] uA;
 
 	return A[p][k];
 }
@@ -596,7 +605,7 @@ f32 posHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 k, u32 p
 	f32* Au;
 	i32 i, j;
 
-	Au = (f32*)malloc(sizeof(f32)*(m - k));
+	Au = new f32[m - k];// (f32*)malloc(sizeof(f32)*(m - k));
 	
 	// Au = A[k:m][p:n] * u[1:n - p]
 	for(i = 0; i < m - k; i++)
@@ -624,16 +633,16 @@ f32 posHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 k, u32 p
 		A[k][i + p + 1] = u[i + 1];
 	}
 
-	delete Au;
+	delete[] Au;
 
 	return A[k][p];
 }
 
-void householderBidiagonalization(Matrix& A, f32* diag, f32* sdiag, Matrix& u, Matrix& v)
+void householderBidiagonalization(Matrix& A, f32* diag, f32* sdiag, Matrix& u, Matrix& v, f32 tol)
 {
 	i32 m,n,i,j,k,q;
 
-	f32 *w, *wQ, nw, beta, gamma;
+	f32 *w, *wQ, *beta, *gamma, nw;
 
 	m = A.rows();
 	n = A.columns();
@@ -641,43 +650,43 @@ void householderBidiagonalization(Matrix& A, f32* diag, f32* sdiag, Matrix& u, M
 	w = new f32[m];
 	wQ = new f32[m];
 
-	u = Matrix(m,m);
-	for(i=0; i<m; i++)
-		u[i][i] = 1.0;
+	beta = new f32[n];
+	gamma = new f32[n];
 
-	v = Matrix(n,n);
-	for(i=0; i<n; i++)
-		v[i][i] = 1.0;
+	gamma[0] = 0;
+
+	u = identity(m,m);
+	v = identity(n,n);
 
 	for(j=0; j<n; j++)
 	{
-		beta = houseCol(A, m, n, j, j, w);
-		diag[j] = preHouseholderMatrix(w, beta, A, m, n, j, j);
+		beta[j] = houseCol(A, m, n, j, j, w);
+		diag[j] = preHouseholderMatrix(w, beta[j], A, m, n, j, j);
 
 		if(j < n - 1)
 		{
-			gamma = houseRow(A, m, n, j, j + 1, w);
-			sdiag[j+1] = posHouseholderMatrix(w, gamma, A, m, n, j, j + 1);
+			gamma[j+1] = houseRow(A, m, n, j, j + 1, w);
+			sdiag[j+1] = posHouseholderMatrix(w, gamma[j+1], A, m, n, j, j + 1);
 		}
 	}
 
-
-	// accumulate left transformations
+	// Accumulate left transformations
 	k = m;
+
 	for(j=n-1; j>=0; j--)
 	{
 
 		w[j] = 1;
-		for(i=1; i<m - j; i++)
+		for(i=1; i < m - j; i++)
 		{
 			w[j+i] = A[j+i][j];
 		}
 
-		nw = 0;
-		for(i=1; i<m-j; i++)
-			nw = nw + (w[j+i] * w[j+i]);
-		beta = 2 / (1 + nw);
-
+		// nw = 0;
+		// for(i=1; i<m-j; i++)
+		// 	nw = nw + (w[j+i] * w[j+i]);
+		// beta = 2 / (1 + nw);
+	
 		// w[j:m]' * u[j:m][j:k]
 		for(q = 0; q < k - j; q++)
 		{
@@ -692,12 +701,12 @@ void householderBidiagonalization(Matrix& A, f32* diag, f32* sdiag, Matrix& u, M
 		{
 			for(i = 0; i< m - j; i++)
 			{
-				u[j + q][j + i] = u[j + q][j + i] - (beta * w[j + q]*wQ[j + i]);
+				u[j + q][j + i] = u[j + q][j + i] - (beta[j] * w[j + q]*wQ[j + i]);
 			}
 		}
 	}
 
-	// accumulate right transformations
+	// Accumulate right transformations
 	k = n;
 	for(j = n-2; j>=0; j--)
 	{
@@ -707,11 +716,11 @@ void householderBidiagonalization(Matrix& A, f32* diag, f32* sdiag, Matrix& u, M
 			w[j+i] = A[j][j+i+1];
 		}
 
-		nw = 0;
-		for(i=1; i< n - (j + 1); i++)
-			nw = nw + (w[j+i] * w[j+i]);
-		beta = 2 / (1 + nw);
-
+		// nw = 0;
+		// for(i=1; i< n - (j + 1); i++)
+		// 	nw = nw + (w[j+i] * w[j+i]);
+		// beta = 2 / (1 + nw);
+		// std::cout << "betas: " << beta <<" " << g[j+1] << "\n";
 
 		for(q = 0; q < k - (j + 1); q++)
 		{
@@ -726,32 +735,16 @@ void householderBidiagonalization(Matrix& A, f32* diag, f32* sdiag, Matrix& u, M
 		{
 			for(i = 0; i< n - (j + 1); i++)
 			{
-				v[j + q + 1][j + i + 1] = v[j + q + 1][j + i + 1] - (beta * w[j + q]*wQ[j + i]);
+				v[j + q + 1][j + i + 1] = v[j + q + 1][j + i + 1] - (gamma[j+1] * w[j + q]*wQ[j + i]);
 			}
 		}
 	}
 
-
-
-	delete w;
+	delete[] beta;
+	delete[] gamma;
+	delete[] wQ;
+	delete[] w;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
