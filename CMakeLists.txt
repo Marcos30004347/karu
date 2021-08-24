@@ -27,7 +27,7 @@ include_directories(${OpenCL_INCLUDE_DIRS})
 
 set(SPARSE_KERNELS_PATH "src/algebra/sparse/lib/kernels/opencl")
 set(COMPUTE_LIB_KERNELS_PATH "src/algebra/compute/lib/kernels/opencl")
-set(BLUR_CL_KERNEL_PATH "src/gaussian/kernels/opencl")
+set(SIFT_KERNELS_PATH "src/sift/kernels/opencl")
 
 
 macro(set_kernel_var filename variable)
@@ -49,7 +49,9 @@ set_kernel_var("${COMPUTE_LIB_KERNELS_PATH}/scan_kernel.cl" SCAN_CL_KERNEL_SRC)
 set_kernel_var("${COMPUTE_LIB_KERNELS_PATH}/radix_sort_kernel.cl" RADIX_SORT_CL_KERNEL_SRC)
 set_kernel_var("${SPARSE_KERNELS_PATH}/bsMV_kernel.cl" BSMAT_VEC_MULT_CL_KERNEL_SRC)
 set_kernel_var("${SPARSE_KERNELS_PATH}/bsMM_kernel.cl" BSMAT_MAT_MULT_CL_KERNEL_SRC)
-set_kernel_var("${BLUR_CL_KERNEL_PATH}/gaussian_blur.cl" BLUR_CL_KERNEL_SRC)
+
+set_kernel_var("${SIFT_KERNELS_PATH}/gaussian_blur.cl" BLUR_CL_KERNEL_SRC)
+set_kernel_var("${SIFT_KERNELS_PATH}/resize.cl" RESIZE_KERNEL_SRC)
 
 # Config LIb kernels
 configure_file(src/algebra/compute/lib/kernels/kernels.template.in src/algebra/compute/lib/kernels/kernels.cpp)
@@ -57,8 +59,8 @@ configure_file(src/algebra/compute/lib/kernels/kernels.template.in src/algebra/c
 # Config Matrix kernels
 configure_file(src/algebra/sparse/lib/kernels/kernels.template.in src/algebra/sparse/lib/kernels/kernels.cpp)
 
-# Config Gaussian kernels
-configure_file(src/gaussian/kernels/kernels.template.in src/gaussian/kernels/kernels.cpp)
+# Config SIFT kernels
+configure_file(src/sift/kernels/kernels.template.in src/sift/kernels/kernels.cpp)
 
 add_library(
     karu
@@ -95,8 +97,9 @@ add_library(
     src/algebra/linear/Linear.cpp
     src/renderer/Renderer.cpp
     
-    src/gaussian/GaussianBlur.cpp
-    src/gaussian/kernels/kernels.cpp
+    src/sift/GaussianBlur.cpp
+    src/sift/Resize.cpp
+    src/sift/kernels/kernels.cpp
 
     src/image/Image.cpp
 )

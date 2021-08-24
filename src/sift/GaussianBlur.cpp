@@ -1,5 +1,5 @@
-#include "gaussian/GaussianBlur.hpp"
-#include "gaussian/kernels/kernels.hpp"
+#include "sift/GaussianBlur.hpp"
+#include "sift/kernels/kernels.hpp"
 #include "algebra/compute/Buffer.hpp"
 #include <math.h>
 

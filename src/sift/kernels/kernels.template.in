@@ -1,0 +1,27 @@
+#include "algebra/compute/lib/kernels/kernels.hpp"
+
+karu::algebra::compute::Program* blur_program = nullptr;
+karu::algebra::compute::Program* resize_program = nullptr;
+
+karu::algebra::compute::Kernel* blur_kernel = nullptr;
+karu::algebra::compute::Kernel* resize_kernel = nullptr;
+
+void create_sift_kernels() {
+    const char* blur_src = ${BLUR_CL_KERNEL_SRC};
+    const char* resize_src = ${RESIZE_KERNEL_SRC};
+
+    blur_program = new karu::algebra::compute::Program(blur_src);
+    resize_program = new karu::algebra::compute::Program(resize_src);
+
+    blur_kernel = new karu::algebra::compute::Kernel(blur_program, "blur");
+    resize_kernel = new karu::algebra::compute::Kernel(resize_program, "resize");
+
+}
+
+void destroy_sift_kernels() {
+    if(blur_kernel)
+        delete blur_kernel;
+    if(resize_kernel)
+        delete resize_kernel;
+}
+

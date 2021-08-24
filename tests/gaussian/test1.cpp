@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "algebra/compute/Compute.hpp"
-#include "gaussian/GaussianBlur.hpp"
+#include "sift/GaussianBlur.hpp"
 #include "image/Image.hpp"
 
 using namespace karu;
