@@ -1,45 +1,52 @@
 
 
-__kernel void blur(
+__kernel void gaussian_blur(
     __global unsigned char *pixels,
     __global unsigned char *out,
     __global double* gaussian,
-    const int rows,
-    const int cols,
-    const int k,
-    const int numOfChannels
+    const unsigned long heigth,
+    const unsigned long width,
+    const unsigned long window_width,
+    const unsigned long chans
 )
 {
-    int idx = get_global_id(0);
-    int y = (idx/(numOfChannels))/ (cols);
-    int x = (idx/(numOfChannels)) % (cols);
-    int colorOffset = idx%(numOfChannels);
-    float acc=0;
+	int i, j, x, y, k, rows, cols, idx;
+	
+	float acc = 0;
 
-    int i, j;
+	idx  = get_global_id(0);
 
-    for (int c = 0; c < numOfChannels-1; c++) {
+	rows = (int)heigth;
+	cols = (int)width;
 
-        int rowStart = max(0, y - k/2);
-        int rowEnd = min(rows, y + k/2);
+	k    = window_width;
+	y    = idx / cols;
+	x    = idx % cols;
 
-        int colStart = max(0, x - k/2);
-        int colEnd = min(cols, x + k/2);
+	for (int t = 0; t < chans - 1; t++) {
 
-        int kernelColStart = min(x, k/2);
-        int kernelColEnd = min(cols - x, k/2);
+		int colStart = max(x - k/2, 0);
+		int colEnd   = min(x + k/2, cols);
 
-        int kernelRowStart = min(y, k/2);
-        int kernelRowEnd = min(rows - y, k/2);
+		int rowStart = max(y - k/2, 0);
+		int rowEnd   = min(y + k/2, rows);
 
-        for (int row= k/2 - kernelRowStart; row < k/2 + kernelRowEnd; row++) {
-            for (int col= k/2 - kernelColStart; col < k/2 + kernelColEnd; col++) {
-                acc += gaussian[row*k+col] * pixels[((y-kernelRowStart + row) * cols + (x-kernelColStart + col)) * numOfChannels + c];
-            }
-        }
-        out[(y * cols + x) * numOfChannels + c] = (unsigned char)acc;
-    }
+		int marginLeft   = clamp(x - k/2, -k, 0);
+		int marginTop    = clamp(y - k/2, -k, 0);
 
-    out[(y * cols + x) * numOfChannels + numOfChannels - 1] = 255;
+		for (int r = rowStart; r < rowEnd; r++)
+		{
+			for (int c = colStart; c < colEnd; c++)
+			{
+				int gIdx = (r - rowStart - marginTop) * k + (c - colStart - marginLeft);
+				int pIdx = (r * width + c) * chans + t;
 
+				acc += gaussian[gIdx] * pixels[pIdx];
+			}
+		}
+		
+		out[(y * width + x) * chans + t] = (unsigned char)acc;
+	}
+
+	out[(y * cols + x) * chans + chans - 1] = 255;
 }

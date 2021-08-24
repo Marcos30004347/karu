@@ -38,7 +38,7 @@ void GaussianBlur::calculateKernel(f32 *GKernel)
     for (int x = -k/2; x <= k/2; x++) {
         for (int y = -k/2; y <= k/2; y++) {
             r = sqrt(x * x + y * y);
-            printf("%f ~ %f",(M_PI * s), (exp(-(r * r) / s)));
+            // printf("%f ~ %f",(M_PI * s), (exp(-(r * r) / s)));
             GKernel[(x + k/2)*k + y + k/2] = (exp(-(r * r) / s)) / (M_PI * s);
             sum += GKernel[(x + k/2)*k + y + k/2];
         }
@@ -80,15 +80,15 @@ void GaussianBlur::run(Buffer *out) {
     
     blur_kernel->setKernelArgument(2, new_kernel);
 
-    blur_kernel->setKernelArgument(3, sizeof(int), &this->rowsSize);
+    blur_kernel->setKernelArgument(3, sizeof(u64), &this->rowsSize);
     
-    blur_kernel->setKernelArgument(4, sizeof(int), &this->colSize);
+    blur_kernel->setKernelArgument(4, sizeof(u64), &this->colSize);
     
-    blur_kernel->setKernelArgument(5, sizeof(int), &this->kernelDimension);
+    blur_kernel->setKernelArgument(5, sizeof(u64), &this->kernelDimension);
     
-    blur_kernel->setKernelArgument(6, sizeof(int), &this->numOfChannels);
-
-    blur_kernel->enqueue({(u64)this->rowsSize * this->colSize * this->numOfChannels}, {1});
+    blur_kernel->setKernelArgument(6, sizeof(u64), &this->numOfChannels);
+	
+	  blur_kernel->enqueue({(u64)(this->rowsSize * this->colSize)}, {1});
     
     out->download();
 

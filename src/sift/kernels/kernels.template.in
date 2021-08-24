@@ -13,8 +13,8 @@ void create_sift_kernels() {
     blur_program = new karu::algebra::compute::Program(blur_src);
     resize_program = new karu::algebra::compute::Program(resize_src);
 
-    blur_kernel = new karu::algebra::compute::Kernel(blur_program, "blur");
-    resize_kernel = new karu::algebra::compute::Kernel(resize_program, "resize");
+    blur_kernel = new karu::algebra::compute::Kernel(blur_program, "gaussian_blur");
+    resize_kernel = new karu::algebra::compute::Kernel(resize_program, "resize_nn");
 
 }
 
