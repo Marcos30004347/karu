@@ -24,7 +24,7 @@ void sortUV(f32* s, u32 n, Matrix& u, Matrix& v)
 	
 		for (j = i + 1; j < n; ++j)
 		{
-			if (s[j] >  s_last)
+			if (fabs(s[j]) >  fabs(s_last))
 			{
 				s_last = s[j];
 				i_last = j;
@@ -413,12 +413,9 @@ void golubKahanStep(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix 
 
 	y = t11 - mu;
 	z = t12;
-	
+
 	f32** diags = buildDiagMatrix(b_diag, b_sdiag, m, n);
 
-	bool gather_rotations = true;
-
-	// for(k = from /* 0 */ ; k < to /* n - 1 */; k++)
 	for(k = 0; k < n - 1; k++)
 	{
 		givens(y, z, &c, &s, tol);
@@ -426,14 +423,14 @@ void golubKahanStep(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix 
 		rightGivens(v, c, s, k, k + 1, tol);
 
 		y = diags[2][k]; z = diags[3][k];
-	
+
 		givens(y, z, &c, &s, tol);
 		diagLeftGivens(diags, m, n, c, s, k, k + 1, tol);
-		leftGivens(uT, c, s, k, k+1, tol);
+		leftGivens(uT, c, s, k, k + 1, tol);
 
 		if(k < n - 2)
 		{
-			y = diags[1][k+1]; z = diags[0][k+2];
+			y = diags[1][k + 1]; z = diags[0][k + 2];
 		}
 	}
 
@@ -452,12 +449,14 @@ void findLimits(f32* b_diag, f32* b_sdiag, i32 m, i32 n, i32* p, i32 *q, f32 tol
 		// Pick largest q such that B33 is diagonal
 		if(*q == n && fabs(b_sdiag[i]) >= tol)
 		{
+			std::cout << b_sdiag[i] << "	AAAAA\n";
 			*q = n - (i + 1);
 		}
 
 		// Pick smalest p such that B22 has nonzero on superdiagonal
 		if(*q != n && fabs(b_sdiag[i]) <= tol)
 		{
+			std::cout << "ASDASDA\n";
 			*p = i;
 			break;
 		}
@@ -467,6 +466,14 @@ void findLimits(f32* b_diag, f32* b_sdiag, i32 m, i32 n, i32* p, i32 *q, f32 tol
 void clearDiag(f32* b_diag, f32* b_sdiag, i32 m, i32 n, f32 tol)
 {
 	i32 i;
+	for(i = 0; i < n - 1; i++)
+	{
+		if(fabs(b_sdiag[i+1]) <= tol*(fabs(b_diag[i]) + fabs(b_diag[i+1])))
+		{
+			b_sdiag[i+1] = 0.0;
+		}
+	}
+	
 	for(i = 0; i < n; i++)
 	{
 		if(fabs(b_diag[i]) <= tol)
@@ -486,13 +493,22 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 	// 	0, 0, b_diag[2], b_sdiag[3],
 	// 	0,     0,      0, b_diag[3],
 	// });
-
+	uT = transpose(uT);
+	// printf("\n");
+	// printf("\n");
+	// printf("\n");
+	// printf("\n");
+	// printf("\n");
+	// printMatrix(uT);
+	// printf("\n");
+	// printMatrix(v);
+	// printf("\n");
 	while(q != n)
 	{
 		// std::cout << "\n\n";
 
-		// f32** b22 = buildDiagMatrix(b_diag, b_sdiag, n - p - q + 1, n - p - q + 1);
-		// debugPrintDiagMatrix(b22, n - p - q, n - p - q);
+		// f32** b22 = buildDiagMatrix(b_diag, b_sdiag, m, n);
+		// debugPrintDiagMatrix(b22, n, n);
 		// freeDiagMatrix(b22);
 		// std::cout << "\n";
 			
@@ -504,7 +520,13 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 		// and B22 has nonzero superdiagonal
 		findLimits(b_diag, b_sdiag, m, n, &p, &q, tol);
 
-		// std::cout << p << " " << q << " " << n << "\n";
+		std::cout <<"p: " << p << ", q: " << q << " n: " << n << "\n";
+
+		f32** b22 = buildDiagMatrix(b_diag, b_sdiag, m, n);
+		debugPrintDiagMatrix(b22, n, n);
+		freeDiagMatrix(b22);
+		std::cout << "\n";
+
 
 		// B11 = B[0:p-1, 0:p-1]
 		// B22 = B[p:n - q - 1, p:n - q - 1]
@@ -539,7 +561,17 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 					b22_sdiag[i] = b_sdiag[i + p];
 				}
 
+				// b22 = buildDiagMatrix(b22_diag, b22_sdiag, n - p - q, n - p - q);
+				// debugPrintDiagMatrix(b22, n - p - q, n - p - q);
+				// freeDiagMatrix(b22);
+				// std::cout << "\n";
+
 				golubKahanStep(b22_diag, b22_sdiag, n - p - q, n - p - q, uT_, v_, tol);
+
+				b22 = buildDiagMatrix(b22_diag, b22_sdiag, n - p - q, n - p - q);
+				debugPrintDiagMatrix(b22, n - p - q, n - p - q);
+				freeDiagMatrix(b22);
+				std::cout << "\n";
 
 				// b22 = buildDiagMatrix(b22_diag, b22_sdiag, n - p - q, n - p - q);
 				// debugPrintDiagMatrix(b22, n - p - q, n - p - q);
@@ -548,30 +580,39 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 				Matrix Iu = identity(p + (n - p - q) + (q + m - n), p + (n - p - q) + (q + m - n));
 				Matrix Iv = identity(p + (n - p - q) + q, p + (n - p - q) + q);
 				
-				for(i=p; i<n - p - q; i++)
+				for(i=p; i < n - p - q; i++)
 				{
-					for(j=p; j<n - p - q; j++)
+					for(j=p; j < n - p - q; j++)
 					{
 						Iu[i][j] = uT_[i - p][j - p];
 					}
 				}
 
-				for(i=p; i<n - p - q; i++)
+				for(i=p; i < n - p - q; i++)
 				{
-					for(j=p; j<n - p - q; j++)
+					for(j=p; j < n - p - q; j++)
 					{
 						Iv[i][j] = v_[i][j];
 					}
 				}
 
 				uT = Iu*uT; v  = v*Iv;
-				
-				for(i = p; i < n - p - q; i++)
-				{
-					b_diag[i] = b22_diag[i - p];
-					b_sdiag[i] = b22_sdiag[i - p];
-				}
+				std::cout << "***********************\n";
+				printMatrix(uT);
+				std::cout << "***********************\n";
+				printMatrix(transpose(v));
+				std::cout << "***********************\n";
 
+				for(i = 0; i < n - p - q; i++)
+				{
+					b_sdiag[i + p] = b22_sdiag[i];
+					b_diag[i + p]  = b22_diag[i];
+				}
+				f32** b22 = buildDiagMatrix(b_diag, b_sdiag, n, n);
+				debugPrintDiagMatrix(b22, n, n);
+				freeDiagMatrix(b22);
+				std::cout << "\n";
+				std::cout << "***********************\n";
 				delete[] b22_diag;
 				delete[] b22_sdiag;
 			}
@@ -579,8 +620,35 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 	}
 
 	uT  = transpose(uT);
+	printMatrix(uT);
+	std::cout << "\n";
+	printMatrix(v);
+	std::cout << "\n";
+
+	for(i=0; i<n; i++)
+	{
+		if(b_diag[i] < 0)
+		{
+			b_diag[i] = -b_diag[i];
+			if(i%2 == 1)
+				for(j=0; j<n; j++)
+					v[j][i] = -v[j][i];
+			else 
+				for(j=0; j<n; j++)
+					uT[j][i] = -uT[j][i];
+		}
+	}
+	std::cout << "\n";
+	std::cout << "\n";
+
+	// uT  = transpose(uT);
+	printMatrix(uT);
+	std::cout << "\n";
+	printMatrix(v);
+	std::cout << "\n";
 
 	sortUV(b_diag, n, uT, v);
+
 
 	for(i=0; i<m; i++)
 	{
@@ -598,7 +666,7 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 	std::cout << "\n\n";
 	printMatrix(diag(b_diag, m, n), 8, 7.22e-16);
 	std::cout << "\n\n";
-	printMatrix(uT*diag(b_diag,  m, n)*transpose(v), 8, 7.22e-16);
+	// printMatrix(uT*diag(b_diag,  m, n)*transpose(v), 8, 7.22e-16);
 
 }
 

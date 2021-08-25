@@ -64,7 +64,10 @@ def estimateRotationAndTranslation(E):
     E = np.dot(np.dot(U, np.diag(D)), V_T)
 
     U, _, V_T = np.linalg.svd(E)
-
+    # U = -1*U
+    # V_T = -1*V_T
+    # print("V_T")
+    # print(V_T)
     W = [0,-1,0,1,0,0,0,0,1]
     W = np.reshape(W, (3,3))
 

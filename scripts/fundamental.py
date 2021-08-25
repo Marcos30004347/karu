@@ -94,33 +94,36 @@ uv = [
 ]
 
 def calc_F(uvMat):
-	A = np.zeros((len(uvMat),9))
-	# img1 x' y' x y im2
-	for i in range(len(uvMat)):
-			A[i][0] = uvMat[i][0]*uvMat[i][2]
-			A[i][1] = uvMat[i][1]*uvMat[i][2]
-			A[i][2] = uvMat[i][2]
-			A[i][3] = uvMat[i][0]*uvMat[i][3]
-			A[i][4] = uvMat[i][1]*uvMat[i][3]
-			A[i][5] = uvMat[i][3] 
-			A[i][6] = uvMat[i][0]
-			A[i][7] = uvMat[i][1]
-			A[i][8] = 1.0  
+    A = np.zeros((len(uvMat),9))
+    # img1 x' y' x y im2
+    for i in range(len(uvMat)):
+            A[i][0] = uvMat[i][0]*uvMat[i][2]
+            A[i][1] = uvMat[i][1]*uvMat[i][2]
+            A[i][2] = uvMat[i][2]
+            A[i][3] = uvMat[i][0]*uvMat[i][3]
+            A[i][4] = uvMat[i][1]*uvMat[i][3]
+            A[i][5] = uvMat[i][3] 
+            A[i][6] = uvMat[i][0]
+            A[i][7] = uvMat[i][1]
+            A[i][8] = 1.0  
 
 
-	# print(A)
-	_,s,v = np.linalg.svd(A)
-	# print(s)
-	f_vec = v.transpose()[:,8]
-	# print("f_vec = ", f_vec)
-	f_hat = np.reshape(f_vec, (3,3))
-	# print("Fmat = ", f_hat)
+    # print(A)
+    u,s,v = np.linalg.svd(A)
 
-	# Enforce rank(F) = 2 
-	s,v,d = np.linalg.svd(f_hat)
-	f_hat = s @ np.diag([*v[:2], 0]) @ d
+    # v = -1*v
 
-	return f_hat
+    # print(s)
+    f_vec = v.transpose()[:,8]
+    # print("f_vec = ", f_vec)
+    f_hat = np.reshape(f_vec, (3,3))
+    # print("Fmat = ", f_hat)
+
+    # Enforce rank(F) = 2 
+    s,v,d = np.linalg.svd(f_hat)
+    f_hat = s @ np.diag([*v[:2], 0]) @ d
+
+    return f_hat
 
 print(calc_F(uv))
 

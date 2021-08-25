@@ -127,38 +127,87 @@ void gsvd(Matrix& a, Matrix& u, f32* s, Matrix& v, f32 tol = 2.22e-15)
 
 	householderBidiagonalization(A, gamma, phi, u, v, tol);
 
-	printMatrix(u);
-	std::cout << "\n";
-	printMatrix(v);
-	std::cout << "\n";
+	// printMatrix(u);
+	// std::cout << "\n";
+	// printMatrix(v);
+	// std::cout << "\n";
 	
-	for(i32 i=0; i<n; i++)
-		std::cout << gamma[i] << " ";
-	std::cout << "\n";
-
-	for(i32 i=0; i<n; i++)
-		std::cout << phi[i] << " ";
-	std::cout << "\n";
-
-	Matrix B(4,4, {
-		gamma[0], phi[1], 0, 0,
-		0, gamma[1], phi[2], 0,
-		0, 0, gamma[2], phi[3],
-		0, 0, 0, gamma[3]
-	});
-
-	printMatrix(u * B * transpose(v));
-	// golubKahanSVD(gamma, phi, m, n, u, v, tol);
+	// for(i32 i=0; i<n; i++)
+	// 	std::cout << gamma[i] << " ";
+	// std::cout << "\n";
 
 	// for(i32 i=0; i<n; i++)
-	// 	s[i] = gamma[i];
+	// 	std::cout << phi[i] << " ";
+	// std::cout << "\n";
 
-	// if(A.rows() == a.columns() && A.columns() == a.rows())
+	// Matrix B(4,4, {
+	// 	gamma[0], phi[1], 0, 0,
+	// 	0, gamma[1], phi[2], 0,
+	// 	0, 0, gamma[2], phi[3],
+	// 	0, 0, 0, gamma[3]
+	// });
+
+	// printMatrix(u * B * transpose(v));
+
+	golubKahanSVD(gamma, phi, m, n, u, v, tol);
+	
+	for(i32 i=0; i<n; i++)
+		s[i] = gamma[i];
+
+	if(a.columns() != a.rows() && A.rows() == a.columns() && A.columns() == a.rows())
+	{
+		Matrix tmp = u;
+		u = v;
+		v = tmp;
+	}
+
+	printMatrix(u*diag(s, m, n)*transpose(v), 0, 2.2e-5);
+
+	// Matrix P(m, n);
+
+	// for(i32 k = 0; k < m; k++)
 	// {
-	// 	Matrix& tmp = u;
-	// 	u = v;
-	// 	v = tmp;
+	// 	Matrix U_m = Matrix(m, 1);
+	// 	Matrix V_m = Matrix(n, 1);
+
+	// 	for(i32 q = 0; q < m; q++)
+	// 		U_m[q][0] = u[q][k];
+
+	// 	for(i32 q = 0; q < n; q++)
+	// 		V_m[q][0] = v[k][q];
+		
+	// 	P = P + U_m * transpose(V_m)*s[k];
 	// }
+
+	// Matrix Y = a - P;
+	// printMatrix(u);
+	// f32* sleft = new f32[m];
+
+	// for(i32 k = 0; k < m; k++)
+	// {
+	// 	sleft[k] = 0;
+		
+	// 	f32 uy_dot = 0;
+		
+	// 	for(i32 q = 0; q < m; q++)
+	// 	{
+	// 		uy_dot += u[q][k]*Y[q][k];
+	// 		std::cout << u[q][k] << "\n";
+	// 		std::cout << Y[q][k] << "\n";
+	// 		std::cout << u[q][k]*Y[q][k] << "\n";
+	// 		std::cout << "\n";
+
+	// 	}
+		
+
+	// 	for(i32 i = 0; i < m; i++)
+	// 	{
+	// 		sleft[k] += sign(uy_dot) * (uy_dot * uy_dot);
+	// 	}
+	// 	// std::cout << std::scientific << sleft[k] << "\n";
+	// }
+
+	// printMatrix(Y);
 
 	delete[] phi;
 	delete[] gamma;
