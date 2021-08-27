@@ -422,10 +422,15 @@ void golubReinschHouseholderBidiagonalization(
 	if(x_) *x_ = x;
 }
 
-f32 house(f32* x, f32* v, i32 n)
+f32 house(f32* x, f32* v, i32 n, f32 tol)
 {
 	i32 i;
 	f32 mu, beta, sigma, v0;
+
+	// std::cout << "x:\n";
+	// for(i=0; i<n; i++)
+	// 	std::cout << x[i] << " ";
+	// std::cout << "\n";
 
 	sigma = 0.0;
 
@@ -441,14 +446,10 @@ f32 house(f32* x, f32* v, i32 n)
 		v[i] = x[i];
 	}
 
-	if(sigma == 0 && x[0] >= 0)
+	if(fabs(sigma) <= tol)
 	{
 		beta = 0;
 	}
-	// else if(sigma == 0 && x[0] < 0)
-	// {
-	// 	beta = -2;
-	// }
 	else
 	{
 		mu = sqrt((x[0] * x[0]) + sigma);
@@ -465,6 +466,10 @@ f32 house(f32* x, f32* v, i32 n)
 		beta = (2 * (v[0] * v[0])) / (sigma + (v[0] * v[0]));
 
 		v0 = v[0];
+		std::cout << "house\n";
+		for(i = 0; i < n; i++)
+			std::cout << v[i] << " ";
+		std::cout << "\n";
 
 		for(i = 0; i < n; i++)
 		{
@@ -502,7 +507,7 @@ void applyHouseholderToVector(f32* u, f32 beta, f32* x, f32* Px, i32 n)
 }
 
 // Computes [v, beta] = house(A[j:m, p]) such that (I - v*v')A[j:m, p] = beta*e1
-f32 houseCol(Matrix& A, i32 m, i32 n, i32 j, i32 p, f32* v)
+f32 houseCol(Matrix& A, i32 m, i32 n, i32 j, i32 p, f32* v, f32 tol)
 {
 	i32 i;
 	f32 beta;
@@ -512,9 +517,11 @@ f32 houseCol(Matrix& A, i32 m, i32 n, i32 j, i32 p, f32* v)
 	for(i = 0; i < m - j; i++)
 	{
 		x[i] = A[j + i][p];	
+		std::cout << A[j + i][p] << " ";
 	}
+	std::cout << "\n";
 
-	beta = house(x, v, m - j);
+	beta = house(x, v, m - j, tol);
 
 	delete[] x;
 
@@ -522,7 +529,7 @@ f32 houseCol(Matrix& A, i32 m, i32 n, i32 j, i32 p, f32* v)
 }
 
 // Computes [v, beta] = house(A[p, j:n]') such that A[j, j:n]*(I - v*v')= beta*e1
-f32 houseRow(Matrix& A, i32 m, i32 n, i32 p, i32 j, f32* v)
+f32 houseRow(Matrix& A, i32 m, i32 n, i32 p, i32 j, f32* v, f32 tol)
 {
 	i32 i;
 
@@ -536,9 +543,11 @@ f32 houseRow(Matrix& A, i32 m, i32 n, i32 p, i32 j, f32* v)
 	for(i = 0; i < n - j; i++)
 	{
 		x[i] = A[p][i + j];	
+		std::cout << A[p][i + j] << " ";
 	}
+	std::cout << "\n";
 
-	beta = house(x, v, n - j);
+	beta = house(x, v, n - j, tol);
 
 	delete[] x;
 
@@ -553,7 +562,7 @@ f32 houseRow(Matrix& A, i32 m, i32 n, i32 p, i32 j, f32* v)
  * 				= (I - beta * u[0:m - p] * u[0:m - p]') * A[p:m][k:n]
  * 				= A[p:m][k:n] - beta * u[1:m - p] * (u[1:m - p]' * A[p:m][k:n])
  */
-f32 preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 k)
+f32 _preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 k)
 {
 	f32* uA;
 	i32 i, j;	
@@ -580,6 +589,89 @@ f32 preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 k
 		}
 	}
 
+	// Store esential part of u where new zeros where introduced.
+	for(i = 0; i < m - (p + 1); i++)
+	{
+		A[i + (p + 1)][k] = u[i + 1];
+	}
+
+	delete[] uA;
+
+	return A[p][k];
+}
+
+f32 preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 k)
+{
+	f32* uA;
+	i32 i, j, t;	
+	
+	// uA = new f32[n - k];
+
+	// // uA[1:n - k] = u[1:m - p]' * A[p:m][k:n]
+	// for(i = 0; i < n - k; i++)
+	// {
+	// 	uA[i] = 0;
+	// 	for(j = 0; j < m - p; j++)
+	// 	{
+	// 		uA[i] = uA[i] + (u[j] * A[j + p][i + k]);
+	// 	}
+	// }
+
+	std::cout << "ASDSADASDD\n";
+
+	std::cout << p << " " << m << " " <<  n << "\n"; 
+
+	Matrix u_(m - p, 1, u);
+
+	printMatrix(u_*transpose(u_)*beta);
+
+	// A[p:m][k:n] - u[1:m - p] * (beta * u[1:m - p]' * A[p:m][k:n])
+	//		= A[p:m][k:n] - beta * u[1:m - p] * uA[1:n - k]
+	Matrix A_ = A;
+	std::cout << "H:\n";
+	for(i = 0; i < m - p; i++)
+	{
+		f32 Hij = 0.0;
+		for(t = 0; t < m - p; t++)
+		{
+			// (I - b*u*u')[i][t]
+			f32 Hit = (i == t ? 1.0 : 0.0) - (beta * u[i] * u[t]);
+			std::cout << Hit << " ";
+		}
+			// std::cout << Hij << " ";
+		std::cout << "\n";
+	}
+	std::cout << "\n";
+	printSubMatrix(A, p, m, k, n);
+
+	std::cout << "A:\n";
+
+	for(i = 0; i < m - p; i++)
+	{
+		for(j = 0; j < n - k; j++)
+		{
+			f32 Hij = 0.0;
+			for(t = 0; t < m - p; t++)
+			{
+				// (I - b*u*u')[i][t]
+				f32 Hit = (i == t ? 1.0 : 0.0) - (beta * u[i] * u[t]);
+				f32 Ait = A[p + t][k + j];
+				// std::cout << Hit << " * " << Ait << " + ";
+				Hij = Hij + Hit*Ait;
+			}
+		
+			// std::cout <<" = " << Hij <<"\n";
+			// std::cout << Hij << " ";
+
+			A_[p + i][k + j] = Hij;
+		}
+		// std::cout << "\n";
+	}
+
+	A = A_;
+
+	std::cout << "MATRIX\n";
+	printSubMatrix(A, p, m, k, n);
 	// Store esential part of u where new zeros where introduced.
 	for(i = 0; i < m - (p + 1); i++)
 	{
@@ -658,16 +750,56 @@ void householderBidiagonalization(Matrix& A, f32* diag, f32* sdiag, Matrix& u, M
 	u = identity(m,m);
 	v = identity(n,n);
 
-	for(j=0; j<n; j++)
+	for(j = 0; j < n; j++)
 	{
-		beta[j] = houseCol(A, m, n, j, j, w);
+		std::cout << "***********\n";
+		// printMatrix(A);
+
+		std::cout << "*u*\n";
+		beta[j] = houseCol(A, m, n, j, j, w, tol);
+		std::cout << "*u*\n";
+
+		std::cout << "*w*\n";
+	
+		for(i=0; i < m - j; i++)
+		{
+			std::cout << w[i] << " ";
+		}
+		std::cout << "\n";
+
+		std::cout << j <<" " <<  m <<" " << n << "\n";
+		std::cout << "beta\n";	
+		std::cout << beta[j] << "\n";
+	
 		diag[j] = preHouseholderMatrix(w, beta[j], A, m, n, j, j);
 
+		printMatrix(A);
 		if(j < n - 1)
 		{
-			gamma[j+1] = houseRow(A, m, n, j, j + 1, w);
+			std::cout << "*v*\n";
+			gamma[j+1] = houseRow(A, m, n, j, j + 1, w, tol);
+			std::cout << "*v*\n";
+			for(i=0; i<n - (j + 1); i++)
+			{
+				std::cout << w[i] << " ";
+			}
+			std::cout << "\n";
 			sdiag[j+1] = posHouseholderMatrix(w, gamma[j+1], A, m, n, j, j + 1);
+			std::cout << "gamma\n";
+			std::cout << gamma[j+1] << "\n";
+			printMatrix(A);
 		}
+	}
+
+
+	for(i=0; i<n; i++)
+	{
+		std::cout << beta[i] << " ";
+	}
+	std::cout << "\n";
+	for(i=0; i<n; i++)
+	{
+		std::cout << gamma[i] << " ";
 	}
 
 	// Accumulate left transformations

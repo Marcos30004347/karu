@@ -22,7 +22,7 @@ void householderMatrixRowTest()
 		x[3], 11, 12
 	});
 
-	beta = houseCol(A, 4, 3, 0, 0, v);
+	beta = houseCol(A, 4, 3, 0, 0, v, 2.22e-15);
 
 	applyHouseholderToVector(v, beta, x, o, 4);
 	
@@ -49,7 +49,7 @@ void householderMatrixColTest()
 		6, 11, 12
 	});
 
-	beta = houseRow(A, 4, 3, 0, 0, v);
+	beta = houseRow(A, 4, 3, 0, 0, v, 2.22e-15);
 
 	applyHouseholderToVector(v, beta, x, o, 3);
 
@@ -72,7 +72,7 @@ void householderVectorTest()
 
 	f32 Px[n] = {0};
 	
-	f32 beta = house(x, v, n);
+	f32 beta = house(x, v, n, 2.22e-15);
 
 	f32 out[n];
 

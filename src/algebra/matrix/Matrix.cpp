@@ -257,16 +257,34 @@ Matrix diag(f32* diag, u32 m, u32 n)
 {
 	Matrix a(m,n);
 
-	for(i32 i=0; i<n; i++)
+	for(i32 i=0; i<std::min(n, m); i++)
 		a[i][i] = diag[i];
 
 	return a;
 }
+
+Matrix bidiag(f32* diag, f32* sdiag, u32 m, u32 n) 
+{
+	Matrix a(m,n);
+
+	for(i32 i=0; i<std::min(n, m); i++)
+	{
+		a[i][i] = diag[i];
+	
+		if(i < std::min(n,m) - 1)
+		{
+			a[i][i+1] = sdiag[i+1];
+		}
+	}
+
+	return a;
+}
+
 Matrix diag(Matrix&& diag, u32 m, u32 n) 
 {
 	assert(diag.rows() == n);
 	Matrix a(m,n);
-	for(i32 i=0; i<n; i++)
+	for(i32 i=0; i<std::min(n, m); i++)
 		a[i][i] = diag[i][0];
 	return a;
 }
@@ -288,7 +306,7 @@ void printMatrixWithMargin(Matrix* A, unsigned precision, f32 eps)
 		for(int j=0; j<A->m_data.m_stored_column;j++)
 		{
 			f32 val = fabs(A->m_data.get(i,j)) > eps ? A->m_data.get(i,j) : 0.0;
-			std::cout << std::fixed << std::setprecision(precision) << std::setw(precision+3) << val << " ";
+			std::cout << std::fixed << std::setprecision(precision) << std::setw(precision+8) << val << " ";
 		}
 		std::cout << std::endl;
 	}
@@ -302,7 +320,7 @@ void printMatrixWithMargin(Matrix& A, unsigned precision, f32 eps)
 		{
 			f32 val = fabs(A.m_data.get(i,j)) > eps ? A.m_data.get(i,j) : 0.0;
 
-			std::cout << std::fixed << std::setprecision(precision) << std::setw(precision+3) <<val << " ";
+			std::cout << std::fixed << std::setprecision(precision) << std::setw(precision+8) <<val << " ";
 		}
 		std::cout << std::endl;
 	}
@@ -316,7 +334,7 @@ void printMatrix(Matrix* A, unsigned precision, f32 eps)
 		{
 			f32 val = fabs(A->m_data.get(i,j)) > eps ? A->m_data.get(i,j) : 0.0;
 
-			std::cout << std::fixed << std::setprecision(precision) << std::setw(precision+3) << val << ", ";
+			std::cout << std::scientific << std::setprecision(precision) << std::setw(precision+8) << val << ", ";
 		}
 		std::cout << std::endl;
 	}
@@ -330,7 +348,21 @@ void printMatrix(Matrix& A, unsigned precision, f32 eps)
 		{
 			f32 val = fabs(A.m_data.get(i,j)) > eps ? A.m_data.get(i,j) : 0.0;
 
-			std::cout << std::fixed << std::setprecision(precision) << std::setw(precision+3) <<val << ", ";
+			std::cout << std::scientific << std::setprecision(precision) << std::setw(precision+8) <<val << ", ";
+		}
+		std::cout << std::endl;
+	}
+}
+
+void printSubMatrix(Matrix& A, i32 p, i32 q, i32 r, i32 s, unsigned precision, f32 eps)
+{
+	for(int i=p;i<q; i++)
+	{
+		for(int j=r; j<s;j++)
+		{
+			f32 val = fabs(A.m_data.get(i,j)) > eps ? A.m_data.get(i,j) : 0.0;
+
+			std::cout << std::scientific << std::setprecision(precision) << std::setw(precision+8) <<val << ", ";
 		}
 		std::cout << std::endl;
 	}
@@ -344,7 +376,7 @@ void printMatrix(Matrix&& A, unsigned precision, f32 eps)
 		{			
 			f32 val = fabs(A.m_data.get(i,j)) > eps ? A.m_data.get(i,j) : 0.0;
 		
-			std::cout << std::fixed << std::setprecision(precision) << std::setw(precision+3) <<val << ", ";
+			std::cout << std::scientific << std::setprecision(precision) << std::setw(precision+8) <<val << ", ";
 		}
 		std::cout << std::endl;
 	}

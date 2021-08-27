@@ -523,8 +523,9 @@ Matrix eightPointAlgorithm(Matrix image0[8], Matrix image1[8])
 
 	svd(S, U, s, V);
 
-	// printMatrix(S);
-	// printMatrix(S - U*transpose(diag(s, 9, 8))*transpose(V));
+	printMatrix(S);
+
+	printMatrix(U*diag(s, 8, 9)*transpose(V));
 
 	std::cout << "\n";
 

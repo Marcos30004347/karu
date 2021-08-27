@@ -54,6 +54,7 @@ Matrix diag(Matrix&& diag, u32 m, u32 n);
 Matrix diag(f32* diag, u32 n);
 Matrix diag(Matrix& diag);
 Matrix diag(Matrix&& diag);
+Matrix bidiag(f32* diag, f32* sdiag, u32 m, u32 n);
 
 Matrix echelonForm(Matrix matrix);
 Matrix nullspace(Matrix matrix);
@@ -78,6 +79,7 @@ f32 LUPDeterminant(const Matrix& A, const Matrix& P);
 
 void printMatrixWithMargin(Matrix& A, unsigned precision = 3, f32 eps = 2.22045e-16);
 void printMatrixWithMargin(Matrix* A, unsigned precision = 3, f32 eps = 2.22045e-16);
+void printSubMatrix(Matrix& A, i32 p, i32 q, i32 r, i32 s,  unsigned precision = 3, f32 eps = 2.22045e-16);
 
 void printMatrix(Matrix& A, unsigned precision = 5, f32 eps = 2.22045e-16);
 void printMatrix(Matrix&& A, unsigned precision = 5, f32 eps = 2.22045e-16);
