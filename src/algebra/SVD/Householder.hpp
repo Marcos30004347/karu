@@ -562,7 +562,7 @@ f32 houseRow(Matrix& A, i32 m, i32 n, i32 p, i32 j, f32* v, f32 tol)
  * 				= (I - beta * u[0:m - p] * u[0:m - p]') * A[p:m][k:n]
  * 				= A[p:m][k:n] - beta * u[1:m - p] * (u[1:m - p]' * A[p:m][k:n])
  */
-f32 _preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 k)
+f32 preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 k)
 {
 	f32* uA;
 	i32 i, j;	
@@ -600,7 +600,8 @@ f32 _preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 
 	return A[p][k];
 }
 
-f32 preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 k)
+// IF PROBLEM SWITH THE ABOVE FUNCTION BY THIS ONE
+f32 _preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 k)
 {
 	f32* uA;
 	i32 i, j, t;	
