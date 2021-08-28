@@ -4,6 +4,7 @@
 #include "algebra/compute/Compute.hpp"
 #include "sift/GaussianBlur.hpp"
 #include "image/Image.hpp"
+#include "sift/Resize.cpp"
 
 using namespace karu;
 using namespace karu::algebra::compute;
@@ -15,16 +16,27 @@ int main() {
     Image *img = new Image("../tests/assets/Karoo.png");
     Image *grayImg = img->getGrayImage();
 
-    Buffer pixels = grayImg->createBuffer();
-    Buffer out = grayImg->createEmptyBuffer();
+    // unsigned char *pixelsss = grayImg->getImage();
+    // for (int i=0; i<grayImg->imageSize; i++) {
+    //     std::cout << (int)pixelsss[i] << ", ";
+    // }
 
-    pixels.upload();
 
-    GaussianBlur *gaussian = new GaussianBlur(5.0, &pixels, grayImg);
-    gaussian->run(&out);
-    
-    unsigned char* new_img = (unsigned char*)out.download();
-    Image *newImg = new Image(new_img, grayImg); 
+    // Buffer pixels = grayImg->createBuffer();
+    // Buffer out = grayImg->createEmptyBuffer();
+
+    // pixels.upload();
+
+    // GaussianBlur *gaussian = new GaussianBlur(5.0, &pixels, grayImg);
+    // gaussian->run(&out);
+    // u64 newWidth;
+    // u64 newHeight;
+
+    u64 newWidth = ceilf(grayImg->width/2);
+    u64 newHeight = ceilf(grayImg->height/2);
+
+    unsigned char* new_img = resizeImage(grayImg, 2, 2);
+    Image *newImg = new Image(new_img, newWidth, newHeight, grayImg->channels); 
 
     newImg->writeImage("luizin.jpg", 100);
 
