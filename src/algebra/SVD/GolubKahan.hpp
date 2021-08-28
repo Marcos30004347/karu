@@ -71,8 +71,6 @@ void givens(f32 a, f32 b, f32* c, f32* s, f32 tol)
 	//   [c, s; -s, c].T * [a, b] = [r, 0]
 	// if(fabs(a) <= tol) a = 0.0;
 	
-	f32 r;
-	
 	if(b == 0)
 	{
 		*c = 1.0;
@@ -80,7 +78,7 @@ void givens(f32 a, f32 b, f32* c, f32* s, f32 tol)
 	}
 	else
 	{
-		r = hypot(a, b);
+		f32 r = hypot(a, b);
 		*c = a/r;
 		*s = -b/r;
 	}
@@ -132,11 +130,11 @@ void leftGivens(Matrix& A, f32 c, f32 s, i32 i, i32 k, f32 tol)
 		A[i][j] = c * t1 - s * t2;
 		A[k][j] = s * t1 + c * t2;
 
-		if(fabs(A[i][j]) <= tol)
-			A[i][j] = 0.0;
+		// if(fabs(A[i][j]) <= tol)
+		// 	A[i][j] = 0.0;
 
-		if(fabs(A[k][j]) <= tol)
-			A[k][j] = 0.0;
+		// if(fabs(A[k][j]) <= tol)
+		// 	A[k][j] = 0.0;
 	}
 }
 
@@ -252,11 +250,11 @@ void rightGivens(Matrix& A, f32 c, f32 s, i32 i, i32 k, f32 tol)
 		A[j][i] = c * t1 - s * t2;
 		A[j][k] = s * t1 + c * t2;
 
-		if(fabs(A[j][i]) <= tol)
-			A[j][i] = 0.0;
+		// if(fabs(A[j][i]) <= tol)
+		// 	A[j][i] = 0.0;
 
-		if(fabs(A[j][k]) <= tol)
-			A[j][k] = 0.0;
+		// if(fabs(A[j][k]) <= tol)
+		// 	A[j][k] = 0.0;
 	}
 }
 
@@ -340,7 +338,6 @@ void freeDiagMatrix(f32** diags)
 	delete[] diags[0];
 	delete[] diags[3];
 	delete[] diags[4];
-	
 	delete[] diags;
 }
 
@@ -473,16 +470,26 @@ void golubKahanStep(Matrix& B, i32 p, i32 q, Matrix &uT, Matrix &v, f32 tol)
 	y = t11 - mu;
 	z = t12;
 
-	for(k = p; k < q - 1; k++)
+	// std::cout << "mu: " << mu << "\n";
+
+	// std::cout << "###########S##########" << "\n";
+	// printSubMatrix(B, p, q, p, q);
+	// std::cout << "#####################" << "\n";
+
+	givens(y, z, &c, &s, tol);
+	rightGivens(B, c, s, p, p + 1, tol);
+	leftGivens(v, c, s, p, p + 1, tol);
+
+	// std::cout << "ASASSA" << "\n";
+
+	// std::cout << "#####################" << "\n";
+	// printSubMatrix(B, p, q, p, q);
+	// std::cout << "#####################" << "\n";
+
+	for(k = p; k < q - 2; k++)
 	{
-		// std::cout << "B Matrix:\n";
-		// printSubMatrix(B, p, q, p, q);
-		// std::cout << "\n";
-
-		givens(y, z, &c, &s, tol);
-
-		rightGivens(B, c, s, k, k + 1, tol);
-		leftGivens(v, c, s, k, k + 1, tol);
+		// std::cout << "###########HIHI##########" << "\n";
+	
 		// std::cout << c << " " << s << " " << k << " " << k+1 << "\n";
 		// std::cout << "V\n";
 		// printMatrix(v);
@@ -491,24 +498,47 @@ void golubKahanStep(Matrix& B, i32 p, i32 q, Matrix &uT, Matrix &v, f32 tol)
 		// std::cout << "B Matrix:\n";
 		// printSubMatrix(B, p, q, p, q);
 		// std::cout << "\n";
+	
 		y = B[k][k]; z = B[k+1][k];
 
 		givens(y, z, &c, &s, tol);
-
 		leftGivens(B, c, s, k, k + 1, tol);
 		rightGivens(uT, c, s, k, k + 1, tol);
-	
+		// std::cout << "#####################" << "\n";
+		// printSubMatrix(B, p, q, p, q);
+		// std::cout << "#####################" << "\n";
+
 		// std::cout << "U\n";
 		// std::cout << c << " " << s << " " << k << " " << k+1 << "\n";
 		// printMatrix(uT);
 		// std::cout << "IS\n";
 		// printMatrix(uT*B*v);
+		y = B[k][k + 1]; z = B[k][k + 2];
 	
-		if(k < q - 2)
-		{
-			y = B[k][k + 1]; z = B[k][k + 2];
-		}
+		givens(y, z, &c, &s, tol);
+		rightGivens(B, c, s, k + 1, k + 2, tol);
+		leftGivens(v, c, s, k + 1, k + 2, tol);
+	
+		// std::cout << "#####################" << "\n";
+		// printSubMatrix(B, p, q, p, q);
+		// std::cout << "#####################" << "\n";
+
 	}
+
+	// std::cout << "#####################" << "\n";
+	// printSubMatrix(B, p, q, p, q);
+	// std::cout << "##########AAA###########" << "\n";
+
+	y = B[q - 2][q - 2]; z = B[q - 1][q - 2];
+	givens(y, z, &c, &s, tol);
+	// std::cout << y << " " << z << "\n";
+	// std::cout << c << " " << s << "\n";
+	leftGivens(B, c, s, q - 2, q - 1, tol);
+	rightGivens(uT, c, s, q - 2, q - 1, tol);
+	// printSubMatrix(B, p, q, p, q);
+
+	// std::cout << "##########AAA###########" << "\n";
+
 	// std::cout << "B Matrix:\n";
 	// printSubMatrix(B, p, q, p, q);
 	// std::cout << "\n";
@@ -640,14 +670,14 @@ void walkBlemishOutRight(Matrix& B, i32 p, i32 q, i32 row, i32 start_col, Matrix
 
 		B[row][col] = 0;                            
 		B[col][col] = B[col][col] * c - old * s;
-		if(fabs(B[col][col]) <= tol) B[col][col] = 0.0;
+		// if(fabs(B[col][col]) <= tol) B[col][col] = 0.0;
 
 		if(col < n - 1)
 		{
 			B[row][col + 1] = s * B[col][col + 1];
-			if(fabs(B[row][col + 1]) <= tol) B[row][col + 1] = 0.0;
+			// if(fabs(B[row][col + 1]) <= tol) B[row][col + 1] = 0.0;
 			B[col][col + 1] = c * B[col][col + 1];
-			if(fabs(B[col][col + 1]) <= tol) B[col][col + 1] = 0.0;
+			// if(fabs(B[col][col + 1]) <= tol) B[col][col + 1] = 0.0;
 		}
 
 		rightGivens(uT, c, s, col, row, tol);
@@ -655,7 +685,7 @@ void walkBlemishOutRight(Matrix& B, i32 p, i32 q, i32 row, i32 start_col, Matrix
 		// std::cout << "U in blemish\n";
 		// std::cout << std::scientific << c << " " << s << " " << col << " " << row << "\n";
 		// printMatrix(uT);
-		// std::cout << "********************************\n";
+		// std::cout << "#####################*****************\n";
 	}
 
 	// std::cout << "IS:\n";
@@ -690,16 +720,15 @@ void walkBlemishOutUp(Matrix& B, i32 p, i32 q, i32 start_row, i32 col, Matrix& u
 	                        
 		B[row][row] = B[row][row] * c - old * s;
 
-		if(fabs(B[row][row]) <= tol) B[row][row] = 0.0;
+		// if(fabs(B[row][row]) <= tol) B[row][row] = 0.0;
 
 		if(row > 0)
 		{
 			B[row-1][col] = s * B[row - 1][row];
-			if(fabs(B[row-1][col]) <= tol) B[row-1][col] = 0.0;
+			// if(fabs(B[row-1][col]) <= tol) B[row-1][col] = 0.0;
 		
 			B[row-1][row] = c * B[row-1][row];
-			if(fabs(B[row-1][row]) <= tol) B[row-1][row] = 0.0;
-			
+			// if(fabs(B[row-1][row]) <= tol) B[row-1][row] = 0.0;
 		}
 
 		leftGivens(v, c, s, row, col, tol);
@@ -888,23 +917,37 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 	// std::cout << "V\n";
 	// printMatrix(v);
 	// std::cout << "CLEAN\n";
+	v = transpose(v);
+
+	// std::cout << "**************B*************\n";
+	// printMatrix(B);
+	// std::cout << "**************B*************\n";
 	clean(B, /* tol */ tol);
 	// printMatrix(B);
 	// std::cout << "CLEAN\n";
-	
+	// std::cout << "**************B*************\n";
+	// printMatrix(B);
+	// std::cout << "**************B*************\n";
 	findLimits(B, &p, &q, tol);
-	v = transpose(v);
 	// printSubMatrix(B, p, q+1, p, q+1);
+	// std::cout << "************** START *************\n";
 
 	while(q - p)
 	{
 
 		// std::cout << p << " " << q << "\n";
-
+		// std::cout << "**************B*************\n";
+		// printMatrix(B);
+		// std::cout << "**************B*************\n";
 		bool zeroed = doZeroDiag(B, p, q + 1, uT, v, tol);
 		if(!zeroed)
 		{
+			// std::cout << "Golub step\n";
 			golubKahanStep(B, p, q + 1, uT, v, tol);
+		}
+		else
+		{
+			// std::cout << "zeroes\n";
 		}
 
 		clean(B, /* tol */ tol);
@@ -938,40 +981,40 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 }
 
 
-f32 sigmaMin(f32* s, f32* e, i32 m, i32 n)
-{
-	i32 j;
-	f32 *l, *u, b_inf, b_one, sigma;
+// f32 sigmaMin(f32* s, f32* e, i32 m, i32 n)
+// {
+// 	i32 j;
+// 	f32 *l, *u, b_inf, b_one, sigma;
 
-	l = (f32*)malloc(sizeof(f32)*n);
-	u = (f32*)malloc(sizeof(f32)*n);
+// 	l = (f32*)malloc(sizeof(f32)*n);
+// 	u = (f32*)malloc(sizeof(f32)*n);
 
-	l[n-1] = fabs(s[n-1]);
+// 	l[n-1] = fabs(s[n-1]);
 
-	for(j = n-2; j >= 0; j--)
-		l[j] = fabs(s[j]) * (l[j+1] / (l[j+1] + fabs(e[j])));
+// 	for(j = n-2; j >= 0; j--)
+// 		l[j] = fabs(s[j]) * (l[j+1] / (l[j+1] + fabs(e[j])));
 
-	u[0] = fabs(s[0]);
+// 	u[0] = fabs(s[0]);
 
-	for(j=0; j<n-1; j++)
-		u[j+1] = fabs(s[j+1]) * (u[j] / (u[j] + fabs(e[j])));
+// 	for(j=0; j<n-1; j++)
+// 		u[j+1] = fabs(s[j+1]) * (u[j] / (u[j] + fabs(e[j])));
 
-	b_inf = l[0];
-	b_one = u[0];
+// 	b_inf = l[0];
+// 	b_one = u[0];
 
-	for(j=1; j<n; j++)
-		b_inf = std::min(b_inf, l[j]);
+// 	for(j=1; j<n; j++)
+// 		b_inf = std::min(b_inf, l[j]);
 
-	for(j=1; j<n; j++)
-		b_one = std::min(b_one, u[j]);
+// 	for(j=1; j<n; j++)
+// 		b_one = std::min(b_one, u[j]);
 
-	sigma = std::min(b_one, b_inf);
+// 	sigma = std::min(b_one, b_inf);
 
-	delete[] l;
-	delete[] u;
-	std::cout << "sigma: " << sigma << "\n";
-	return sigma;
-}
+// 	delete[] l;
+// 	delete[] u;
+// 	std::cout << "sigma: " << sigma << "\n";
+// 	return sigma;
+// }
 
 
 

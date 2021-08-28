@@ -121,6 +121,20 @@ int main()
 	assertMatrixIsClose(A, U*diag(singular_values,  A.rows(), A.columns())*V,  2.22e-12);
 
 	delete[] singular_values;
+
+	singular_values = new f32[3];
+
+	A = Matrix(3,3, {
+		1.2208058232190191e-07,   5.1200019258368155e+00,   2.5927050417706710e-07, 
+			5.1200018037558994e+00,  -3.8135154647843931e-07,   5.1200018037561046e+00, 
+		-1.2208057932616700e-07,  -5.1200016816754985e+00,  -2.5927049462914908e-07,
+	});
+
+	svd(A, U, singular_values, V);
+
+	assertMatrixIsClose(A, U*diag(singular_values,  A.rows(), A.columns())*V,  2.22e-12);
 	
+	delete[] singular_values;
+
 	return 0;
 }

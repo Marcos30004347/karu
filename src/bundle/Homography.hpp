@@ -388,25 +388,19 @@ void fundamentalMatrixEstimation(Matrix& H, Matrix image0[2], Matrix image1[2])
 
 Matrix normalizePoints(Matrix* p, u64 n)
 {
-	f32 tx, ty, sx, sy, s, msd;
+	f32 mx, my, sx, sy, s, msd;
 
-	tx = 0.0;
-	ty = 0.0;
+	mx = 0.0;
+	my = 0.0;
 
 	for(int j=0; j<n; j++)
 	{
-		tx += p[j][0][0];
-		ty += p[j][1][0];
+		mx += p[j][0][0];
+		my += p[j][1][0];
 	}
 	
-	tx = tx/(n);
-	ty = ty/(n);
-
-	// for(int j=0; j<n; j++)
-	// {
-	// 	p[j][0][0] = (p[j][0][0] - tx);
-	// 	p[j][1][0] = (p[j][1][0] - ty);
-	// }
+	mx = mx/n;
+	my = my/n;
 
 	sx = 0.0;
 	sy = 0.0;
@@ -415,17 +409,16 @@ Matrix normalizePoints(Matrix* p, u64 n)
 
 	for(int j=0; j<n; j++)
 	{
-		sx = pow(p[j][0][0] - tx,2);
-		sy = pow(p[j][1][0] - ty,2);
-		s += sx+sy;
+		sx = pow(p[j][0][0] - mx, 2);
+		sy = pow(p[j][1][0] - my, 2);
+		s += sx + sy;
 	}
 
-	s /= 2*n;
-	s = sqrt(s);
+	s = sqrt(s/(2 * n));
 
 	Matrix T(3,3, {
-		1./s, 0, -tx/s,
-		0, 1./s, -ty/s,
+		1./s, 0, -mx/s,
+		0, 1./s, -my/s,
 		0, 0, 1
 	});
 
@@ -438,34 +431,51 @@ Matrix normalizePoints(Matrix* p, u64 n)
 	msd /= n;
 	msd = sqrt(msd);
 
-	std::cout <<"msd^2: " << (msd*msd) << "\n";
+	// std::cout <<"msd^2: " << (msd*msd) << "\n";
 
 	return T;
 }
 
-Matrix eightPointAlgorithm(Matrix x1[8], Matrix x2[8])
+Matrix eightPointAlgorithm(Matrix x1[8], Matrix x2[8], bool normalized = true)
 {
-
 	Matrix lSingularVectors;
 	Matrix singulaValues;
 	Matrix rSingularVectors;
 
 	Matrix A(8,9);
+	Matrix T = identity(3,3);
+	Matrix T_Inv = identity(3,3);
 
-	// Matrix T = normalizePoints(x1, 8);
-	// Matrix T_INV = normalizePoints(x2, 8);
+	if(normalized)
+	{
+		T 		= normalizePoints(x1, 8);
+		T_Inv = normalizePoints(x2, 8);
+	}
+
+	// for(i32 i=0; i<8; i++)
+	// {
+	// 	A[i][0] = x1[i][0][0]*x2[i][0][0];
+	// 	A[i][1] = x1[i][1][0]*x2[i][0][0];
+	// 	A[i][2] = x2[i][0][0];
+	// 	A[i][3] = x1[i][0][0]*x2[i][1][0];
+	// 	A[i][4] = x1[i][1][0]*x2[i][1][0];
+	// 	A[i][5] = x2[i][1][0];
+	// 	A[i][6] = x1[i][0][0];
+	// 	A[i][7] = x1[i][1][0];
+	// 	A[i][8] = 1.0;
+	// }
 
 	for(i32 i=0; i<8; i++)
 	{
-		A[i][0] = x1[i][0][0]*x2[i][0][0];
-		A[i][1] = x1[i][1][0]*x2[i][0][0];
-		A[i][2] = x2[i][0][0];
-		A[i][3] = x1[i][0][0]*x2[i][1][0];
-		A[i][4] = x1[i][1][0]*x2[i][1][0];
-		A[i][5] = x2[i][1][0];
-		A[i][6] = x1[i][0][0];
-		A[i][7] = x1[i][1][0];
-		A[i][8] = 1.0;
+		A[i][0] = x2[i][0][0]*x1[i][0][0];
+		A[i][1] = x2[i][0][0]*x1[i][1][0];
+		A[i][2] = x2[i][0][0]*x1[i][2][0];
+		A[i][3] = x2[i][1][0]*x1[i][0][0];
+		A[i][4] = x2[i][1][0]*x1[i][1][0];
+		A[i][5] = x2[i][1][0]*x1[i][2][0];
+		A[i][6] = x2[i][2][0]*x1[i][0][0];
+		A[i][7] = x2[i][2][0]*x1[i][1][0];
+		A[i][8] = x2[i][2][0]*x1[i][2][0];
 	}
 
 	Matrix U, V_T;
@@ -473,13 +483,6 @@ Matrix eightPointAlgorithm(Matrix x1[8], Matrix x2[8])
 	f32* s = new f32[9];
 
 	svd(A, U, s, V_T);
-
-	// for(i32 i=0; i<9; i++)
-	// {
-	// 	std::cout << s[i] << " ";
-	// }
-	// std::cout << "\n";
-	// std::cout << "\n";
 
 	Matrix F = Matrix(3,3);
 
@@ -490,184 +493,109 @@ Matrix eightPointAlgorithm(Matrix x1[8], Matrix x2[8])
 			F[i][j] = V_T[8][i*3 + j]/V_T[8][8];
 		}
 	}
+
 	svd(F, U, s, V_T);
 	
 	s[2] = 0;
 	
 	F = U*diag(s, 3, 3)*V_T;
 
-	// printMatrix(F);
+	printMatrix(F);
 
-	// std::cout << "errors Fundamental:\n";
-	// for(i64 i=0;i<8; i++)
-	// 	printMatrix(transpose(x2[i])*F*x1[i]);
-	
 	delete[] s;
+
+	F = transpose(T_Inv)*F*T;
+	F = F/F[2][2];
+
 	return F;
-	// Matrix F = transpose(Tinv)*Fnorm*T_inv;
 
-	// std::cout <<"det: " <<  det3x3(Fnorm) << "\n";
-	// std::cout <<"det: " <<  det3x3(F) << "\n";
-
-	// return F;
-	// return F;
-	// Matrix S,V,D;
-	// svd(A, S, D, V);
-	// printMatrix(A);
-	// std::cout <<"ASDASDS\n";
-	// printMatrix(S);
-	// std::cout <<"ASDASDS\n";
-	// printMatrix(D);
-	// std::cout <<"ASDASDS\n";
-	// printMatrix(V);
-	// std::cout <<"ASDASDS\n";
-	// printMatrix(ns);
-	// std::cout <<"*************\n";
-
-	// Matrix W(9,9, {
-	// 	D[0][0], 0, 0, 0, 0, 0, 0, 0, 0,
-	// 	0, D[1][0], 0, 0, 0, 0, 0, 0, 0,
-	// 	0, 0, D[2][0], 0, 0, 0, 0, 0, 0,
-	// 	0, 0, 0, D[3][0], 0, 0, 0, 0, 0,
-	// 	0, 0, 0, 0, D[4][0], 0, 0, 0, 0,
-	// 	0, 0, 0, 0, 0, D[5][0], 0, 0, 0,
-	// 	0, 0, 0, 0, 0, 0, D[6][0], 0, 0,
-	// 	0, 0, 0, 0, 0, 0, 0, 0, 0,
-	// 	0, 0, 0, 0, 0, 0, 0, 0, 0,
-	// });
-	// Matrix V_T = transpose(V);
-	// Matrix A_ = S*W*V_T;
-
-	// printMatrix(A_);
-
-	// Matrix f1(9,1, { ns[0][0], ns[0][1], ns[0][2], ns[0][3], ns[0][4], ns[0][5], ns[0][6], ns[0][7], ns[0][8] });
-	// Matrix f2(9,1, { ns[1][0], ns[1][1], ns[1][2], ns[1][3], ns[1][4], ns[1][5], ns[1][6], ns[1][7], ns[1][8] });
-
-	// Matrix F[2];
-
-	// F[0] = Matrix(3,3, {
-	// 	f1[0][0], f1[1][0], f1[2][0],
-	// 	f1[3][0], f1[4][0], f1[5][0],
-	// 	f1[6][0], f1[7][0], f1[8][0],
-	// });
-
-	// F[1] = Matrix(3,3, {
-	// 	f2[0][0], f2[1][0], f2[2][0],
-	// 	f2[3][0], f2[4][0], f2[5][0],
-	// 	f2[6][0], f2[7][0], f2[8][0],
-	// });
-
-	// f32 K[2][2][2];
-
-	// Matrix tmp(3,3);
-	
-	// for(i64 i1=0; i1<2; i1++)
-	// 	for(i64 i2=0; i2<2; i2++)
-	// 		for(i64 i3=0; i3<2; i3++)
-	// 		{
-	// 			tmp[0][0] = F[i1][0][0];
-	// 			tmp[1][0] = F[i1][1][0];
-	// 			tmp[2][0] = F[i1][2][0];
-
-	// 			tmp[0][1] = F[i2][0][1];
-	// 			tmp[1][1] = F[i2][1][1];
-	// 			tmp[2][1] = F[i2][2][1];
-
-	// 			tmp[0][2] = F[i3][0][2];
-	// 			tmp[1][2] = F[i3][1][2];
-	// 			tmp[2][2] = F[i3][2][2];
-		
-	// 			K[i1][i2][i3] = det3x3(tmp);
-	// 		}
-
-	// f32 coeffs[4];
-
-	// coeffs[0] = -K[1][0][0] + K[0][1][1] + K[0][0][0] + K[1][1][0] + K[1][0][1] - K[0][1][0] - K[0][0][1] - K[1][1][1];
-	// coeffs[1] = K[0][0][1] - 2*K[0][1][1] - 2*K[1][0][1]+K[1][0][0] - 2*K[1][1][0] + K[0][1][0] + 3*K[1][1][1];
-	// coeffs[2] = K[1][1][0] + K[0][1][1] + K[1][0][1] - 2*K[1][1][1];
-	// coeffs[3] = K[1][1][1];
-
-	// Polynomial poly(3, {coeffs[3], coeffs[2], coeffs[1], coeffs[0]});
-
-	// std::vector<f32> roots;
-	
-	// poly.roots(roots, 0.00000000000001);
-
-	// // printPoly(poly);
-
-	// for(i64 i=0; i<roots.size(); i++)
-	// {
-	// 	std::cout << "ASDASD\n";
-	// 	Matrix Fundamental = F[0]*roots[i] + F[1]*(1-roots[i]);
-	
-	// 	printMatrix(Fundamental);
-	
-	// 	// Matrix U,W,V;
-	// 	// svd(Fundamental, U, W, V);
-
-	// 	// Matrix D(3,3, {
-	// 	// 	W[0][0], 0, 0,
-	// 	// 	0, W[1][0], 0,
-	// 	// 	0, 0, W[2][0],
-	// 	// });
-	// 	// if(det3x3(U) == -1.)
-	// 	// 	U = U*-1;
-	// 	// if(det3x3(V) == -1.)
-	// 	// 	V = V*-1;
-	// 	// std::cout << det3x3(U) << "\n";
-	// 	// std::cout << det3x3(V) << "\n";
-	// 	// printMatrix(U);
-	// 	// std::cout << "\n";
-	// 	// printMatrix(W);
-	// 	// std::cout << "\n";
-	// 	// printMatrix(V);
-
-	// 	// Matrix E(3,3, {
-	// 	// 	0, 1, 0,
-	// 	// 	-1, 0, 0,
-	// 	// 	0, 0, 1
-	// 	// });
-
-	// 	// Matrix Z(3,3, {
-	// 	// 	0, -1, 0,
-	// 	// 	1, 0, 0,
-	// 	// 	0, 0, 0
-	// 	// });
-
-	// 	// Matrix X0 = U*E*transpose(V);
-	// 	// Matrix X1 = U*transpose(E)*transpose(V);
-	
-	// 	// Matrix v(3,1, {0,0,1});
-	
-	// 	// Matrix t0 = U*v;
-	// 	// Matrix t1 = U*-1*v;
-	// 	// t0 = transpose(t0);
-	// 	// t1 = transpose(t1);
-	// 	// printMatrix(t0);
-	// 	// std::cout <<"\n";
-	// 	// printMatrix(X0);
-	// 	// std::cout <<"\n";
-	// 	// std::cout <<"\n";
-	// 	// printMatrix(t1);
-	// 	// std::cout <<"\n";
-	// 	// printMatrix(X0);
-	// 	// std::cout <<"\n";
-	// 	// std::cout <<"\n";
-	// 	// printMatrix(t0);
-	// 	// std::cout <<"\n";
-	// 	// printMatrix(X1);
-	// 	// std::cout <<"\n";
-	// 	// std::cout <<"\n";
-	// 	// printMatrix(t1);
-	// 	// std::cout <<"\n";
-	// 	// printMatrix(X1);
-	// 	for(i64 j=0; j<7; j++)
-	// 	{
-	// 		Matrix k = transpose(p_[j])*Fundamental*p[j];
-	// 		printMatrix(k);
-	// 	}
-	
-	// 	std::cout << "\n";
-	// }
 }
 
+Matrix getEssentialMatrix(Matrix F, Matrix K1, Matrix K2)
+{
+	return transpose(K2)*F*K1;
+}
+
+void estimateRotationAndTranslation(Matrix& E, Matrix& R1, Matrix& R2, Matrix& t1, Matrix& t2)
+{
+	f32 s[3]; 
+
+	Matrix W = Matrix(3,3, {
+		0, -1, 0,
+		1, 0, 0,
+		0, 0, 1
+	});
+
+	Matrix Z = Matrix(3,3, {
+		0, 1, 0,
+		-1, 0, 0,
+		0, 0, 0
+	});
+
+	Matrix U, V_T;
+
+	svd(E, U, s , V_T);
+
+	f32 e = (s[0] + s[1]) / 2;
+	
+	s[0] = e;
+	s[1] = e;
+	s[2] = 0;
+
+	E = U*diag(s, 3,3)*V_T;
+
+	svd(E, U, s , V_T);
+
+	R1 = U*W*V_T;
+	R2 = U*transpose(W)*V_T;
+
+	if(det3x3(R1) < 0)
+	{
+		R1 = R1 * -1;
+	}
+
+	if(det3x3(R2) < 0)
+	{
+		R2 = R2 * -1;
+	}
+
+	Matrix T = U*Z*transpose(U);
+
+	Matrix t(3,1, {
+		T[2][1],
+		T[0][2],
+		T[1][0],
+	});
+
+	t1 = t;
+
+	t2 = t*-1;
+}
+
+f32 rad2deg(f32 rad)
+{
+	return rad * (180.0/3.141592653589793238463);
+}
+
+void rotationToEulerAngles(Matrix& R, f32* x, f32* y, f32* z)
+{
+	f32 sy = sqrt(R[0][0] * R[0][0] +  R[1][0] * R[1][0]);
+
+  f32 singular = sy < 1e-6;
+
+	if (!(sy < 1e-6))
+	{
+		*x = atan2(R[2][1] , R[2][2]);
+		*y = atan2(-R[2][0], sy);
+		*z = atan2(R[1][0], R[0][0]);
+	}
+	else
+	{
+		*x = atan2(-R[1][2], R[1][1]);
+		*y = atan2(-R[2][0], sy);
+		*z = 0;
+	}
+
+	std::cout << rad2deg(*x) << " " << rad2deg(*y) << " " << rad2deg(*z) << "\n";
+
+}

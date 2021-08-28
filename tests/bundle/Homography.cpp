@@ -95,6 +95,8 @@ int main()
 
 	Matrix p1[8] = { p11, p21, p31, p41, p51, p61, p71, p81 };
 	Matrix p2[8] = { p12, p22, p32, p42, p52, p62, p72, p82 };
+	Matrix p1_[8] = { p11, p21, p31, p41, p51, p61, p71, p81 };
+	Matrix p2_[8] = { p12, p22, p32, p42, p52, p62, p72, p82 };
 	// for(i64 i=0;i<8; i++)
 	// {
 	// 	std::cout <<"[\n";
@@ -108,6 +110,10 @@ int main()
 	// 	printMatrix(p2[i]);
 	// 	std::cout <<"]\n";
 	// }
+	// for(i64 i=0;i<8; i++)
+	// {
+	// 	printMatrix(p1[i]);
+	// }
 	Matrix F = eightPointAlgorithm(p1, p2);
 
 	std::cout << "Fundamental:\n";
@@ -115,29 +121,23 @@ int main()
 
 	std::cout << "errors Fundamental:\n";
 	for(i64 i=0;i<8; i++)
-		printMatrix(transpose(p2[i])*F*p1[i]);
+		printMatrix(transpose(p2_[i])*F*p1_[i]);
 
-	// std::cout << "lines Essential:\n";
+	Matrix E = getEssentialMatrix(F, K, K);
 
-	// for(i64 i=0;i<8; i++)
-	// {
-	// 	printMatrix(F*p1[i]);
-	// 	printf("\n");
-	// }
-
-
-	Matrix E = transpose(K)*F*K;
-
-	std::pair<Matrix,Matrix> KLU = LUPDecomposition(K);
-	Matrix K_inv = LUPInverse(KLU.first, KLU.second);
-	std::cout << "Essential:\n";
 	printMatrix(E);
 
-	std::cout << "errors Essential:\n";
-	for(i64 i=0;i<8; i++)
-		printMatrix(transpose(K_inv*p2[i])*E*K_inv*p1[i]);
+	Matrix R1, R2, t1, t2;
 
+	estimateRotationAndTranslation(E, R1, R2, t1, t2);
 
+	f32 x, y, z;
 
+	rotationToEulerAngles(R1, &x, &y, &z);
+	rotationToEulerAngles(R2, &x, &y, &z);
+	std::cout << "t1\n";
+	printMatrix(t1);
+	std::cout << "t2\n";
+	printMatrix(t2);
 	return 0;
 }

@@ -63,6 +63,14 @@ print("******************")
 
 E = np.dot(np.dot(K.T, F), K)
 print("Essential")
+print(K)
+print("Essential")
+print(K.T)
+print("Essential")
+print(F)
+print("Essential")
+print(np.dot(K.T, F))
+print("Essential")
 print(E)
 print("##########################")
 pts, r, t, mask = cv2.recoverPose(E,pts1, pts2, K)
@@ -137,13 +145,14 @@ def calc_F(uvMat):
 
     return f_hat
 F = calc_F(uv)
-
+F = F/F[2,2]
 print("asdasdasdasdasdasdasdasdsd")
-print(F/F[2,2])
+print(F)
 print("asdasdasdasdasdasdasdasdsd")
 
-E = np.dot(np.dot(K.T, calc_F(uv)), K)
+E = np.dot(np.dot(K.T, F), K)
 
+print("E")
 print(E)
 
 pts, r, t, mask = cv2.recoverPose(E,pts1, pts2, K)
