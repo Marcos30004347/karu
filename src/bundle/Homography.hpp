@@ -597,5 +597,146 @@ void rotationToEulerAngles(Matrix& R, f32* x, f32* y, f32* z)
 	}
 
 	std::cout << rad2deg(*x) << " " << rad2deg(*y) << " " << rad2deg(*z) << "\n";
+}
 
+Matrix triangulate(Matrix p, Matrix p_, Matrix P, Matrix P_)
+{
+	Matrix M(6,6);
+
+	M[0][0] = P[0][0];
+	M[1][0] = P[1][0];
+	M[2][0] = P[2][0];
+
+	M[0][1] = P[0][1];
+	M[1][1] = P[1][1];
+	M[2][1] = P[2][1];
+
+	M[0][2] = P[0][2];
+	M[1][2] = P[1][2];
+	M[2][2] = P[2][2];
+
+	M[0][3] = P[0][3];
+	M[1][3] = P[1][3];
+	M[2][3] = P[2][3];
+
+
+	M[3][0] = P_[0][0];
+	M[4][0] = P_[1][0];
+	M[5][0] = P_[2][0];
+
+	M[3][1] = P_[0][1];
+	M[4][1] = P_[1][1];
+	M[5][1] = P_[2][1];
+
+	M[3][2] = P_[0][2];
+	M[4][2] = P_[1][2];
+	M[5][2] = P_[2][2];
+
+	M[3][3] = P_[0][3];
+	M[4][3] = P_[1][3];
+	M[5][3] = P_[2][3];
+
+	M[0][4] = -p[0][0];
+	M[1][4] = -p[1][0];
+	M[2][4] = -p[2][0];
+
+	M[3][5] = -p_[0][0];
+	M[4][5] = -p_[1][0];
+	M[5][5] = -p_[2][0];
+
+	Matrix U, V_T;
+
+	f32 s[6];
+
+	svd(M, U, s, V_T);
+
+	Matrix X(4,1, {
+		V_T[5][0]/V_T[5][3],
+		V_T[5][1]/V_T[5][3],
+		V_T[5][2]/V_T[5][3],
+		V_T[5][3]/V_T[5][3]
+	});
+
+	// printMatrix(V_T);
+	// std::cout << std::fixed << "(" << X[0][0] <<", " << X[1][0] << ", " << X[2][0] << ")\n";
+
+	return X;
+}
+
+void chooseRealizableSolution(Matrix Intrinsics[2], Matrix Rotations[2], Matrix Translations[2], Matrix* pts1, Matrix* pts2, i32 n)
+{
+	i32 i, r, t, rotation, translation;
+
+	Matrix cam0 = Intrinsics[0] * identity(3,4);
+	Matrix cam1(3,4);
+	
+	bool realizable;
+
+	for(r = 0; r < 2; r++)
+	{
+	
+		realizable = true;
+	
+		for(t = 0; t < 2; t++)
+		{
+			std::cout << "TRIANGULATE: " << r << " " << t << "\n";
+			
+			cam1[0][0] = Rotations[r][0][0];
+			cam1[1][0] = Rotations[r][1][0];
+			cam1[2][0] = Rotations[r][2][0];
+			
+			cam1[0][1] = Rotations[r][0][1];
+			cam1[1][1] = Rotations[r][1][1];
+			cam1[2][1] = Rotations[r][2][1];
+
+			cam1[0][2] = Rotations[r][0][2];
+			cam1[1][2] = Rotations[r][1][2];
+			cam1[2][2] = Rotations[r][2][2];
+
+			cam1[0][3] = Translations[t][0][0];
+			cam1[1][3] = Translations[t][1][0];
+			cam1[2][3] = Translations[t][2][0];
+
+			cam1 = Intrinsics[1] * cam1;
+
+			for(i = 0; i < n; i++)
+			{
+				Matrix point = triangulate(pts1[i], pts2[i], cam0, cam1);
+
+				// Reproject points		
+				Matrix reprojected0 = cam0 * point;
+				Matrix reprojected1 = cam1 * point;
+
+				// if z of one of the reprojections are negative, the point
+				// is behind the camera, so this configuration is invalid.
+				// printMatrix(reprojected0);
+				// std::cout << "\n";
+				// printMatrix(reprojected1);
+			
+				if(reprojected0[2][0] < 0 || reprojected1[2][0] < 0)
+				{
+					realizable = false;
+					break;
+				}
+				else
+				{
+					realizable = true;
+				}
+			}
+		
+			if(realizable)
+			{
+				rotation = r;
+				translation = t;
+			}
+			if(!realizable)
+			{
+				break;
+			}
+		}
+	
+
+	}
+
+	std::cout << rotation << " " << translation << "\n";
 }

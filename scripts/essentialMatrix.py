@@ -118,10 +118,12 @@ def triangulate(p, p_, P, P_):
         -(u_*P_[2][3] - P_[0][3]),
         -(v_*P_[2][3] - P_[1][3]),
     ]
+
     b = np.reshape(b, (4, 1))
     x = np.zeros((3,1))
 
     r = cv2.solve(a, b, x, cv2.DECOMP_SVD);
+
     print("(",r[1][0][0],",", r[1][1][0],",", r[1][2][0], ")")
     # A = np.reshape(A, (4,4))
     # S,D,V_T =  np.linalg.svd(A)
@@ -134,6 +136,7 @@ def chooseRealizableSolution(Rotations, Translations, K0, K1, pts1, pts2):
     cam0 = np.dot(K0, np.concatenate((np.eye(3), np.zeros((1,3)).T), axis=1))
 
     cam1 = np.dot(K1, np.concatenate((Rotations[0].T, Translations[0].T), axis=1))
+
     for i in range(8):
         triangulate([pts1[i][0], pts1[i][1]], [pts2[i][0], pts2[i][1]], cam0, cam1)
     print()
@@ -197,6 +200,7 @@ rotationMatrixToEulerAngles(R2)
 R4 = [ 1.88248688e-08,  1.46553336e-05, -1.00000000e+00,
  1.21329510e-05,  1.00000000e+00,  1.46553338e-05,
  1.00000000e+00, -1.21329513e-05,  1.86470562e-08]
+
 R4 = np.reshape(R4,(3,3))
 
 print(np.linalg.det(R4))

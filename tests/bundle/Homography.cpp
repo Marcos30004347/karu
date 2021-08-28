@@ -139,5 +139,13 @@ int main()
 	printMatrix(t1);
 	std::cout << "t2\n";
 	printMatrix(t2);
+	std::cout << "\n";
+
+	Matrix R[2] = {R1, R2};
+	Matrix T[2] = {t1, t2};
+	Matrix I[2] = {K, K};
+	
+	chooseRealizableSolution(I, R, T, p1_, p2_, 8);
+	
 	return 0;
 }
