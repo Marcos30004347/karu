@@ -34,21 +34,21 @@ void svd(Matrix& a, Matrix& u, f32* s, Matrix& v, f32 tol = 2.22e-15)
 	f32* phi   = new f32[n];
 	phi[0] = 0;
 
-	printMatrix(A, 5);
+	// printMatrix(A, 5);
 
 	householderBidiagonalization(A, s, phi, u, v, tol);
-	std::cout << "\n";
-	std::cout << "\n";
-	std::cout << "\n";
-	std::cout << "\n";
-	std::cout << "\n";
-	std::cout << "\n";
+	// std::cout << "\n";
+	// std::cout << "\n";
+	// std::cout << "\n";
+	// std::cout << "\n";
+	// std::cout << "\n";
+	// std::cout << "\n";
 
-	printMatrix(bidiag(s, phi, m, n), 5, 2.2e-5);
+	// printMatrix(bidiag(s, phi, m, n), 5, 2.2e-5);
 
-	printMatrix(u*bidiag(s, phi, m, n)*transpose(v), 5, 2.2e-5);
+	// printMatrix(u*bidiag(s, phi, m, n)*transpose(v), 5, 2.2e-5);
 
-	std::cout << "\n";
+	// std::cout << "\n";
 
 	golubKahanSVD(s, phi, m, n, u, v, tol);
 
@@ -58,8 +58,8 @@ void svd(Matrix& a, Matrix& u, f32* s, Matrix& v, f32 tol = 2.22e-15)
 	if(a.columns() != a.rows() && A.rows() == a.columns() && A.columns() == a.rows())
 	{
 		Matrix tmp = u;
-		u = v;
-		v = tmp;
+		u = transpose(v);
+		v = transpose(tmp);
 	}
 
 

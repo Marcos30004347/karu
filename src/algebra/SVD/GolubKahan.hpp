@@ -54,9 +54,9 @@ void sortUV(f32* s, u32 n, Matrix& u, Matrix& v)
 		
 			for (k = 0; k < rows; ++k) 
 			{
-				tmp = v[k][i];
-				v[k][i] = v[k][i_last];
-				v[k][i_last] = tmp;
+				tmp = v[i][k];
+				v[i][k] = v[i_last][k];
+				v[i_last][k] = tmp;
 			}
 
 
@@ -381,30 +381,37 @@ f32 trailing2x2Eigenvalue(Matrix& B, i32 p, i32 q, f32 tol)
 	
 	//	T[0:2, 0:2] = B[:,-2:].T*B[:,-2:]
 	//  B[:, -2] = {{0,..., 0, a, c}, { 0,..., 0, b, d}}.T
-	std::cout << p << " " << q << "\n";
+	// std::cout << p << " " << q << "\n";
 
-	printSubMatrix(B, p, q, p, q);
-	
+	// printSubMatrix(B, p, q, p, q);
+
 	if(q >= 3)
+	{
 		a = B[q - 3][q - 2];
+		b = B[q - 2][q - 1];
+		c = B[q - 2][q - 2];
+		d = B[q - 1][q - 1];
+	}
 	else 
-		a = 0;
-	b = B[q - 2][q - 1];
-	c = B[q - 2][q - 2];
-	d = B[q - 1][q - 1];
+	{
+		a = B[q - 2][q - 2];
+		b = B[q - 2][q - 1];
+		c = B[q - 1][q - 2];
+		d = B[q - 1][q - 1];
+	}
 
-	std::cout << a << " " << b << " " << c << " " << d << "\n";
+	// std::cout << a << " " << b << " " << c << " " << d << "\n";
 
 	t11 = a*a + c*c;
 	t12 = c*b;
 	t21 = b*c;
 	t22 = b*b + d*d;
-	std::cout << t11 << " " << t12 << " " << t21 << " " << t22 << "\n";
+	// std::cout << t11 << " " << t12 << " " << t21 << " " << t22 << "\n";
 
 	// compute wilkinson shift value "µ" ("mu")
 	d = (t11 - t22) / 2.0;
 	mu = t22 - (sign(d) * (t21 * t21)) / (fabs(d) + sqrt((d * d) + (t21 * t21)));
-	std::cout << mu << "\n";
+	// std::cout << mu << "\n";
 	
 	return mu;
 }
@@ -476,11 +483,11 @@ void golubKahanStep(Matrix& B, i32 p, i32 q, Matrix &uT, Matrix &v, f32 tol)
 
 		rightGivens(B, c, s, k, k + 1, tol);
 		leftGivens(v, c, s, k, k + 1, tol);
-		std::cout << c << " " << s << " " << k << " " << k+1 << "\n";
-		std::cout << "V\n";
-		printMatrix(v);
-		std::cout << "IS\n";
-		printMatrix(uT*B*v);
+		// std::cout << c << " " << s << " " << k << " " << k+1 << "\n";
+		// std::cout << "V\n";
+		// printMatrix(v);
+		// std::cout << "IS\n";
+		// printMatrix(uT*B*v);
 		// std::cout << "B Matrix:\n";
 		// printSubMatrix(B, p, q, p, q);
 		// std::cout << "\n";
@@ -490,11 +497,13 @@ void golubKahanStep(Matrix& B, i32 p, i32 q, Matrix &uT, Matrix &v, f32 tol)
 
 		leftGivens(B, c, s, k, k + 1, tol);
 		rightGivens(uT, c, s, k, k + 1, tol);
-		std::cout << "U\n";
-		std::cout << c << " " << s << " " << k << " " << k+1 << "\n";
-		printMatrix(uT);
-		std::cout << "IS\n";
-		printMatrix(uT*B*v);
+	
+		// std::cout << "U\n";
+		// std::cout << c << " " << s << " " << k << " " << k+1 << "\n";
+		// printMatrix(uT);
+		// std::cout << "IS\n";
+		// printMatrix(uT*B*v);
+	
 		if(k < q - 2)
 		{
 			y = B[k][k + 1]; z = B[k][k + 2];
@@ -605,16 +614,6 @@ f32 getDiagMat(f32** diags, i32 l, i32 c)
 	return 0;
 }
 
-void setDiagMat(f32** diags, i32 l, i32 c, f32 v)
-{
-	assert(v != 0 && (l + 2 - c >= 0) && (l + 2 - c < 5));
-
-	if(v != 0 && (l + 2 - c >= 0) && (l + 2 - c < 5))
-	{
-		diags[l + 2 - c][c] = v;
-	}
-}
-
 
 void walkBlemishOutRight(Matrix& B, i32 p, i32 q, i32 row, i32 start_col, Matrix& uT, Matrix& v, f32 tol)
 {
@@ -653,14 +652,14 @@ void walkBlemishOutRight(Matrix& B, i32 p, i32 q, i32 row, i32 start_col, Matrix
 
 		rightGivens(uT, c, s, col, row, tol);
 		
-		std::cout << "U in blemish\n";
-		std::cout << std::scientific << c << " " << s << " " << col << " " << row << "\n";
-		printMatrix(uT);
-		std::cout << "********************************\n";
+		// std::cout << "U in blemish\n";
+		// std::cout << std::scientific << c << " " << s << " " << col << " " << row << "\n";
+		// printMatrix(uT);
+		// std::cout << "********************************\n";
 	}
 
-	std::cout << "IS:\n";
-	printMatrix(uT*B*v);
+	// std::cout << "IS:\n";
+	// printMatrix(uT*B*v);
 
 	// std::cout << "\n";
 	// printSubMatrix(B, p, q, p, q);
@@ -672,8 +671,8 @@ void walkBlemishOutUp(Matrix& B, i32 p, i32 q, i32 start_row, i32 col, Matrix& u
 {
 	i32 row;
 	f32 c, s, old;
-	std::cout << "walkBlemishOutUp:\n";
-	std::cout << start_row << " " << p << "\n";
+	// std::cout << "walkBlemishOutUp:\n";
+	// std::cout << start_row << " " << p << "\n";
 
 	for(row = start_row; row >= p; row--)
 	{
@@ -690,6 +689,7 @@ void walkBlemishOutUp(Matrix& B, i32 p, i32 q, i32 start_row, i32 col, Matrix& u
 		B[row][col] = 0;    
 	                        
 		B[row][row] = B[row][row] * c - old * s;
+
 		if(fabs(B[row][row]) <= tol) B[row][row] = 0.0;
 
 		if(row > 0)
@@ -704,16 +704,16 @@ void walkBlemishOutUp(Matrix& B, i32 p, i32 q, i32 start_row, i32 col, Matrix& u
 
 		leftGivens(v, c, s, row, col, tol);
 
-		std::cout << "V in blemish\n";
-		std::cout << c << " " << s << " " << row << " " << col << "\n";
+		// std::cout << "V in blemish\n";
+		// std::cout << c << " " << s << " " << row << " " << col << "\n";
 	}
 
-	std::cout << "IS:\n";
-	printMatrix(uT*B*v);
+	// std::cout << "IS:\n";
+	// printMatrix(uT*B*v);
 	// std::cout << "\n";
 	// printSubMatrix(B, p, q, p, q);
 	// std::cout << "\n";
-	std::cout << "***************************\n";
+	// std::cout << "***************************\n";
 
 }
 
@@ -725,17 +725,17 @@ bool doZeroDiag(Matrix& B, i32 p, i32 q, Matrix& uT, Matrix& v, f32 tol)
 
 	bool zeroed = false;
 
-	std::cout << "doZeroDiag" "\n";
-	std::cout << p << " " << q << "\n";
+	// std::cout << "doZeroDiag" "\n";
+	// std::cout << p << " " << q << "\n";
 
-	printSubMatrix(B, p, q, p, q);
+	// printSubMatrix(B, p, q, p, q);
 	// Get zeros idx in diag
 	for(i = p; i < q; i++)
 	{
 
 		if(fabs(B[i][i]) <= tol)
 		{
-			std::cout << "zeroidx: " << i << "\n";
+			// std::cout << "zeroidx: " << i << "\n";
 			zeroed = true;
 			
 			if(i < q - 1)
@@ -882,15 +882,15 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 	
 	Matrix B = bidiag(b_diag, b_sdiag, m, n);
 	
-	std::cout << "U\n";
-	printMatrix(uT);
-	std::cout << "\n";
-	std::cout << "V\n";
-	printMatrix(v);
-	std::cout << "CLEAN\n";
+	// std::cout << "U\n";
+	// printMatrix(uT);
+	// std::cout << "\n";
+	// std::cout << "V\n";
+	// printMatrix(v);
+	// std::cout << "CLEAN\n";
 	clean(B, /* tol */ tol);
-	printMatrix(B);
-	std::cout << "CLEAN\n";
+	// printMatrix(B);
+	// std::cout << "CLEAN\n";
 	
 	findLimits(B, &p, &q, tol);
 	v = transpose(v);
@@ -899,7 +899,7 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 	while(q - p)
 	{
 
-		std::cout << p << " " << q << "\n";
+		// std::cout << p << " " << q << "\n";
 
 		bool zeroed = doZeroDiag(B, p, q + 1, uT, v, tol);
 		if(!zeroed)
@@ -910,10 +910,10 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 		clean(B, /* tol */ tol);
 		findLimits(B, &p, &q, tol);
 
-		std::cout << "************* END ITERATION **************\n" << "\n";
+		// std::cout << "************* END ITERATION **************\n" << "\n";
 	}
 
-	v = transpose(v);
+	// v = transpose(v);
 
 	for(i=0; i<n; i++)
 	{
@@ -922,20 +922,19 @@ void golubKahanSVD(f32* b_diag, f32* b_sdiag, i32 m, i32 n, Matrix &uT, Matrix &
 
 	sortUV(b_diag, n, uT, v);
 
-	std::cout << "Bdiag\n";
-	printMatrix(diag(b_diag, 9, 9));
+	// std::cout << "Bdiag\n";
 
-	std::cout << "U\n";
+	// printMatrix(diag(b_diag, m, n));
 
-	printMatrix(uT);
-	std::cout << "V\n";
+	// std::cout << "U\n";
 
-	printMatrix(transpose(v));
-
-	std::cout << "U*S*VT\n";
+	// printMatrix(uT);
+	// std::cout << "V\n";
+	// printMatrix(v);
 	
-	printMatrix(uT*diag(b_diag, 9, 9)*transpose(v));
-	std::cout << "\n";
+	// std::cout << "U*S*VT\n";
+	// printMatrix(uT*diag(b_diag, m, n)*v);
+	// std::cout << "\n";
 }
 
 

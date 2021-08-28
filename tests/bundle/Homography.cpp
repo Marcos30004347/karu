@@ -52,12 +52,12 @@ int main()
 		std::vector<u64> point_idx;
 		std::vector<Matrix> projections;
 	
-		std::vector<Matrix> pixels;
+		// std::vector<Matrix> pixels;
 
 		for(int j=0; j<points.size(); j++)
 		{
 			Matrix projection = camera.projection(points[j]);
-			pixels.push_back(Matrix(2,1, {projection[0][0], projection[1][0]}));
+			// pixels.push_back(Matrix(2,1, {projection[0][0], projection[1][0]}));
 			point_idx.push_back(j);
 			projections.push_back(projection);
 		}
@@ -115,7 +115,7 @@ int main()
 
 	std::cout << "errors Fundamental:\n";
 	for(i64 i=0;i<8; i++)
-		printMatrix(transpose(p1[i])*F*p2[i]);
+		printMatrix(transpose(p2[i])*F*p1[i]);
 
 	// std::cout << "lines Essential:\n";
 
@@ -128,14 +128,14 @@ int main()
 
 	Matrix E = transpose(K)*F*K;
 
-	// std::pair<Matrix,Matrix> KLU = LUPDecomposition(K);
-	// Matrix K_inv = LUPInverse(KLU.first, KLU.second);
+	std::pair<Matrix,Matrix> KLU = LUPDecomposition(K);
+	Matrix K_inv = LUPInverse(KLU.first, KLU.second);
 	std::cout << "Essential:\n";
 	printMatrix(E);
 
-	// std::cout << "errors Essential:\n";
-	// for(i64 i=0;i<8; i++)
-	// 	printMatrix(transpose(K_inv*p1[i])*E*K_inv*p2[i]);
+	std::cout << "errors Essential:\n";
+	for(i64 i=0;i<8; i++)
+		printMatrix(transpose(K_inv*p2[i])*E*K_inv*p1[i]);
 
 
 

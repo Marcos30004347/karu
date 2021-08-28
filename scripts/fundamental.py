@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 
-pts1 = [
+pts1 = np.array([
     6.185e+02,
     6.185e+02,
     3.300e+02,
@@ -18,9 +18,9 @@ pts1 = [
     5.000e+02,
     5.576e+02,
     5.000e+02,
-]
+])
 
-pts2 = [
+pts2 = np.array([
     6.500e+02,
     6.000e+02,
     3.797e+02,
@@ -37,19 +37,29 @@ pts2 = [
     5.000e+02,
     6.135e+02,
     5.000e+02,
-]
+])
 
 pts1 = np.reshape(pts1, (8, 2))
 pts2 = np.reshape(pts2, (8, 2))
 
-
 K = [1600, 0, 500, 0, 1600, 500, 0, 0, 1]
 K = np.reshape(K, (3,3))
 
+F, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_8POINT, 3, 0.99)
 
-F, mask = cv2.findFundamentalMat(pts1, pts2,cv2.FM_8POINT, 3, 0.99)
 print("Fundamental")
 print(F)
+
+p1 = np.array([pts1[0][0], pts1[0][1], 1], dtype=object)
+p2 = np.array([pts2[0][0], pts2[0][1], 1], dtype=object)
+p1 = np.reshape(p1, (3,1))
+p2 = np.reshape(p2, (3,1))
+
+print("******************")
+print(p1)
+print(p2)
+print(p1.T @ F @ p2)
+print("******************")
 
 E = np.dot(np.dot(K.T, F), K)
 print("Essential")
@@ -63,6 +73,7 @@ t = t
 print(r)
 print(t)
 print(pts)
+np.set_printoptions(linewidth=1200)
 
 
 E = [
@@ -97,20 +108,21 @@ def calc_F(uvMat):
     A = np.zeros((len(uvMat),9))
     # img1 x' y' x y im2
     for i in range(len(uvMat)):
-            A[i][0] = uvMat[i][0]*uvMat[i][2]
-            A[i][1] = uvMat[i][1]*uvMat[i][2]
-            A[i][2] = uvMat[i][2]
-            A[i][3] = uvMat[i][0]*uvMat[i][3]
-            A[i][4] = uvMat[i][1]*uvMat[i][3]
-            A[i][5] = uvMat[i][3] 
-            A[i][6] = uvMat[i][0]
-            A[i][7] = uvMat[i][1]
-            A[i][8] = 1.0  
+        A[i][0] = uvMat[i][0]*uvMat[i][2]
+        A[i][1] = uvMat[i][1]*uvMat[i][2]
+        A[i][2] = uvMat[i][2]
+        A[i][3] = uvMat[i][0]*uvMat[i][3]
+        A[i][4] = uvMat[i][1]*uvMat[i][3]
+        A[i][5] = uvMat[i][3] 
+        A[i][6] = uvMat[i][0]
+        A[i][7] = uvMat[i][1]
+        A[i][8] = 1.0  
 
-
+    print(A)
     # print(A)
     u,s,v = np.linalg.svd(A)
-
+    print(s)
+    print(v)
     # v = -1*v
 
     # print(s)
@@ -124,8 +136,11 @@ def calc_F(uvMat):
     f_hat = s @ np.diag([*v[:2], 0]) @ d
 
     return f_hat
+F = calc_F(uv)
 
-print(calc_F(uv))
+print("asdasdasdasdasdasdasdasdsd")
+print(F/F[2,2])
+print("asdasdasdasdasdasdasdasdsd")
 
 E = np.dot(np.dot(K.T, calc_F(uv)), K)
 

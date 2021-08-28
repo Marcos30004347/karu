@@ -229,7 +229,8 @@ f32 applyHouseholderRight(Matrix& X, f32* z, i32 k, i32 n, i32 m, f32* Vk, f32 t
 	// std::cout << "P*z: [\n";
 	// printMatrix(Vkk*zk);
 	// std::cout << "]\n";
-	delete u;
+	delete[] u;
+	delete[] b;
 
 	return alpha;
 }
@@ -466,10 +467,10 @@ f32 house(f32* x, f32* v, i32 n, f32 tol)
 		beta = (2 * (v[0] * v[0])) / (sigma + (v[0] * v[0]));
 
 		v0 = v[0];
-		std::cout << "house\n";
-		for(i = 0; i < n; i++)
-			std::cout << v[i] << " ";
-		std::cout << "\n";
+		// std::cout << "house\n";
+		// for(i = 0; i < n; i++)
+		// 	std::cout << v[i] << " ";
+		// std::cout << "\n";
 
 		for(i = 0; i < n; i++)
 		{
@@ -517,9 +518,9 @@ f32 houseCol(Matrix& A, i32 m, i32 n, i32 j, i32 p, f32* v, f32 tol)
 	for(i = 0; i < m - j; i++)
 	{
 		x[i] = A[j + i][p];	
-		std::cout << A[j + i][p] << " ";
+		// std::cout << A[j + i][p] << " ";
 	}
-	std::cout << "\n";
+	// std::cout << "\n";
 
 	beta = house(x, v, m - j, tol);
 
@@ -543,9 +544,9 @@ f32 houseRow(Matrix& A, i32 m, i32 n, i32 p, i32 j, f32* v, f32 tol)
 	for(i = 0; i < n - j; i++)
 	{
 		x[i] = A[p][i + j];	
-		std::cout << A[p][i + j] << " ";
+		// std::cout << A[p][i + j] << " ";
 	}
-	std::cout << "\n";
+	// std::cout << "\n";
 
 	beta = house(x, v, n - j, tol);
 
@@ -600,7 +601,7 @@ f32 preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 k
 	return A[p][k];
 }
 
-// IF PROBLEM SWITH THE ABOVE FUNCTION BY THIS ONE
+// IF PROBLEM ARRIVES, SWITH THE ABOVE FUNCTION BY THIS ONE
 f32 _preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 k)
 {
 	f32* uA;
@@ -618,18 +619,18 @@ f32 _preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 
 	// 	}
 	// }
 
-	std::cout << "ASDSADASDD\n";
+	// std::cout << "ASDSADASDD\n";
 
-	std::cout << p << " " << m << " " <<  n << "\n"; 
+	// std::cout << p << " " << m << " " <<  n << "\n"; 
 
 	Matrix u_(m - p, 1, u);
 
-	printMatrix(u_*transpose(u_)*beta);
+	// printMatrix(u_*transpose(u_)*beta);
 
 	// A[p:m][k:n] - u[1:m - p] * (beta * u[1:m - p]' * A[p:m][k:n])
 	//		= A[p:m][k:n] - beta * u[1:m - p] * uA[1:n - k]
 	Matrix A_ = A;
-	std::cout << "H:\n";
+	// std::cout << "H:\n";
 	for(i = 0; i < m - p; i++)
 	{
 		f32 Hij = 0.0;
@@ -637,15 +638,15 @@ f32 _preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 
 		{
 			// (I - b*u*u')[i][t]
 			f32 Hit = (i == t ? 1.0 : 0.0) - (beta * u[i] * u[t]);
-			std::cout << Hit << " ";
+			// std::cout << Hit << " ";
 		}
 			// std::cout << Hij << " ";
-		std::cout << "\n";
+		// std::cout << "\n";
 	}
-	std::cout << "\n";
-	printSubMatrix(A, p, m, k, n);
+	// std::cout << "\n";
+	// printSubMatrix(A, p, m, k, n);
 
-	std::cout << "A:\n";
+	// std::cout << "A:\n";
 
 	for(i = 0; i < m - p; i++)
 	{
@@ -671,8 +672,8 @@ f32 _preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 
 
 	A = A_;
 
-	std::cout << "MATRIX\n";
-	printSubMatrix(A, p, m, k, n);
+	// std::cout << "MATRIX\n";
+	// printSubMatrix(A, p, m, k, n);
 	// Store esential part of u where new zeros where introduced.
 	for(i = 0; i < m - (p + 1); i++)
 	{
@@ -753,55 +754,55 @@ void householderBidiagonalization(Matrix& A, f32* diag, f32* sdiag, Matrix& u, M
 
 	for(j = 0; j < n; j++)
 	{
-		std::cout << "***********\n";
+		// std::cout << "***********\n";
 		// printMatrix(A);
 
-		std::cout << "*u*\n";
+		// std::cout << "*u*\n";
 		beta[j] = houseCol(A, m, n, j, j, w, tol);
-		std::cout << "*u*\n";
+		// std::cout << "*u*\n";
 
-		std::cout << "*w*\n";
+		// std::cout << "*w*\n";
 	
-		for(i=0; i < m - j; i++)
-		{
-			std::cout << w[i] << " ";
-		}
-		std::cout << "\n";
+		// for(i=0; i < m - j; i++)
+		// {
+		// 	std::cout << w[i] << " ";
+		// }
+		// std::cout << "\n";
 
-		std::cout << j <<" " <<  m <<" " << n << "\n";
-		std::cout << "beta\n";	
-		std::cout << beta[j] << "\n";
+		// std::cout << j <<" " <<  m <<" " << n << "\n";
+		// std::cout << "beta\n";	
+		// std::cout << beta[j] << "\n";
 	
 		diag[j] = preHouseholderMatrix(w, beta[j], A, m, n, j, j);
 
-		printMatrix(A);
+		// printMatrix(A);
 		if(j < n - 1)
 		{
-			std::cout << "*v*\n";
+			// std::cout << "*v*\n";
 			gamma[j+1] = houseRow(A, m, n, j, j + 1, w, tol);
-			std::cout << "*v*\n";
-			for(i=0; i<n - (j + 1); i++)
-			{
-				std::cout << w[i] << " ";
-			}
-			std::cout << "\n";
+			// std::cout << "*v*\n";
+			// for(i=0; i<n - (j + 1); i++)
+			// {
+			// 	std::cout << w[i] << " ";
+			// }
+			// std::cout << "\n";
 			sdiag[j+1] = posHouseholderMatrix(w, gamma[j+1], A, m, n, j, j + 1);
-			std::cout << "gamma\n";
-			std::cout << gamma[j+1] << "\n";
-			printMatrix(A);
+			// std::cout << "gamma\n";
+			// std::cout << gamma[j+1] << "\n";
+			// printMatrix(A);
 		}
 	}
 
 
-	for(i=0; i<n; i++)
-	{
-		std::cout << beta[i] << " ";
-	}
-	std::cout << "\n";
-	for(i=0; i<n; i++)
-	{
-		std::cout << gamma[i] << " ";
-	}
+	// for(i=0; i<n; i++)
+	// {
+	// 	std::cout << beta[i] << " ";
+	// }
+	// std::cout << "\n";
+	// for(i=0; i<n; i++)
+	// {
+	// 	std::cout << gamma[i] << " ";
+	// }
 
 	// Accumulate left transformations
 	k = m;
