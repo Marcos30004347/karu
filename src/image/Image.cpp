@@ -66,7 +66,7 @@ unsigned char* Image::getImage() {
 }
 
 Buffer Image::createBuffer() {
-    Buffer pixels(this->pixels, this->imageSize, Buffer::READ_WRITE, false);
+    Buffer pixels(this->pixels, sizeof(unsigned char) * this->imageSize, Buffer::READ_WRITE, false);
     return pixels;
 }
 

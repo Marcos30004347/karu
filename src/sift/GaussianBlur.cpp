@@ -88,7 +88,7 @@ void GaussianBlur::run(Buffer *out) {
     
     blur_kernel->setKernelArgument(6, sizeof(u64), &this->numOfChannels);
 	
-	  blur_kernel->enqueue({(u64)(this->rowsSize * this->colSize)}, {1});
+	blur_kernel->enqueue({(u64)(this->rowsSize * this->colSize)}, {1});
     
     out->download();
 

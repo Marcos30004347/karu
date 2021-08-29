@@ -1,34 +1,31 @@
 #include <string.h>
 #include <iostream>
 
-#include "algebra/compute/Compute.hpp"
-#include "sift/GaussianBlur.hpp"
-#include "image/Image.hpp"
+// #include "algebra/compute/Compute.hpp"
+// #include "sift/GaussianBlur.hpp"
+// #include "image/Image.hpp"
+
+#include "sift/Sift.hpp"
+#include "sift/Matcher.cpp"
 
 using namespace karu;
-using namespace karu::algebra::compute;
+// using namespace karu::algebra::compute;
 
 int main() {
 
-    Context::initContext();
+    //Context::initContext();
 
-    Image *img = new Image("../tests/assets/Karoo.png");
-    Image *grayImg = img->getGrayImage();
+    Sift *sift1 = new Sift("../tests/assets/Karoo.png");
+    Sift *sift2 = new Sift("../tests/assets/Karoo.png");
 
-    Buffer pixels = grayImg->createBuffer();
-    Buffer out = grayImg->createEmptyBuffer();
-
-    pixels.upload();
-
-    GaussianBlur *gaussian = new GaussianBlur(5.0, &pixels, grayImg);
-    gaussian->run(&out);
+    sift1->run();
+    sift2->run();
     
-    unsigned char* new_img = (unsigned char*)out.download();
-    Image *newImg = new Image(new_img, grayImg); 
+    // sift1->drawImagesWithKeypoints("daleeee.jpg");
+    // sift2->drawImagesWithKeypoints("daleeee.jpg");
 
-    newImg->writeImage("luizin.jpg", 100);
-
-    Context::stopContext();
+    std::vector<DMatch> matches = matchTwoImages(sift1->src, sift2->src);
+    drawMatches("daleeee.jpg",sift1->src, sift2->src, matches, sift1->keypoints, sift2->keypoints);
 
     return 0;
 }

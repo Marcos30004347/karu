@@ -8,23 +8,26 @@ using namespace algebra::compute;
 
 unsigned char* resizeImage(Image *img, f32 ratioX, f32 ratioY) {
     // Definir o tamanho da nova imagem
-    int newWidth = ceilf(img->width/ratioX);
-    int newHeight = ceilf(img->height/ratioY);
-    int size = newWidth * newHeight * img->channels;
+    int newWidth = (int)ceil(img->width/ratioX);
+    int newHeight = (int)ceil(img->height/ratioY);
+    int size = newWidth * newHeight * (int)(img->channels);
 
     Buffer pixels = img->createBuffer();
-    Buffer out(size, Buffer::READ_WRITE, Buffer::MEM_GPU);
+    Buffer out(size*sizeof(unsigned char), Buffer::READ_WRITE, Buffer::MEM_GPU);
 
     pixels.upload();
+    int largura = (int)img->width;
+    int altura = (int)img->height;
+    int canais = (int)img->channels;
 
     resize_kernel->setKernelArgument(0, pixels);
     resize_kernel->setKernelArgument(1, out);
-    resize_kernel->setKernelArgument(2, sizeof(int), &img->width);
-    resize_kernel->setKernelArgument(3, sizeof(int), &img->height);
-    resize_kernel->setKernelArgument(4, sizeof(int), &img->channels);
+    resize_kernel->setKernelArgument(2, sizeof(int), &largura);
+    resize_kernel->setKernelArgument(3, sizeof(int), &altura);
+    resize_kernel->setKernelArgument(4, sizeof(int), &canais);
 
-    resize_kernel->enqueue({(u64)newHeight * newWidth * img->channels}, {1});
-    
+    printf("=> %i\n",(newHeight * newWidth * (int)(img->channels)));
+    resize_kernel->enqueue({(u64)(newHeight * newWidth * canais)}, {1});
     unsigned char* newImg = (unsigned char*)out.download();
     return newImg;
 }

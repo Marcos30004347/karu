@@ -94,6 +94,7 @@ target_link_libraries(SVDTests karu)
 add_test(NAME SVDTests COMMAND SVDTests)
 
 project(GaussianTests)
+find_package( OpenCV REQUIRED )
 add_executable(GaussianTests gaussian/test1.cpp)
-target_link_libraries(GaussianTests karu)
+target_link_libraries(GaussianTests karu ${OpenCV_LIBS} )
 add_test(NAME GaussianTests COMMAND GaussianTests)

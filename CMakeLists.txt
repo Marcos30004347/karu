@@ -7,6 +7,7 @@ set (CMAKE_CXX_STANDARD 11)
 
 add_subdirectory(vendor/glfw)
 find_package(OpenGL REQUIRED)
+find_package( OpenCV REQUIRED )
 
 # include_directories(${GLEW_INCLUDE_DIRS})
 include_directories(${OPENGL_INCLUDE_DIRS})
@@ -15,6 +16,8 @@ include_directories(${OPENGL_INCLUDE_DIRS})
 link_libraries(${OPENGL_LIBRARIES})
 link_libraries(${OPENGL_gl_LIBRARY})
 link_libraries(${OPENGL_glu_LIBRARY})
+
+
 
 set(GLAD_DIR "vendor/glad")
 add_library("glad" "${GLAD_DIR}/src/glad.c")
@@ -100,6 +103,9 @@ add_library(
     src/sift/GaussianBlur.cpp
     src/sift/Resize.cpp
     src/sift/kernels/kernels.cpp
+    src/sift/Sift.cpp
+    src/sift/Matcher.cpp
+  
 
     src/image/Image.cpp
 )
@@ -116,6 +122,7 @@ target_link_libraries(karu OpenCL::OpenCL)
 target_link_libraries(karu glfw)
 target_link_libraries(karu ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(karu glad)
+target_link_libraries(karu ${OpenCV_LIBS} )
 
 target_compile_definitions(karu PRIVATE DEBUG=1)
 
