@@ -1,5 +1,7 @@
 from sympy import *
 
+init_printing(wrap_line=False)
+
 U11 = Symbol("U[0][0]")
 U12 = Symbol("U[0][1]")
 U13 = Symbol("U[0][2]")
@@ -38,14 +40,33 @@ Mx = Matrix([
     [-s * U23 * V11, -r * U23*V12, r*U22*V12 + s*U21*V11, r*s*U23*V13],
     [-s * U23 * V21, -r * U23*V22, r*U22*V22 + s*U21*V21, r*s*U23*V23],
 ])
+print("det")
+pprint(det(M1))
+print()
+print("det")
+pprint(det(Mx))
+print()
+print()
+print()
+print()
 
 d = det(M1 - x*Mx)
+pprint(M1 - x*Mx)
 
-print(expand(d))
+pprint(expand(d))
 
 poly = Poly(d, x)
-
-print(len(poly.all_coeffs()))
+pprint(poly)
+print()
+pprint(poly.all_coeffs()[0])
+print()
+pprint(poly.all_coeffs()[1])
+print()
+pprint(poly.all_coeffs()[2])
+print()
+pprint(poly.all_coeffs()[3])
+print()
+pprint(poly.all_coeffs()[4])
 
 f = open("src/bundle/codegen/Estimation.hpp", "a")
 
