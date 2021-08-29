@@ -41,7 +41,11 @@ Mx = Matrix([
 
 d = det(M1 - x*Mx)
 
+print(expand(d))
+
 poly = Poly(d, x)
+
+print(len(poly.all_coeffs()))
 
 f = open("src/bundle/codegen/Estimation.hpp", "a")
 
@@ -53,6 +57,7 @@ f.write("double polyCoeff0(double** U, double** V, double s, double r);\n")
 f.write("double polyCoeff1(double** U, double** V, double s, double r);\n")
 f.write("double polyCoeff2(double** U, double** V, double s, double r);\n")
 f.write("double polyCoeff3(double** U, double** V, double s, double r);\n")
+f.write("double polyCoeff4(double** U, double** V, double s, double r);\n")
 
 f.close()
 
@@ -63,9 +68,10 @@ f.truncate(0)
 f.write("#include <cmath>\n")
 f.write("#include \"Estimation.hpp\"\n")
 
-f.write("double polyCoeff0(double** U, double** V, double s, double r)\n{\n return %s;\n}\n\n" % cxxcode(poly.coeffs()[0]))
-f.write("double polyCoeff1(double** U, double** V, double s, double r)\n{\n return %s;\n}\n\n" % cxxcode(poly.coeffs()[1]))
-f.write("double polyCoeff2(double** U, double** V, double s, double r)\n{\n return %s;\n}\n\n" % cxxcode(poly.coeffs()[2]))
-f.write("double polyCoeff3(double** U, double** V, double s, double r)\n{\n return %s;\n}\n\n" % cxxcode(poly.coeffs()[3]))
+f.write("double polyCoeff0(double** U, double** V, double s, double r)\n{\n return %s;\n}\n\n" % cxxcode(poly.all_coeffs()[0]))
+f.write("double polyCoeff1(double** U, double** V, double s, double r)\n{\n return %s;\n}\n\n" % cxxcode(poly.all_coeffs()[1]))
+f.write("double polyCoeff2(double** U, double** V, double s, double r)\n{\n return %s;\n}\n\n" % cxxcode(poly.all_coeffs()[2]))
+f.write("double polyCoeff3(double** U, double** V, double s, double r)\n{\n return %s;\n}\n\n" % cxxcode(poly.all_coeffs()[3]))
+f.write("double polyCoeff4(double** U, double** V, double s, double r)\n{\n return %s;\n}\n\n" % cxxcode(poly.all_coeffs()[4]))
 
 f.close()
