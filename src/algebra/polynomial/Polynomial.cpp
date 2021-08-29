@@ -459,7 +459,9 @@ void Polynomial::roots(std::vector<f32>& roots, f32 tol)
 		}
 		else
 		{
+			std::cout << "ASDASDS\n";
 			x = p.root(tol);
+			std::cout << x << "\n";
 
 			if(std::isnan(x))
 				break;
