@@ -97,23 +97,7 @@ int main()
 	Matrix p2[8] = { p12, p22, p32, p42, p52, p62, p72, p82 };
 	Matrix p1_[8] = { p11, p21, p31, p41, p51, p61, p71, p81 };
 	Matrix p2_[8] = { p12, p22, p32, p42, p52, p62, p72, p82 };
-	// for(i64 i=0;i<8; i++)
-	// {
-	// 	std::cout <<"[\n";
-	// 	printMatrix(p1[i]);
-	// 	std::cout <<"]\n";
-	// }
-	// std::cout <<"\n";
-	// for(i64 i=0;i<8; i++)
-	// {
-	// 	std::cout <<"[\n";
-	// 	printMatrix(p2[i]);
-	// 	std::cout <<"]\n";
-	// }
-	// for(i64 i=0;i<8; i++)
-	// {
-	// 	printMatrix(p1[i]);
-	// }
+
 	Matrix F = eightPointAlgorithm(p1, p2);
 
 	std::cout << "Fundamental:\n";
@@ -122,6 +106,10 @@ int main()
 	std::cout << "errors Fundamental:\n";
 	for(i64 i=0;i<8; i++)
 		printMatrix(transpose(p2_[i])*F*p1_[i]);
+
+	printf("=============\n");
+	estimateCameraFocalLengths(F);
+	printf("=============\n");
 
 	Matrix E = getEssentialMatrix(F, K, K);
 

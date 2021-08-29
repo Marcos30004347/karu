@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include "bundle/codegen/Homography.hpp"
+#include "bundle/codegen/Estimation.hpp"
 #include "algebra/matrix/Matrix.hpp"
 #include "algebra/polynomial/Polynomial.hpp"
 #include "algebra/linear/Linear.hpp"
@@ -739,4 +740,69 @@ void chooseRealizableSolution(Matrix Intrinsics[2], Matrix Rotations[2], Matrix 
 	}
 
 	std::cout << rotation << " " << translation << "\n";
+}
+
+
+void estimateCameraFocalLengths(Matrix& Q)
+{
+	f32 s[4];
+
+	Matrix U, W_T;
+	svd(Q, U, s, W_T);
+
+	if(det3x3(U) < 0)
+	{
+		U = U*-1;
+	}
+
+	if(det3x3(W_T) < 0)
+	{
+		W_T = W_T*-1;
+	}
+
+	Matrix E = Matrix(3,3, {
+		0, 1, 0,
+		-1, 0, 0,
+		0, 0, 1
+	});
+
+	Matrix V = transpose(W_T)*E;
+
+	std::cout << det3x3(U) << "\n";
+	std::cout << det3x3(W_T) << "\n";
+
+	double** U_ = new double*[3];
+	U_[0] = new double[3];
+	U_[1] = new double[3];
+	U_[1] = new double[3];
+
+	double** V_ = new double*[3];
+	V_[0] = new double[3];
+	V_[1] = new double[3];
+	V_[1] = new double[3];
+
+	U_[0][0] = U[0][0]; U_[0][1] = U[0][1]; U_[0][2] = U[0][2];
+	U_[1][0] = U[1][0]; U_[1][1] = U[1][1]; U_[1][2] = U[1][2];
+	U_[2][0] = U[2][0]; U_[2][1] = U[2][1]; U_[2][2] = U[2][2];
+
+	V_[0][0] = V[0][0]; V_[0][1] = V[0][1]; V_[0][2] = V[0][2];
+	V_[1][0] = V[1][0]; V_[1][1] = V[1][1]; V_[1][2] = V[1][2];
+	V_[2][0] = V[2][0]; V_[2][1] = V[2][1]; V_[2][2] = V[2][2];
+
+	double coeff0 = polyCoeff0(U_, V_, s[1], s[0]);
+	double coeff1 = polyCoeff1(U_, V_, s[1], s[0]);
+	double coeff2 = polyCoeff2(U_, V_, s[1], s[0]);
+	double coeff3 = polyCoeff3(U_, V_, s[1], s[0]);
+
+	printf("%f, %f, %f, %f\n", coeff0, coeff1, coeff2, coeff3);
+
+	delete[] U_[0];
+	delete[] U_[1];
+	delete[] U_[2];
+	delete[] U_;
+
+	delete[] V_[0];
+	delete[] V_[1];
+	delete[] V_[2];
+	delete[] V_;
 }

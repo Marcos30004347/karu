@@ -7,7 +7,7 @@ set (CMAKE_CXX_STANDARD 11)
 
 add_subdirectory(vendor/glfw)
 find_package(OpenGL REQUIRED)
-find_package( OpenCV REQUIRED )
+find_package(OpenCV REQUIRED)
 
 # include_directories(${GLEW_INCLUDE_DIRS})
 include_directories(${OPENGL_INCLUDE_DIRS})
@@ -16,7 +16,6 @@ include_directories(${OPENGL_INCLUDE_DIRS})
 link_libraries(${OPENGL_LIBRARIES})
 link_libraries(${OPENGL_gl_LIBRARY})
 link_libraries(${OPENGL_glu_LIBRARY})
-
 
 
 set(GLAD_DIR "vendor/glad")
@@ -80,6 +79,7 @@ add_library(
     src/camera/Camera.cpp
     src/camera/codegen/CameraModel.cpp
     src/bundle/codegen/Homography.cpp
+    src/bundle/codegen/Estimation.cpp
     src/algebra/vector/Vector.cpp
     src/algebra/polynomial/Polynomial.cpp
     src/algebra/matrix/Matrix.cpp
