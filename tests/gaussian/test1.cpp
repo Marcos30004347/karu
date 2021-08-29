@@ -1,26 +1,32 @@
 #include <string.h>
 #include <iostream>
 
-#include "algebra/compute/Compute.hpp"
-#include "sift/GaussianBlur.hpp"
-#include "image/Image.hpp"
-#include "sift/Resize.cpp"
+// #include "algebra/compute/Compute.hpp"
+// #include "sift/GaussianBlur.hpp"
+// #include "image/Image.hpp"
 
-using namespace karu;
-using namespace karu::algebra::compute;
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/features2d/features2d.hpp>
+
+// using namespace karu;
+// using namespace karu::algebra::compute;
 
 int main() {
 
-    Context::initContext();
+    //Context::initContext();
 
-    Image *img = new Image("../tests/assets/Karoo.png");
-    Image *grayImg = img->getGrayImage();
+    cv::Mat src = cv::imread("../tests/assets/Karoo.png", cv::IMREAD_GRAYSCALE);
 
-    // unsigned char *pixelsss = grayImg->getImage();
-    // for (int i=0; i<grayImg->imageSize; i++) {
-    //     std::cout << (int)pixelsss[i] << ", ";
-    // }
+    cv::Ptr<cv::SIFT> sift = cv::SIFT::create();
+    std::vector<cv::KeyPoint> keypoints;
+    sift->detect(src, keypoints);
 
+    std::cout << keypoints[0] << std::endl;
+
+    // Image *img = new Image("../tests/assets/Karoo.png");
+    // Image *grayImg = img->getGrayImage();
 
     // Buffer pixels = grayImg->createBuffer();
     // Buffer out = grayImg->createEmptyBuffer();
@@ -29,18 +35,13 @@ int main() {
 
     // GaussianBlur *gaussian = new GaussianBlur(5.0, &pixels, grayImg);
     // gaussian->run(&out);
-    // u64 newWidth;
-    // u64 newHeight;
+    
+    // unsigned char* new_img = (unsigned char*)out.download();
+    // Image *newImg = new Image(new_img, grayImg); 
 
-    u64 newWidth = ceilf(grayImg->width/2);
-    u64 newHeight = ceilf(grayImg->height/2);
+    // newImg->writeImage("luizin.jpg", 100);
 
-    unsigned char* new_img = resizeImage(grayImg, 2, 2);
-    Image *newImg = new Image(new_img, newWidth, newHeight, grayImg->channels); 
-
-    newImg->writeImage("luizin.jpg", 100);
-
-    Context::stopContext();
+    // Context::stopContext();
 
     return 0;
 }
