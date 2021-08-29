@@ -774,12 +774,12 @@ void estimateCameraFocalLengths(Matrix& Q)
 	double** U_ = new double*[3];
 	U_[0] = new double[3];
 	U_[1] = new double[3];
-	U_[1] = new double[3];
+	U_[2] = new double[3];
 
 	double** V_ = new double*[3];
 	V_[0] = new double[3];
 	V_[1] = new double[3];
-	V_[1] = new double[3];
+	V_[2] = new double[3];
 
 	U_[0][0] = U[0][0]; U_[0][1] = U[0][1]; U_[0][2] = U[0][2];
 	U_[1][0] = U[1][0]; U_[1][1] = U[1][1]; U_[1][2] = U[1][2];
@@ -795,6 +795,7 @@ void estimateCameraFocalLengths(Matrix& Q)
 	double coeff3 = polyCoeff3(U_, V_, s[1], s[0]);
 
 	printf("%f, %f, %f, %f\n", coeff0, coeff1, coeff2, coeff3);
+	std::cout << std::scientific << coeff0 << " " << coeff1 << " " << coeff2 << " " << coeff3 << std::endl; 
 
 	delete[] U_[0];
 	delete[] U_[1];
