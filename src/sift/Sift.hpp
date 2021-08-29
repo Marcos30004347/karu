@@ -8,19 +8,18 @@
 namespace karu {
 
 class Sift {
-private:
+
+public:
     cv::Mat src;
     std::vector<cv::KeyPoint> keypoints;
     cv::Mat descriptors;
-
-public:
-    
+  
     Sift(const char* filePath);
     ~Sift();
 
     void run();
     void drawImagesWithKeypoints(const char* fileName); 
-    
+
 };
 
 }

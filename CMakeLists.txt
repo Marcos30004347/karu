@@ -104,6 +104,7 @@ add_library(
     src/sift/Resize.cpp
     src/sift/kernels/kernels.cpp
     src/sift/Sift.cpp
+    src/sift/Matcher.cpp
   
 
     src/image/Image.cpp

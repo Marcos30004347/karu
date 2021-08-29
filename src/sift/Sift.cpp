@@ -20,4 +20,4 @@ void Sift::drawImagesWithKeypoints(const char* fileName) {
     cv::Mat output;
     cv::drawKeypoints(this->src, this->keypoints, output);
     cv::imwrite(fileName, output);
-} 
+}
