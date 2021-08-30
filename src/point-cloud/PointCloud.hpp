@@ -1,5 +1,7 @@
+#pragma once
 #include "sift/Sift.hpp"
-#include "bundle/BundleAdjustment.hpp"
+#include "algebra/compute/Compute.hpp"
+#include <map>
 
 namespace karu {
 

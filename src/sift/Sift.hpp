@@ -1,5 +1,4 @@
 #pragma once
-#include "algebra/compute/Compute.hpp"
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui/highgui.hpp>

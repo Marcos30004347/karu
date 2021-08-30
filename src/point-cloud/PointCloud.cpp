@@ -1,12 +1,8 @@
-#pragma once
 #include "point-cloud/PointCloud.hpp"
+#include "bundle/BundleAdjustment.hpp"
 #include "sift/Matcher.cpp"
-#include "algebra/linear/Rotation.hpp"
-#include <map>
 
 using namespace karu;
-
-
 
 PointCloud::PointCloud(std::vector<const char*> filesList) {
     this->filesList = filesList;
