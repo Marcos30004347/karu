@@ -56,10 +56,10 @@ int main()
 	{
 		Matrix R = axisAngleToRotationMaxtrix(rotations[i]);
 		
-		Matrix position = (transpose(R)*-1)*positions[i] + position_noises[i];
-		Matrix rotation = rotationMaxtrixToAxisAngle(transpose(R)) + rotation_noises[i];
+		Matrix position = (transpose(R)*-1)*positions[i];
+		Matrix rotation = rotationMaxtrixToAxisAngle(transpose(R));
 
-		CameraBundle cam(
+		CameraBundle camera(
 			3000,
 			3000,
 			500,
@@ -73,11 +73,25 @@ int main()
 
 		for(int j=0; j<5; j++)
 		{
-			Matrix projection = cam.projection(points[j]);
+			Matrix projection = camera.projection(points[j]);
 
 			point_idx.push_back(j);
 			projections.push_back(projection);
 		}
+	
+		R = axisAngleToRotationMaxtrix(rotations[i]);
+		
+		position = (transpose(R)*-1)*positions[i] + position_noises[i];
+		rotation = rotationMaxtrixToAxisAngle(transpose(R)) + rotation_noises[i];
+
+		CameraBundle cam(
+			3000,
+			3000,
+			500,
+			500, 
+			position,
+			rotation
+		);
 
 		bundles.push_back({cam, projections, point_idx});
 	}
