@@ -68,11 +68,6 @@ add_executable(BundleAdjustmentTests bundle/BundleAdjustment.cpp)
 target_link_libraries(BundleAdjustmentTests karu)
 add_test(NAME BundleAdjustmentTests COMMAND BundleAdjustmentTests)
 
-project(BundleHomographyTests)
-add_executable(BundleHomographyTests bundle/Homography.cpp)
-target_link_libraries(BundleHomographyTests karu)
-add_test(NAME BundleHomographyTests COMMAND BundleHomographyTests)
-
 project(PolynomialTests)
 add_executable(PolynomialTests algebra/polynomial/Polynomial.cpp)
 target_link_libraries(PolynomialTests karu)
