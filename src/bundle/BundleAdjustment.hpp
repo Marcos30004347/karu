@@ -62,7 +62,7 @@ without forming S on memory:
 #include "algebra/matrix/Matrix.hpp"
 #include "algebra/sparse/SpMatrix.hpp"
 #include "algebra/linear/Linear.hpp"
-#include "camera/Camera.hpp"
+#include "camera/CameraBundle.hpp"
 
 using namespace karu::algebra;
 
@@ -85,7 +85,7 @@ struct Pixel
 struct Bundle 
 {
 	// Camera parameter
-	Camera camera;
+	CameraBundle camera;
 
 	// Camera observerd points pixel coordinates
 	std::vector<Matrix> projections;
@@ -93,8 +93,6 @@ struct Bundle
 	// idx of the point that projections[i] is the projection in this camera
 	std::vector<u64> point_idx;
 };
-
-
 
 Matrix packObservations(std::vector<Bundle>& bundles, std::vector<Point>& points)
 {

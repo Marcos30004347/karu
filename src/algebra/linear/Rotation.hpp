@@ -43,7 +43,7 @@ Matrix lookAt(Matrix& from, Matrix& to)
  */
 Matrix getRotationMatrix(f32 y, f32 b, f32 a)
 {
-
+	// xy
 	Matrix pitch(3,3, {
 		1, 0, 0,
 		0, cos(y), -1*sin(y),
@@ -56,6 +56,7 @@ Matrix getRotationMatrix(f32 y, f32 b, f32 a)
 		-1*sin(y), 0, cos(y)
 	});
 
+	// 
 	Matrix roll(3,3, {
 		cos(a), -1*sin(a), 0,
 		sin(a), cos(a), 0,
@@ -92,9 +93,9 @@ Matrix axisAngleToRotationMaxtrix(Matrix u)
 	Matrix axis = u/angle;
 
 	Matrix skew(3,3, {
-			0, -1*axis[2][0], axis[1][0],
-			axis[2][0], 0, -1*axis[0][0],
-			-1*axis[1][0], axis[0][0], 0,
+			0, -axis[2][0], axis[1][0],
+			axis[2][0], 0, -axis[0][0],
+			-axis[1][0], axis[0][0], 0,
 	});
 
 	Matrix outer_u(3,3, {

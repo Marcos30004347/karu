@@ -6,6 +6,7 @@
 #include "algebra/matrix/Matrix.hpp"
 #include "algebra/polynomial/Polynomial.hpp"
 #include "algebra/linear/Linear.hpp"
+#include "algebra/linear/Rotation.hpp"
 // #include "algebra/linear/SingularValueDecomposition.hpp"
 // #include "algebra/linear/svd.hpp"
 #include "algebra/SVD/SVD.hpp"
@@ -666,7 +667,7 @@ Matrix triangulate(Matrix p, Matrix p_, Matrix P, Matrix P_)
 
 void chooseRealizableSolution(Matrix Intrinsics[2], Matrix Rotations[2], Matrix Translations[2], Matrix* pts1, Matrix* pts2, i32 n)
 {
-	i32 i, r, t, rotation, translation;
+	i32 i, r, t, rotation = -1, translation = -1;
 
 	Matrix cam0 = Intrinsics[0] * identity(3,4);
 	Matrix cam1(3,4);
@@ -703,7 +704,7 @@ void chooseRealizableSolution(Matrix Intrinsics[2], Matrix Rotations[2], Matrix 
 			for(i = 0; i < n; i++)
 			{
 				Matrix point = triangulate(pts1[i], pts2[i], cam0, cam1);
-
+				
 				// Reproject points		
 				Matrix reprojected0 = cam0 * point;
 				Matrix reprojected1 = cam1 * point;
@@ -725,155 +726,242 @@ void chooseRealizableSolution(Matrix Intrinsics[2], Matrix Rotations[2], Matrix 
 				}
 			}
 		
+			std::cout << realizable << "\n";
+		
 			if(realizable)
 			{
-				rotation = r;
+				rotation    = r;
 				translation = t;
 			}
-			if(!realizable)
-			{
-				break;
-			}
+			// if(!realizable)
+			// {
+			// 	break;
+			// }
 		}
-	
-
 	}
 
 	std::cout << rotation << " " << translation << "\n";
+
+	if(rotation != -1 && translation != -1)
+	{
+		cam1[0][0] = Rotations[rotation][0][0];
+		cam1[1][0] = Rotations[rotation][1][0];
+		cam1[2][0] = Rotations[rotation][2][0];
+		
+		cam1[0][1] = Rotations[rotation][0][1];
+		cam1[1][1] = Rotations[rotation][1][1];
+		cam1[2][1] = Rotations[rotation][2][1];
+
+		cam1[0][2] = Rotations[rotation][0][2];
+		cam1[1][2] = Rotations[rotation][1][2];
+		cam1[2][2] = Rotations[rotation][2][2];
+
+		cam1[0][3] = Translations[translation][0][0];
+		cam1[1][3] = Translations[translation][1][0];
+		cam1[2][3] = Translations[translation][2][0];
+
+		cam1 = Intrinsics[1] * cam1;
+
+		for(i = 0; i < n; i++)
+		{
+			Matrix point = triangulate(pts1[i], pts2[i], cam0, cam1);
+			std::cout << std::fixed << "(" << point[0][0] << ", " << point[1][0] << ", " << point[2][0] << ")\n";
+		}
+	}
 }
 
 
-void estimateCameraFocalLengths(Matrix& Q)
-{
-	f32 singular_values[4];
+// void estimateCameraFocalLengths(Matrix& Q)
+// {
+// 	f32 singular_values[4];
 
-	Matrix U, W_T;
-	svd(Q, U, singular_values, W_T);
+// 	Matrix U, W_T;
+// 	svd(Q, U, singular_values, W_T);
 
-	if(det3x3(U) < 0)
-	{
-		U = U*-1;
-	}
+// 	if(det3x3(U) < 0)
+// 	{
+// 		U = U*-1;
+// 	}
 
-	if(det3x3(W_T) < 0)
-	{
-		W_T = W_T*-1;
-	}
+// 	if(det3x3(W_T) < 0)
+// 	{
+// 		W_T = W_T*-1;
+// 	}
 
-	Matrix E = Matrix(3,3, {
-		0, 1, 0,
-		-1, 0, 0,
-		0, 0, 1
-	});
+// 	Matrix E = Matrix(3,3, {
+// 		0, 1, 0,
+// 		-1, 0, 0,
+// 		0, 0, 1
+// 	});
 
-	Matrix V = transpose(W_T)*E;
+// 	Matrix V = transpose(W_T)*E;
 
-	std::cout << det3x3(U) << "\n";
-	std::cout << det3x3(W_T) << "\n";
+// 	std::cout << det3x3(U) << "\n";
+// 	std::cout << det3x3(W_T) << "\n";
 
-	double** U_ = new double*[3];
-	U_[0] = new double[3];
-	U_[1] = new double[3];
-	U_[2] = new double[3];
+// 	double** U_ = new double*[3];
+// 	U_[0] = new double[3];
+// 	U_[1] = new double[3];
+// 	U_[2] = new double[3];
 
-	double** V_ = new double*[3];
-	V_[0] = new double[3];
-	V_[1] = new double[3];
-	V_[2] = new double[3];
+// 	double** V_ = new double*[3];
+// 	V_[0] = new double[3];
+// 	V_[1] = new double[3];
+// 	V_[2] = new double[3];
 
-	U_[0][0] = U[0][0]; U_[0][1] = U[0][1]; U_[0][2] = U[0][2];
-	U_[1][0] = U[1][0]; U_[1][1] = U[1][1]; U_[1][2] = U[1][2];
-	U_[2][0] = U[2][0]; U_[2][1] = U[2][1]; U_[2][2] = U[2][2];
+// 	U_[0][0] = U[0][0]; U_[0][1] = U[0][1]; U_[0][2] = U[0][2];
+// 	U_[1][0] = U[1][0]; U_[1][1] = U[1][1]; U_[1][2] = U[1][2];
+// 	U_[2][0] = U[2][0]; U_[2][1] = U[2][1]; U_[2][2] = U[2][2];
 
-	V_[0][0] = V[0][0]; V_[0][1] = V[0][1]; V_[0][2] = V[0][2];
-	V_[1][0] = V[1][0]; V_[1][1] = V[1][1]; V_[1][2] = V[1][2];
-	V_[2][0] = V[2][0]; V_[2][1] = V[2][1]; V_[2][2] = V[2][2];
+// 	V_[0][0] = V[0][0]; V_[0][1] = V[0][1]; V_[0][2] = V[0][2];
+// 	V_[1][0] = V[1][0]; V_[1][1] = V[1][1]; V_[1][2] = V[1][2];
+// 	V_[2][0] = V[2][0]; V_[2][1] = V[2][1]; V_[2][2] = V[2][2];
 
-	std::cout << "singular values" << "\n";
-	printMatrix(Matrix(3,1, singular_values));
+// 	std::cout << "singular values" << "\n";
+// 	printMatrix(Matrix(3,1, singular_values));
 
-	double a0 = polyCoeff0(U_, V_, singular_values[1], singular_values[0]);
-	double a1 = polyCoeff1(U_, V_, singular_values[1], singular_values[0]);
-	double a2 = polyCoeff2(U_, V_, singular_values[1], singular_values[0]);
-	double a3 = polyCoeff3(U_, V_, singular_values[1], singular_values[0]);
+// 	double a0 = polyCoeff0(U_, V_, singular_values[1], singular_values[0]);
+// 	double a1 = polyCoeff1(U_, V_, singular_values[1], singular_values[0]);
+// 	double a2 = polyCoeff2(U_, V_, singular_values[1], singular_values[0]);
+// 	double a3 = polyCoeff3(U_, V_, singular_values[1], singular_values[0]);
 
-	if(-a1/a3 < 0)
-	{
-		std::cout << "No real root of polynomial exists, ";
-		std::cout << "so it is no possible to estimate the camera focal lengths. ";
-		std::cout << "The system is probably ill conditionated or suffer from too much noise!\n";
-		abort();
-	}
+// 	if(-a1/a3 < 0)
+// 	{
+// 		std::cout << "No real root of polynomial exists, ";
+// 		std::cout << "so it is no possible to estimate the camera focal lengths. ";
+// 		std::cout << "The system is probably ill conditionated or suffer from too much noise!\n";
+// 		abort();
+// 	}
 
-	f32 x = sqrt(-a1/a3);
+// 	f32 x = sqrt(-a1/a3);
 
-	double r = singular_values[0];
-	double s = singular_values[1];
+// 	double r = singular_values[0];
+// 	double s = singular_values[1];
 
-	Matrix M1(4,4, {
-		U[0][0]*V[0][2], U[0][1]*V[0][2], U[0][2]*V[0][2], r * U[0][0]*V[0][0] + s*U[0][1]*V[0][1],
-		U[0][0]*V[1][2], U[0][1]*V[1][2], U[0][2]*V[1][2], r * U[0][0]*V[1][0] + s*U[0][1]*V[1][1],
-		U[1][0]*V[0][2], U[1][1]*V[0][2], U[1][2]*V[0][2], r * U[1][0]*V[0][0] + s*U[1][1]*V[0][1],
-		U[1][0]*V[1][2], U[1][1]*V[1][2], U[1][2]*V[1][2], r * U[1][0]*V[1][0] + s*U[1][1]*V[1][1],
-	});
+// 	Matrix M1(4,4, {
+// 		U[0][0]*V[0][2], U[0][1]*V[0][2], U[0][2]*V[0][2], r * U[0][0]*V[0][0] + s*U[0][1]*V[0][1],
+// 		U[0][0]*V[1][2], U[0][1]*V[1][2], U[0][2]*V[1][2], r * U[0][0]*V[1][0] + s*U[0][1]*V[1][1],
+// 		U[1][0]*V[0][2], U[1][1]*V[0][2], U[1][2]*V[0][2], r * U[1][0]*V[0][0] + s*U[1][1]*V[0][1],
+// 		U[1][0]*V[1][2], U[1][1]*V[1][2], U[1][2]*V[1][2], r * U[1][0]*V[1][0] + s*U[1][1]*V[1][1],
+// 	});
 
-	Matrix Mx(4,4, {
-		-s*U[0][2]*V[0][0], -r*U[0][2]*V[0][1], r*U[0][1]*V[0][1] + s*U[0][0]*V[0][0], r*s*U[0][2]*V[0][2], 
-		-s*U[0][2]*V[1][0], -r*U[0][2]*V[1][1], r*U[0][1]*V[1][1] + s*U[0][0]*V[1][0], r*s*U[0][2]*V[1][2], 
-		-s*U[1][2]*V[0][0], -r*U[1][2]*V[0][1], r*U[1][1]*V[0][1] + s*U[1][0]*V[0][0], r*s*U[1][2]*V[0][2], 
-		-s*U[1][2]*V[1][0], -r*U[1][2]*V[1][1], r*U[1][1]*V[1][1] + s*U[1][0]*V[1][0], r*s*U[1][2]*V[1][2], 
-	});
+// 	Matrix Mx(4,4, {
+// 		-s*U[0][2]*V[0][0], -r*U[0][2]*V[0][1], r*U[0][1]*V[0][1] + s*U[0][0]*V[0][0], r*s*U[0][2]*V[0][2], 
+// 		-s*U[0][2]*V[1][0], -r*U[0][2]*V[1][1], r*U[0][1]*V[1][1] + s*U[0][0]*V[1][0], r*s*U[0][2]*V[1][2], 
+// 		-s*U[1][2]*V[0][0], -r*U[1][2]*V[0][1], r*U[1][1]*V[0][1] + s*U[1][0]*V[0][0], r*s*U[1][2]*V[0][2], 
+// 		-s*U[1][2]*V[1][0], -r*U[1][2]*V[1][1], r*U[1][1]*V[1][1] + s*U[1][0]*V[1][0], r*s*U[1][2]*V[1][2], 
+// 	});
 
-	Matrix Us, Vs_T, S = M1 - Mx*x;
+// 	Matrix Us, Vs_T, S = M1 - Mx*x;
 
-	f32 Ss[4];
+// 	f32 Ss[4];
 
-	svd(S, Us, Ss, Vs_T);
+// 	svd(S, Us, Ss, Vs_T);
+// 	printMatrix(Vs_T);
 
-	printMatrix(Vs_T);
-	std::cout << "\n";
-	f32 a = Vs_T[3][0]/Vs_T[3][3];
-	f32 b = Vs_T[3][1]/Vs_T[3][3];
-	f32 y = Vs_T[3][2]/Vs_T[3][3];
-	std::cout << "S*[a,b,y,1] = 0?\n";
+// 	std::cout << "\n";
+// 	f32 a = Vs_T[3][0]/Vs_T[3][3];
+// 	f32 b = Vs_T[3][1]/Vs_T[3][3];
+// 	f32 y = Vs_T[3][2]/Vs_T[3][3];
+// 	std::cout << "S*[a,b,y,1] = 0?\n";
 
-	printMatrix(S*Matrix(4,1, {a, b, y, 1}));
+// 	printMatrix(S*Matrix(4,1, {a, b, y, 1}));
 
-	std::cout << "\n";
-	Matrix X_aby(3,3, {
-		r, 0, a,
-		0, s, b,
-		0, 0, y
-	});
+// 	std::cout << "\n";
+// 	Matrix X_aby(3,3, {
+// 		r, 0, a,
+// 		0, s, b,
+// 		0, 0, y
+// 	});
 
-	Matrix Xx_aby(3,3, {
-		 s*y,    0,   0,
-		   0,  r*y,   0,
-		-s*a, -r*b, r*s,
-	});
+// 	Matrix Xx_aby(3,3, {
+// 		 s*y,    0,   0,
+// 		   0,  r*y,   0,
+// 		-s*a, -r*b, r*s,
+// 	});
 
-	Matrix f = U * X_aby  * transpose(V);
-	Matrix g = U * Xx_aby * transpose(V);
+// 	Matrix f = U * X_aby  * transpose(V);
+// 	Matrix g = U * Xx_aby * transpose(V);
 	
-	printMatrix(f);
-	std::cout << "\n";
-	printMatrix(g);
+// 	printMatrix(f);
+// 	std::cout << "\n";
+// 	printMatrix(g);
 
-	f32 k2 = sqrt(x * g[2][0] / f[2][0]); 
-	std::cout << k2 << "\n"; 
-	std::cout << x * g[2][1] / f[2][1] << "\n"; 
+// 	f32 k2 = sqrt(x * g[2][0] / f[2][0]); 
+// 	std::cout << k2 << "\n"; 
+// 	std::cout << x * g[2][1] / f[2][1] << "\n"; 
 
-	f32 k1 = sqrt(f[0][2] / (x * g[0][2])); 
-	std::cout << k1 << "\n"; 
-	std::cout << f[1][2] / (x * g[1][2]) << "\n"; 
+// 	f32 k1 = sqrt(f[0][2] / (x * g[0][2])); 
+// 	std::cout << k1 << "\n"; 
+// 	std::cout << f[1][2] / (x * g[1][2]) << "\n"; 
 
-	delete[] U_[0];
-	delete[] U_[1];
-	delete[] U_[2];
-	delete[] U_;
+// 	delete[] U_[0];
+// 	delete[] U_[1];
+// 	delete[] U_[2];
+// 	delete[] U_;
 
-	delete[] V_[0];
-	delete[] V_[1];
-	delete[] V_[2];
-	delete[] V_;
+// 	delete[] V_[0];
+// 	delete[] V_[1];
+// 	delete[] V_[2];
+// 	delete[] V_;
+// }
+
+
+Matrix skew(Matrix v)
+{
+	return Matrix(3,3, {
+		0, -v[2][0], v[1][0],
+		v[2][0], 0, -v[0][0],
+		-v[1][0], v[0][0], 0,
+	});
+}
+
+void estimateCameraFocalLengths(Matrix F, Matrix p1, Matrix p2, f32* f1, f32* f2)
+{
+	Matrix Uf, Vf_T;
+	Matrix Uft, Vft_T;
+
+	f32 Sf[3];
+	f32 Sft[3];
+
+	Matrix F_T = transpose(F); 
+
+	svd(F, Uf, Sf, Vf_T);
+	svd(F_T, Uft, Sft, Vft_T);
+
+	Matrix e2  = Matrix(3, 1, { Vf_T[2][0], Vf_T[2][1], Vf_T[2][2] });
+	Matrix e1 = Matrix(3, 1, { Vft_T[2][0], Vft_T[2][1], Vft_T[2][2] });
+	
+	Matrix I2 = identity(3,3);
+	I2[2][2] = 0;
+
+	Matrix f1_2_num = transpose(p1) * skew(e2) * I2 * F * p1 * transpose(p1) * transpose(F) * p1;
+	Matrix f1_2_den = transpose(p1) * skew(e2) * I2 * transpose(F) * I2 * F * p1;
+	
+	Matrix f2_2_num = transpose(p2) * skew(e1) * I2 * transpose(F) * p2 * transpose(p2) * transpose(F) * p2;
+	Matrix f2_2_den = transpose(p2) * skew(e1) * I2 * F * I2 * transpose(F) * p2;
+	
+	*f1 = f1_2_num[0][0]/f1_2_den[0][0];
+
+	if(*f1 < 0)
+	{
+		*f1 = sqrt(-*f1);
+	}
+	else
+	{
+		*f1 = sqrt(*f1);
+	}
+
+	*f2 = f2_2_num[0][0]/f2_2_den[0][0];
+
+	if(*f2 < 0)
+	{
+		*f2 = sqrt(-*f2);
+	}
+	else
+	{
+		*f2 = sqrt(*f2);
+	}
+
+	std::cout << *f1 << " " << *f2 << "\n";
 }

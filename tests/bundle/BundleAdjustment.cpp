@@ -74,10 +74,12 @@ int main()
 			projections.push_back(projection);
 		}
 
-		Matrix position = positions[i] + position_noises[i];
-		Matrix rotation = rotations[i] + rotation_noises[i];
+		Matrix R = axisAngleToRotationMaxtrix(rotations[i]);
 		
-		Camera cam(
+		Matrix position = (transpose(R)*-1)*positions[i] + position_noises[i];
+		Matrix rotation = rotationMaxtrixToAxisAngle(transpose(R)) + rotation_noises[i];
+
+		CameraBundle cam(
 			3000,
 			3000,
 			500,
@@ -127,7 +129,6 @@ int main()
 		{
 				u64 k = bundles[j].point_idx[i];
 				Matrix r = bundles[j].projections[i] - bundles[j].camera.projection(points[k]);
-				// printMatrix(r);
 				std::cout << "Reprojection Error: " << norm(r) << "\n";
 		}
 	}
@@ -151,87 +152,5 @@ int main()
 		std::cout << "\n";
 	}
 
-	// hessian(bundles, points, point_idx_to_camera, 0.0, U, V, W, W_T);
-	// buildHessianVInverse(V, V_inv);
-	
-	// std::vector<u64> row_ptr = U.m_data.rowPtr();
-	// for(int i=0; i<row_ptr.size(); i++)
-	// {
-	// 	std::cout << row_ptr[i] << " ";
-	// }
-	// std::cout << "\n";
-	// std::vector<u64> col_idx = U.m_data.columnsIdx();
-	// for(int i=0; i<col_idx.size(); i++)
-	// {
-	// 	std::cout << col_idx[i] << " ";
-	// }
-	// std::cout << "\n";
-	// printMatrix(U);
-	// std::cout << "\n";
-
-	// row_ptr = W_T.m_data.rowPtr();
-	// for(int i=0; i<row_ptr.size(); i++)
-	// {
-	// 	std::cout << row_ptr[i] << " ";
-	// }
-	// std::cout << "\n";
-	// col_idx = W_T.m_data.columnsIdx();
-	// for(int i=0; i<col_idx.size(); i++)
-	// {
-	// 	std::cout << col_idx[i] << " ";
-	// }
-
-	// std::cout << "\n";
-	// printMatrix(W_T);
-	// std::cout << "\n";
-
-	// row_ptr = W.m_data.rowPtr();
-	// for(int i=0; i<row_ptr.size(); i++)
-	// {
-	// 	std::cout << row_ptr[i] << " ";
-	// }
-	// std::cout << "\n";
-	// col_idx = W.m_data.columnsIdx();
-	// for(int i=0; i<col_idx.size(); i++)
-	// {
-	// 	std::cout << col_idx[i] << " ";
-	// }
-
-	// std::cout << "\n";
-	// printMatrix(W);
-	// std::cout << "\n";
-
-	// row_ptr = V.m_data.rowPtr();
-	// for(int i=0; i<row_ptr.size(); i++)
-	// {
-	// 	std::cout << row_ptr[i] << " ";
-	// }
-	// std::cout << "\n";
-	// col_idx = V.m_data.columnsIdx();
-	// for(int i=0; i<col_idx.size(); i++)
-	// {
-	// 	std::cout << col_idx[i] << " ";
-	// }
-
-	// std::cout << "\n";
-	// printMatrix(V);
-	// std::cout << "\n";
-
-	// row_ptr = V_inv.m_data.rowPtr();
-	// for(int i=0; i<row_ptr.size(); i++)
-	// {
-	// 	std::cout << row_ptr[i] << " ";
-	// }
-	// std::cout << "\n";
-	// col_idx = V_inv.m_data.columnsIdx();
-	// for(int i=0; i<col_idx.size(); i++)
-	// {
-	// 	std::cout << col_idx[i] << " ";
-	// }
-	// std::cout << "\n";
-	// printMatrix(V_inv);
-	// std::cout << "\n";
-
-	// algebra::compute::Context::stopContext();
 	return 0;
 }
