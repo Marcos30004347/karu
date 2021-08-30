@@ -22,7 +22,7 @@ void PointCloud::run() {
     }
 
     for (int i=0; i<this->sifts.size(); i++) {
-        PointAux* aux = new PointAux;
+        PointAux* aux = new PointAux();
         aux->img_idx = i;
         for (int j=i+1; j<this->sifts.size(); j++) {
             std::vector<cv::DMatch> matches = matchTwoImages(this->sifts[i]->descriptors, this->sifts[j]->descriptors);
@@ -101,6 +101,28 @@ void PointCloud::run() {
                 }
             }
         }
+    }
+
+    std::vector<bundle::Bundle> bundles;
+
+    // Create Bundles
+    for (int i=0; i<this->sifts.size(); i++) {
+        bundles.push_back({
+            
+        })
+
+        // Criar a camera
+
+
+        // Criar as projections
+        Sift *sift = this->sifts[i];
+        for (const cv::KeyPoint& keypoint : sift->keypoints) {
+            float x = keypoint.pt.x;
+            float y = keypoint.pt.y;
+
+        }
+
+        // Add o global keypoints da imagem
     }
 
 }
