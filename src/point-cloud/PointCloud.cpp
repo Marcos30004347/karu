@@ -34,41 +34,6 @@ void PointCloud::run() {
         this->allMatches.push_back(aux);
     }
 
-    // u64 idx = 0;
-    // std::vector<std::pair<u64,u64>> lista;
-    // std::map<u64,std::vector<std::pair<u64,u64>>>::iterator it;
-    // for (it=this->allMatches[0]->keyMap.begin(); it!=this->allMatches[0]->keyMap.end();  it++) {
-    //     lista.push_back({it->first, idx});
-    //     idx++;
-    // }
-    
-    // para cada imagem
-    // for (int i=1; i<this->sifts.size(); i++) {
-
-    //     // para cada keymap dentro de cada PointAux
-    //     for (it=this->allMatches[i]->keyMap.begin(); it!=this->allMatches[i]->keyMap.end();  it++) {
-    //         bool flag = false;
-
-    //         // para cada match do keypoint
-    //         for(int j=0; j<it->second.size(); j++) {
-    //             flag = false;
-
-    //             // se deu match com alguma imagem anterior, colocar indice do keypoint "anterior"
-    //             if(it->second[j].second < i) {
-    //                 flag = true;
-    //                 lista.push_back();
-    //                 break;   
-    //             }
-    //         }
-
-    //         // senao, keypoint novo, add na lista
-    //         if(!flag){
-    //             lista.push_back({it->first, idx});
-    //             idx++;
-    //         }
-    //     }
-    // }
-
     std::vector<std::vector<u64>> globalKeypoints;
 
     // Passando por cada Point Aux e criando um vetor com o tamanho de todos os keypoints que deram match
@@ -107,22 +72,25 @@ void PointCloud::run() {
 
     // Create Bundles
     for (int i=0; i<this->sifts.size(); i++) {
-        bundles.push_back({
-            
-        })
-
         // Criar a camera
 
 
         // Criar as projections
         Sift *sift = this->sifts[i];
+        std::vector<Matrix> projections;
         for (const cv::KeyPoint& keypoint : sift->keypoints) {
             float x = keypoint.pt.x;
             float y = keypoint.pt.y;
-
+            projections.push_back(Matrix(3,1, { x, y, 1 }));
         }
 
         // Add o global keypoints da imagem
+        std::vector<u64> point_idx = globalKeypoints[i];
+
+        // Add to bundles   
+        bundles.push_back({
+
+        });
     }
 
 }
