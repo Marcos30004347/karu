@@ -69,7 +69,7 @@ public:
 	// Project the point (X,Y,Z)
 	algebra::Matrix projection(algebra::Matrix pos)
 	{
-		f32 x = u(
+		f32 x = bund_u(
 			this->fx,
 			this->fy,
 			this->cx,
@@ -90,7 +90,7 @@ public:
 			pos[2][0]
 		);
 
-		f32 y = v(
+		f32 y = bund_v(
 			this->fx,
 			this->fy,
 			this->cx,

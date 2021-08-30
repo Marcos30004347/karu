@@ -54,26 +54,6 @@ int main()
 
 	for(u64 i=0; i<3; i++)
 	{
-		Camera camera(
-			3000,
-			3000,
-			500,
-			500, 
-			positions[i],
-			rotations[i]
-		);
-	
-		std::vector<u64> point_idx;
-		std::vector<Matrix> projections;
-
-		for(int j=0; j<5; j++)
-		{
-			Matrix projection = camera.projection(points[j]);
-
-			point_idx.push_back(j);
-			projections.push_back(projection);
-		}
-
 		Matrix R = axisAngleToRotationMaxtrix(rotations[i]);
 		
 		Matrix position = (transpose(R)*-1)*positions[i] + position_noises[i];
@@ -87,7 +67,18 @@ int main()
 			position,
 			rotation
 		);
-		
+
+		std::vector<u64>    point_idx;
+		std::vector<Matrix> projections;
+
+		for(int j=0; j<5; j++)
+		{
+			Matrix projection = cam.projection(points[j]);
+
+			point_idx.push_back(j);
+			projections.push_back(projection);
+		}
+
 		bundles.push_back({cam, projections, point_idx});
 	}
 

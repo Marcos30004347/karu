@@ -60,7 +60,6 @@ int main()
 		}
 	}
 
-
 	Matrix p1[8] = {
 		projections[0][0],
 		projections[0][1],
@@ -72,7 +71,7 @@ int main()
 		projections[0][7]
 	};
 
-	Matrix p1[8] = {
+	Matrix p2[8] = {
 		projections[1][0],
 		projections[1][1],
 		projections[1][2],
@@ -82,6 +81,7 @@ int main()
 		projections[1][6],
 		projections[1][7]
 	};
+
 	Matrix F = eightPointAlgorithm(p1, p2);
 
 	f32 f1, f2;
@@ -115,7 +115,7 @@ int main()
 	Matrix T[2] = {t1, t2};
 	Matrix I[2] = {K1, K2};
 
-	Matrix p1[8] = {
+	Matrix points1[8] = {
 		projections[0][0],
 		projections[0][1],
 		projections[0][2],
@@ -126,7 +126,7 @@ int main()
 		projections[0][7]
 	};
 
-	Matrix p1[8] = {
+	Matrix points2[8] = {
 		projections[1][0],
 		projections[1][1],
 		projections[1][2],
