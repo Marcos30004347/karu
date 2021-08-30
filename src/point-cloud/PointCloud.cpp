@@ -73,7 +73,7 @@ void PointCloud::run() {
     // Create Bundles
     for (int i=0; i<this->sifts.size(); i++) {
         // Criar a camera
-
+        Camera cam = Camera();
 
         // Criar as projections
         Sift *sift = this->sifts[i];
@@ -89,7 +89,7 @@ void PointCloud::run() {
 
         // Add to bundles   
         bundles.push_back({
-
+            cam, projections, point_idx
         });
     }
 
