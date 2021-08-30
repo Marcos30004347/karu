@@ -10,3 +10,4 @@ References:
 [6] Matrix Computations (4th and 3th Editions)- Gene H.Golub and Charles F. Van Loan
 [7] Handbook Series Linear Algebra, Singular Value Decomposition and Least Squares Solutions - G. H. Golub and C. Reinsch
 [8] Revisiting Hartley’s Normalized Eight-Point Algorithm - Wojciech Chojnacki, Michael J. Brooks, Anton van den Hengel, and Darren Gawley
+[9] Robust Focal Length Computation - Oleh Rybkin

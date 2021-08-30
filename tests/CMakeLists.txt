@@ -98,3 +98,8 @@ find_package( OpenCV REQUIRED )
 add_executable(GaussianTests gaussian/test1.cpp)
 target_link_libraries(GaussianTests karu ${OpenCV_LIBS} )
 add_test(NAME GaussianTests COMMAND GaussianTests)
+
+project(CameraTests)
+add_executable(CameraTests camera/Camera.cpp)
+target_link_libraries(CameraTests karu)
+add_test(NAME CameraTests COMMAND CameraTests)

@@ -76,7 +76,7 @@ add_library(
     src/algebra/compute/lib/Reduce.cpp
     src/algebra/compute/lib/Commom.cpp
     src/algebra/compute/lib/kernels/kernels.cpp
-    src/camera/Camera.cpp
+    src/camera/codegen/CameraModelBundle.cpp
     src/camera/codegen/CameraModel.cpp
     src/bundle/codegen/Homography.cpp
     src/bundle/codegen/Estimation.cpp
