@@ -20,6 +20,8 @@ int main() {
 
     sift1->run();
     sift2->run();
+
+    std::cout << sift1->src.size[1] << std::endl;
     
     // sift1->drawImagesWithKeypoints("daleeee.jpg");
     // sift2->drawImagesWithKeypoints("daleeee.jpg");
