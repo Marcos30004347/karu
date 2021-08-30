@@ -997,15 +997,6 @@ void placeBundlesAndGetInitialPoints(
 					relativePosition[b1][b2][2][3],
 				});
 
-				Camera camera2(
-					bundles[b1].camera.fx,
-					bundles[b1].camera.fy,
-					bundles[b1].camera.cx,
-					bundles[b1].camera.cy,
-					transpose(R)*-1*T,
-					rotationMaxtrixToAxisAngle(transpose(R))
-				);
-
 				Camera camera1(
 					bundles[b1].camera.fx,
 					bundles[b1].camera.fy,
@@ -1015,11 +1006,26 @@ void placeBundlesAndGetInitialPoints(
 					rotationMaxtrixToAxisAngle(getRotationMatrix(2*PI, 2*PI, 2*PI))
 				);
 
-				printMatrix(camera2.projection(triangulated_points[0])); 
-				printMatrix(camera1.projection(triangulated_points[0])); 
+				Camera camera2(
+					bundles[b1].camera.fx,
+					bundles[b1].camera.fy,
+					bundles[b1].camera.cx,
+					bundles[b1].camera.cy,
+					transpose(R)*-1*T,
+					rotationMaxtrixToAxisAngle(transpose(R))
+				);
 
+				printMatrix(camera2.projection(points[0])); 
+				printMatrix(camera1.projection(points[0])); 
 				printMatrix(bundles[b2].projections[0]);
 				printMatrix(bundles[b1].projections[0]);
+
+				Matrix axis1 = rotationMaxtrixToAxisAngle(getRotationMatrix(2*PI, 2*PI, 2*PI));
+
+				bundles[b1].camera.R = rotationMaxtrixToAxisAngle(axisAngleToRotationMaxtrix(bundles[b1].camera.R) * getRotationMatrix(2*PI, 2*PI, 2*PI));
+				bundles[b1].camera.P = bundles[b1].camera.P + Matrix(3,1, {0,0,0});
+				bundles[b2].camera.R = rotationMaxtrixToAxisAngle(axisAngleToRotationMaxtrix(bundles[b1].camera.R) * transpose(R));
+				bundles[b2].camera.P = bundles[b2].camera.P + transpose(R)*-1*T;
 			}
 		}
 	}

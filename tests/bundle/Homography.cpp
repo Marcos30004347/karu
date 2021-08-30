@@ -84,7 +84,14 @@ int main()
 	std::vector<Matrix> wPoints;
 
 	bundles.push_back({
-		Camera(0,0, 500, 500, Matrix(3,1), Matrix(3,1)),
+		Camera(
+			0,
+			0,
+			500,
+			500,
+			Matrix(3,1, {0, 0, 0}),
+			rotationMaxtrixToAxisAngle(getRotationMatrix(2*PI, 2*PI, 2*PI))
+		),
 		{	
 			projections[0][0],
 			projections[0][1],
@@ -99,7 +106,14 @@ int main()
 	});
 
 	bundles.push_back({
-		Camera(0,0, 500, 500, Matrix(3,1), Matrix(3,1)),
+		Camera(
+			0,
+			0,
+			500,
+			500,
+			Matrix(3,1, {0, 0, 0}),
+			rotationMaxtrixToAxisAngle(getRotationMatrix(2*PI, 2*PI, 2*PI))
+		),
 		{	
 			projections[1][0],
 			projections[1][1],
