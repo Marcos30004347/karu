@@ -35,15 +35,15 @@ int main()
 	};
 
 	std::vector<Matrix> position_noises = {
-		Matrix(3,1, { 8, 7, 5 }),
-		Matrix(3,1, { 6, 4, 10 }),
-		Matrix(3,1, { 9, 7, 1 }),
+		Matrix(3,1, { 0.005, 0.04, 0.01 }),
+		Matrix(3,1, { 0.01, 0.006, 0.05 }),
+		Matrix(3,1, { 0.004, 0.01, 0.003 }),
 	};
 
 	std::vector<Matrix> rotation_noises = {
-		Matrix(3,1, { 0.1, 0.3, 0.1 }),
-		Matrix(3,1, { 0.6, 0.7, 0.1 }),
-		Matrix(3,1, { 0.3, 0.2, 0.1 }),
+		Matrix(3,1, { 0.001, 0.03, 0.01 }),
+		Matrix(3,1, { 0.06, 0.007, 0.01 }),
+		Matrix(3,1, { 0.03, 0.02, 0.01 }),
 	};
 
 	std::vector<Matrix> rotations = {
@@ -54,18 +54,13 @@ int main()
 
 	for(u64 i=0; i<3; i++)
 	{
-		Matrix R = axisAngleToRotationMaxtrix(rotations[i]);
-		
-		Matrix position = (transpose(R)*-1)*positions[i];
-		Matrix rotation = rotationMaxtrixToAxisAngle(transpose(R));
-
-		CameraBundle camera(
-			3000,
-			3000,
+		Camera camera(
+			1520,
+			1520,
 			500,
 			500, 
-			position,
-			rotation
+			positions[i],
+			rotations[i]
 		);
 
 		std::vector<u64>    point_idx;
@@ -74,23 +69,17 @@ int main()
 		for(int j=0; j<5; j++)
 		{
 			Matrix projection = camera.projection(points[j]);
-
 			point_idx.push_back(j);
 			projections.push_back(projection);
 		}
-	
-		R = axisAngleToRotationMaxtrix(rotations[i]);
-		
-		position = (transpose(R)*-1)*positions[i] + position_noises[i];
-		rotation = rotationMaxtrixToAxisAngle(transpose(R)) + rotation_noises[i];
 
-		CameraBundle cam(
-			3000,
-			3000,
+		Camera cam(
+			1520,
+			1520,
 			500,
 			500, 
-			position,
-			rotation
+			positions[i] + position_noises[i],
+			rotations[i] + rotation_noises[i]
 		);
 
 		bundles.push_back({cam, projections, point_idx});
@@ -104,28 +93,32 @@ int main()
 		for(u64 i : bundles[j].point_idx)
 			point_idx_to_camera[i].push_back(j);
 
+	points[0] = points[0] + Matrix(3,1, {0.1, 0.01, 0.01});
+	points[1] = points[1] + Matrix(3,1, {0.01, 0.01, 0.01});
+	points[2] = points[2] + Matrix(3,1, {0.01, 0.0, 0.01});
+	points[3] = points[3] + Matrix(3,1, {0.01, 0.01, 0.1});
+	points[4] = points[4] + Matrix(3,1, {0.01, 0.1, 0.01});
 
 	for(u64 j=0; j<bundles.size(); j++)
 	{
 		for(u64 i=0; i<bundles[j].projections.size(); i++)
 		{
-				u64 k = bundles[j].point_idx[i];
-				Matrix r = bundles[j].projections[i] - bundles[j].camera.projection(points[k]);
+				Matrix r = bundles[j].projections[i] - bundles[j].camera.projection(points[bundles[j].point_idx[i]]);
 				std::cout << norm(r) << "\n";
 		}
 	}
 
-	f32 lambda = 0.0;
+	f32 lambda = 1.0;
+	i32 it = 0;
+	i32 max_it = 20000;
 
 	do
 	{
-		solveNormalEquations(bundles, points, point_idx_to_camera, lambda);
-		std::cout << "converging: " << lambda << std::endl;
-	} while (lambda > 0.1);
+		it++;
+		solveNormalEquations(bundles, points, point_idx_to_camera, lambda * lambda, lambda);
+		std::cout << "step(" << it << "): error = " << lambda << std::endl;
+	} while (lambda > 0.9 && it < max_it);
 	
-	
-	std::cout << "\n";
-	std::cout << "\n";
 	std::cout << "\n";
 
 	for(u64 j=0; j<bundles.size(); j++)
@@ -137,9 +130,7 @@ int main()
 				std::cout << "Reprojection Error: " << norm(r) << "\n";
 		}
 	}
-	
-	std::cout << "\n";
-	std::cout << "\n";
+
 	std::cout << "\n";
 
 	for(i64 j=0; j<bundles.size(); j++)

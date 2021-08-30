@@ -24,12 +24,6 @@ int main()
 		Matrix(3,1, { 0.0, 2.2214415, 2.2214415 }),
 	};
 
-	// printMatrix(rotations[2]);
-	// std::cout << "\n";
-	// printMatrix(axisAngleToRotationMaxtrix(rotations[2]));
-	// std::cout << "\n";
-	// printMatrix(rotationMaxtrixToAxisAngle(axisAngleToRotationMaxtrix(rotations[2])));
-
 	Camera camera(
 		3000,
 		3000,
