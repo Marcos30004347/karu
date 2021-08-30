@@ -117,8 +117,6 @@ void PointCloud::run() {
         if (found) break;
 
     }
-    
-    std::vector<bundle::Bundle> bundles;
 
     std::vector<Matrix> projections1, projections2;
     
@@ -163,6 +161,7 @@ void PointCloud::run() {
         algebra::rotationMaxtrixToAxisAngle(getRotationMatrix(2*PI, 2*PI, 2*PI))
     );
     
+    std::vector<bundle::Bundle> bundles;
 
     // Add to bundles   
     bundles.push_back({
@@ -177,17 +176,22 @@ void PointCloud::run() {
         pointIdx2
     });
 
-    
+    std::vector<std::vector<u64>> point_idx_to_camera(pares.size());
+    std::vector<Matrix> wPoints;
+
+	for(i64 j=0; j<bundles.size(); j++)
+		for(u64 i : bundles[j].point_idx)
+			point_idx_to_camera[i].push_back(j);
+
+	bundleAdjustment(bundles, wPoints, point_idx_to_camera, 0.000001);
+
+	for(u64 j=0; j<bundles.size(); j++)
+	{
+		for(u64 i=0; i<bundles[j].projections.size(); i++)
+		{
+			Matrix r = bundles[j].projections[i] - bundles[j].camera.projection(wPoints[bundles[j].point_idx[i]]);
+			assert(norm(r) < 0.000001);
+		}
+	}
 
 }
-
-
-/*
-    [-1 -1 -1...] []
-    [-1 -1 -1...]
-    1
-     -> 2
-    2 -> 3
-    1 -> 3
-*/
-
