@@ -1,16 +1,27 @@
 #include "algebra/polynomial/Polynomial.hpp"
+
 #include <cmath>
-#include <algorithm>
 #include <random>
 #include <chrono>
 
 namespace karu::algebra {
 
-
 complex::complex(f32 r, f32 i)
 {
 	this->real = r;
 	this->imag = i;
+}
+
+complex::complex(f32 r)
+{
+	this->real = r;
+	this->imag = 0;
+}
+
+complex::complex()
+{
+	this->real = 0;
+	this->imag = 0;
 }
 
 complex complex::conj() const
@@ -49,15 +60,11 @@ complex complex::operator/(complex& other)
 
 	complex b = other;
 
-	complex bc = other.conj();
-
-	complex n = a * bc;
-	complex d = b * bc;
+	complex n = a * other.conj();
+	complex d = b * other.conj();
 
 	return complex(n.real / d.real, n.imag / d.real);
 }
-
-
 
 complex complex::operator*(const complex& other)
 {
@@ -67,6 +74,7 @@ complex complex::operator*(const complex& other)
 		(this->real * other.imag) + (this->imag * other.real)
 	);
 }
+
 complex complex::operator+(const complex& other)
 {
 	return complex(
@@ -102,6 +110,7 @@ f32 complex::abs()
 {
 	return std::hypot(this->real, this->imag);
 }
+
 complex complex::operator*(f32 other)
 {
 	return complex(this->real * other, this->imag * other);
@@ -109,12 +118,12 @@ complex complex::operator*(f32 other)
 
 complex complex::operator+(f32 other)
 {
-	return complex(this->real + other, this->imag + other);
+	return complex(this->real + other, this->imag);
 }
 
 complex complex::operator-(f32 other)
 {
-	return complex(this->real - other, this->imag - other);
+	return complex(this->real - other, this->imag);
 }
 
 complex complex::operator/(f32 other)
@@ -122,7 +131,7 @@ complex complex::operator/(f32 other)
 	return complex(this->real / other, this->imag / other);
 }
 
-void printPoly(Polynomial& p)
+void printPoly(RealPoly& p)
 {
 
 	for(i64 i=0;i<p.power()+1; i++)
@@ -140,7 +149,7 @@ void printPoly(Polynomial& p)
 	std::cout << "\n";
 }
 
-void divPoly(const Polynomial p, const Polynomial& d, Polynomial& q, Polynomial& r)
+void divPoly(const RealPoly p, const RealPoly& d, RealPoly& q, RealPoly& r)
 {
 	i64 i,j;
 	i64 power = p.power() - d.power();
@@ -148,9 +157,9 @@ void divPoly(const Polynomial p, const Polynomial& d, Polynomial& q, Polynomial&
 
 	if(power < 0) return;
 
-	q = Polynomial(power, {});
+	q = RealPoly(power, {});
 
-	r = Polynomial(p);
+	r = RealPoly(p);
 
 	for(i=p.power(); i>=d.power(); i--)
 	{
@@ -170,17 +179,17 @@ void divPoly(const Polynomial p, const Polynomial& d, Polynomial& q, Polynomial&
 }
 
 
-void divPoly(const Polynomial p, const f32 d, Polynomial& q)
+void divPoly(const RealPoly p, const f32 d, RealPoly& q)
 {
-	q = Polynomial(p);
+	q = RealPoly(p);
 	for (int j=0; j<=p.power(); j++)
 		q[j] = p[j]/d;
 }
 
-Polynomial addPoly(const Polynomial& A, const Polynomial& B)
+RealPoly addPoly(const RealPoly& A, const RealPoly& B)
 {
-	Polynomial X = A.power() > B.power() ? Polynomial(A) : Polynomial(B);
-	Polynomial Y = A.power() > B.power() ? Polynomial(B) : Polynomial(A);
+	RealPoly X = A.power() > B.power() ? RealPoly(A) : RealPoly(B);
+	RealPoly Y = A.power() > B.power() ? RealPoly(B) : RealPoly(A);
 
 	for(i64 i=0; i<=Y.power(); i++)
 	{
@@ -191,12 +200,12 @@ Polynomial addPoly(const Polynomial& A, const Polynomial& B)
 	return X;
 }
 
-Polynomial subPoly(const Polynomial& A, const Polynomial& B)
+RealPoly subPoly(const RealPoly& A, const RealPoly& B)
 {
-	Polynomial B_ = mulPoly(B, -1.0);
+	RealPoly B_ = mulPoly(B, -1.0);
 
-	Polynomial X = A.power() > B.power() ? Polynomial(A) : Polynomial(B_);
-	Polynomial Y = A.power() > B.power() ? Polynomial(B_) : Polynomial(A);
+	RealPoly X = A.power() > B.power() ? RealPoly(A) : RealPoly(B_);
+	RealPoly Y = A.power() > B.power() ? RealPoly(B_) : RealPoly(A);
 
 	for(i64 i=0; i<=Y.power(); i++)
 	{
@@ -208,12 +217,12 @@ Polynomial subPoly(const Polynomial& A, const Polynomial& B)
 	return X;
 }
 
-Polynomial mulPoly(const Polynomial& A, const Polynomial& B)
+RealPoly mulPoly(const RealPoly& A, const RealPoly& B)
 {
 	u64 m = A.power() + 1;
 	u64 n = B.power() + 1;
 
-	Polynomial AB(m+n-2,{});
+	RealPoly AB(m+n-2,{});
 
 	for (int i=0; i<m; i++)
 	{
@@ -225,31 +234,33 @@ Polynomial mulPoly(const Polynomial& A, const Polynomial& B)
 	return AB;
 }
 
-Polynomial mulPoly(const Polynomial& A, f32 B)
+RealPoly mulPoly(const RealPoly& A, f32 B)
 {
-	Polynomial AB(A);
+	RealPoly AB(A);
 	for (int j=0; j<=AB.power(); j++)
 		AB[j] = A[j]*B;
 	return AB;
 }
 
-Polynomial::Polynomial()
+RealPoly::RealPoly()
 {
 	this->p_power = 0;
 	this->p_coefficients = new f32[this->p_power+1];
 	this->p_coefficients[0] = 0.0;
 }
 
-Polynomial::Polynomial(const Polynomial& other)
+RealPoly::RealPoly(const RealPoly& other)
 {
 	this->p_power = other.p_power;
 	this->p_coefficients = new f32[this->p_power+1];
+
 	std::copy(other.p_coefficients, other.p_coefficients + other.p_power+1, this->p_coefficients);
 }
 
-Polynomial::Polynomial(u64 power, std::initializer_list<f32> coefs)
+RealPoly::RealPoly(u64 power, std::initializer_list<f32> coefs)
 {
 	i64 i;
+
 	this->p_power = power;
 	this->p_coefficients = new f32[++power];
 
@@ -263,7 +274,16 @@ Polynomial::Polynomial(u64 power, std::initializer_list<f32> coefs)
 	}
 }
 
-Polynomial::Polynomial(u64 power, f32* coefs)
+RealPoly::RealPoly(u64 power)
+{
+	i64 i;
+	this->p_power = power;
+	this->p_coefficients = new f32[++power];
+	std::fill(&this->p_coefficients[0], &this->p_coefficients[power-1]+1, 0);
+}
+
+
+RealPoly::RealPoly(u64 power, f32* coefs)
 {
 	i64 i;
 
@@ -280,51 +300,51 @@ Polynomial::Polynomial(u64 power, f32* coefs)
 	}
 }
 
-Polynomial::~Polynomial(){
+RealPoly::~RealPoly(){
 	delete this->p_coefficients;
 }
 
-i64 Polynomial::power() const
+i64 RealPoly::power() const
 {
 	return this->p_power;
 }
 
 
-Polynomial Polynomial::operator/(const Polynomial& other)
+RealPoly RealPoly::operator/(const RealPoly& other)
 {
-	Polynomial q,r;
+	RealPoly q,r;
 	divPoly(*this, other, q, r);
 	return q;
 }
 
-Polynomial Polynomial::operator/(const f32 other)
+RealPoly RealPoly::operator/(const f32 other)
 {
-	Polynomial q;
+	RealPoly q;
 	divPoly(*this, other, q);
 	return q;
 }
 
-Polynomial Polynomial::operator*(const f32 other)
+RealPoly RealPoly::operator*(const f32 other)
 {
 	return mulPoly(*this, other);
 }
 
-Polynomial Polynomial::operator*(const Polynomial& other)
+RealPoly RealPoly::operator*(const RealPoly& other)
 {
 	return mulPoly(*this, other);
 }
 
-Polynomial Polynomial::operator+(const Polynomial& other)
+RealPoly RealPoly::operator+(const RealPoly& other)
 {
 	return addPoly(*this, other);
 }
 
-Polynomial Polynomial::operator-(const Polynomial& other)
+RealPoly RealPoly::operator-(const RealPoly& other)
 {
 	return subPoly(*this, other);
 }
 
-Polynomial& Polynomial::operator = (const Polynomial& other)
+RealPoly& RealPoly::operator = (const RealPoly& other)
 {
 	this->p_power = other.p_power;
 	this->p_coefficients = new f32[this->p_power+1];
@@ -332,7 +352,7 @@ Polynomial& Polynomial::operator = (const Polynomial& other)
 	return *this;
 }
 
-bool Polynomial::operator == (const Polynomial& other)
+bool RealPoly::operator == (const RealPoly& other)
 {
 	if(other.p_power != this->p_power)
 		return false;
@@ -346,13 +366,13 @@ bool Polynomial::operator == (const Polynomial& other)
 	return true;
 }
 
-f32& Polynomial::operator[](u64 i) const
+f32& RealPoly::operator[](u64 i) const
 {
 	return this->p_coefficients[i];
 }
 
 // horners method
-f32 Polynomial::eval(f32 x)
+f32 RealPoly::eval(f32 x)
 {
 	f32 px = this->p_coefficients[this->power()];
 
@@ -362,6 +382,20 @@ f32 Polynomial::eval(f32 x)
 	}
 
 	return px;
+}
+
+f32 syntheticDivision(RealPoly& p, f32 x, RealPoly& q)
+{
+	q = RealPoly(p.power() - 1, {});
+	
+	q[p.power() - 1] = p[p.power()];
+
+	for(i32 i = p.power() - 2; i >= 0; i--)
+	{
+		q[i] = p[i + 1] + q[i + 1] * x;
+	}
+
+	return p[0] + q[0] * x;
 }
 
 complex pow(complex c, u32 i)
@@ -377,7 +411,7 @@ complex pow(complex c, u32 i)
 }
 
 // horners method
-complex Polynomial::eval(complex x)
+complex RealPoly::eval(complex x)
 {
 	complex px(0, 0);
 
@@ -389,9 +423,9 @@ complex Polynomial::eval(complex x)
 	return px;
 }
 
-Polynomial Polynomial::dx()
+RealPoly RealPoly::dx()
 {
-	Polynomial d(this->power() - 1, {});
+	RealPoly d(this->power() - 1, {});
 
 	for(i64 i=1; i<=this->power(); i++)
 	{
@@ -401,9 +435,9 @@ Polynomial Polynomial::dx()
 	return d;
 }
 
-Polynomial Polynomial::abs()
+RealPoly RealPoly::abs()
 {
-	Polynomial d(this->power(), {});
+	RealPoly d(this->power(), {});
 
 	for(i64 i=0; i<=this->power(); i++)
 	{
@@ -413,9 +447,9 @@ Polynomial Polynomial::abs()
 	return d;
 }
 
-Polynomial Polynomial::reverse()
+RealPoly RealPoly::reverse()
 {
-	Polynomial d(this->power(), {});
+	RealPoly d(this->power(), {});
 
 	for(i64 i=0; i<=this->power(); i++)
 	{
@@ -425,9 +459,9 @@ Polynomial Polynomial::reverse()
 	return d;
 }
 
-Polynomial Polynomial::noLeadingTerm()
+RealPoly RealPoly::noLeadingTerm()
 {
-	Polynomial d(this->power() - 1, {});
+	RealPoly d(this->power() - 1, {});
 
 	for(i64 i=0; i<this->power(); i++)
 	{
@@ -438,9 +472,9 @@ Polynomial Polynomial::noLeadingTerm()
 	return d;
 }
 
-Polynomial Polynomial::noConstantTerm()
+RealPoly RealPoly::noConstantTerm()
 {
-	Polynomial d(this->power(), {});
+	RealPoly d(this->power(), {});
 
 	for(i64 i=0; i<=this->power(); i++)
 	{
@@ -452,10 +486,10 @@ Polynomial Polynomial::noConstantTerm()
 	return d;
 }
 
-Polynomial Polynomial::normalized()
+RealPoly RealPoly::normalized()
 {
 
-	Polynomial n(this->power(), {});
+	RealPoly n(this->power(), {});
 
 	if(n[n.power()] == 1)
 		return n;
@@ -468,9 +502,9 @@ Polynomial Polynomial::normalized()
 	return n;
 }
 
-Polynomial Polynomial::cauchy()
+RealPoly RealPoly::cauchy()
 {
-	Polynomial p = this->normalized();
+	RealPoly p = this->normalized();
 
 	for(i64 i=0; i<=p.power(); i++)
 	{
@@ -492,25 +526,19 @@ f32 randomBetweenZeroOne()
 	return unif(rng);
 }
 
-f32 newtonRaphson(Polynomial& p, f32 x0, f32 tol, u32 max_it = 1000000)
+f32 newtonRaphson(RealPoly& p, f32 x0, f32 tol, u32 max_it = 300)
 {
-	Polynomial pdx = p.dx();
+	RealPoly pdx = p.dx();
 
 	f32 x = x0;
-
-	while(pdx.eval(x) == 0)
+	f32 prev = 0;
+	for(i32 i = 0; i<max_it; i++)
 	{
-		x += 0.01;//randomBetweenZeroOne();
-	}
-	f32 tmp;
-
-	for(i32 i =0; i<max_it; i++)
-	{
-		tmp = x;
-
+		prev = x;
+	
 		x = x - p.eval(x)/pdx.eval(x);
 
-		if(fabs(p.eval(x)) <= tol)
+    if (fabs(prev - x) < std::numeric_limits<f32>::epsilon()) 
 		{
 			break;
 		}
@@ -519,18 +547,20 @@ f32 newtonRaphson(Polynomial& p, f32 x0, f32 tol, u32 max_it = 1000000)
 	return x;
 }
 
-f32 rootRadius(Polynomial& p, f32 tol = 0.001)
+f32 rootRadius(RealPoly& p, f32 tol = 0.01)
 {
-	Polynomial p_ = p.abs();
+	RealPoly p_ = p.abs();
 
 	p_[0] *= -1;
 
-	return newtonRaphson(p_, 1.0, tol, 100);
+	printPoly(p_);
+
+	return newtonRaphson(p_, 1.0, 0.01, 100);
 }
 
-void jenkinsTraubPhaseOne(std::vector<complex>& roots, Polynomial& p, Polynomial& K, complex& s, u64 M, f32 tol)
+void jenkinsTraubPhaseOne(std::vector<complex>& roots, RealPoly& p, RealPoly& K, complex& s, u64 M, f32 tol)
 {
-	Polynomial z = Polynomial(1, { 0,1 });
+	RealPoly z = RealPoly(1, { 0,1 });
 
 	K = p.dx() / (p.power() + 1);
 
@@ -540,13 +570,13 @@ void jenkinsTraubPhaseOne(std::vector<complex>& roots, Polynomial& p, Polynomial
 	}
 }
 
-Polynomial nextSigma(Polynomial& p, Polynomial& sigma, Polynomial& K, f32& a, f32& b, f32& c, f32& d)
+RealPoly nextSigma(RealPoly& p, RealPoly& sigma, RealPoly& K, f32& a, f32& b, f32& c, f32& d)
 {
-	f32 u = sigma[sigma.power() - 1];
-	f32 v = sigma[sigma.power() - 2];
+	f32 u = sigma[1];
+	f32 v = sigma[0];
 
 	f32 b1 = -K[0] / p[0];
-	f32 b2 = -K[1] + b1 * p[1] / p[0];
+	f32 b2 = -(K[1] + b1 * p[1]) / p[0];
 
 	f32 a1 = b * c - a * d;
 	f32 a2 = a * c + u * a * d + v * b * d;
@@ -557,25 +587,30 @@ Polynomial nextSigma(Polynomial& p, Polynomial& sigma, Polynomial& K, f32& a, f3
 	f32 du = -(u * (c2 + c3) + v * (b1 * a1 + b2 * a2)) / c1;
 	f32 dv = v * c4 / c1;
 
-	return Polynomial(2, {v + dv, u + du, 1});
+	return RealPoly(2, {v + dv, u + du, 1});
 }
 
-Polynomial nextKQuaraticShift(Polynomial K, Polynomial& sigma, Polynomial& p_q, Polynomial& k_q, f32& a, f32& b, f32& c, f32& d)
+RealPoly nextKQuaraticShift(RealPoly K, RealPoly& sigma, RealPoly& p_q, RealPoly& k_q, f32& a, f32& b, f32& c, f32& d)
 {
-	f32 t = (a * a + sigma[sigma.power() - 1] * a * b + sigma[sigma.power() - 2] * b * b) / (b * c - a * d);
+	f32 t = (a * a + sigma[1] * a * b + sigma[0] * b * b) / (b * c - a * d);
+  
+	printPoly(sigma);
 
-	Polynomial lin(2, {-(a * c + sigma[sigma.power() - 1] * a * d + sigma[sigma.power() - 2] * b * d) / (b * c - a * d), 1});
+	RealPoly lin(1, {});
 
-	K = k_q * t + lin * p_q;
+  lin[0] = -(a * c + sigma[1] * a * d + sigma[0] * b * d) / (b * c - a * d);
+	lin[1] = 1;
+	
+	K = (k_q * t) + (lin * p_q);
 
 	K[0] += b;
 
 	return K;
 }
 
-int fixedShiftKPoly(Polynomial& p, Polynomial& sigma, Polynomial& K, complex& x, f32& a, f32& b, f32& c, f32& d, u32 max_it)
+int fixedShiftKPoly(RealPoly& p, RealPoly& sigma, RealPoly& K, complex& x, f32& a, f32& b, f32& c, f32& d, u32 max_it)
 {
-	Polynomial p_r, p_q, k_q, k_r;
+	RealPoly p_r, p_q, k_q, k_r;
 
 	sigma[0] = x.real*x.real + x.imag*x.imag;
 	sigma[1] = -2.0 * x.real;
@@ -584,44 +619,58 @@ int fixedShiftKPoly(Polynomial& p, Polynomial& sigma, Polynomial& K, complex& x,
 	divPoly(p, sigma, p_q, p_r);
 
 	b = p_r[p_r.power()];
-	a = p_r[p_r.power() - 1] - b * sigma[sigma.power() - 1];
+	a = p_r[1] - b * sigma[1];
 
 	complex p_x = x.conj() * -b + a;
 
+	std::cout << p_x.real << " + " << p_x.imag << "i\n";
+
 	complex t_l[3] = {complex(0,0),complex(0,0),complex(0,0)};
-	f32 s_l[3] = {0,0,0};
+	f32 s_l[3] 		 = {0,0,0};
 
 	for(i32 j=0; j < max_it; j++)
 	{
+    std::cout << "*********\n";
+
+		printPoly(K);
 		K = K.normalized();
+		printPoly(K);
 
 		divPoly(K, sigma, k_q, k_r);
 
 		d = k_r[k_r.power()];
-		c = k_r[k_r.power() - 1] - d - sigma[sigma.power() - 1];
+		c = k_r[k_r.power() - 1] - d * sigma[sigma.power() - 1];
+	
+    std::cout << d << " " << c << "\n";
 
-		Polynomial s = nextSigma(p, sigma, K, a, b, c, d);
+		RealPoly s = nextSigma(p, sigma, K, a, b, c, d);
 
 		complex k_x = x.conj() * -d + c;
 
 		t_l[0] = t_l[1];
-		s_l[0] = s_l[1];
-
 		t_l[1] = t_l[2];
+	
+		s_l[0] = s_l[1];
 		s_l[1] = s_l[2];
 
 		t_l[2] = x - p_x / k_x;
-		s_l[2] = s[2];
+		s_l[2] = s[0];
+	
+		std::cout << t_l[0].real << " + " << t_l[0].imag << "i, ";
+		std::cout << t_l[1].real << " + " << t_l[1].imag << "i, ";
+		std::cout << t_l[2].real << " + " << t_l[2].imag << "i\n";
+	
+		std::cout << s_l[0] << " " << s_l[1] << " " << s_l[2] << "\n";
 
-		// return if converge
 		if(
 			std::fabs(s_l[1] - s_l[0]) < std::fabs(s_l[0]) / 2.0 &&
 			std::fabs(s_l[2] - s_l[1]) < std::fabs(s_l[1]) / 2.0
-		) return 1;
+		) return 2;
+
 		if(
 			(t_l[1] - t_l[0]).abs() < (t_l[0]).abs() / 2.0 &&
 			(t_l[2] - t_l[1]).abs() < (t_l[1]).abs() / 2.0
-		) return 2;
+		) return 1;
 
 		K = nextKQuaraticShift(K, sigma, p_q, k_q, a, b, c, d);
 	}
@@ -630,7 +679,7 @@ int fixedShiftKPoly(Polynomial& p, Polynomial& sigma, Polynomial& K, complex& x,
 }
 
 
-int jenkinsTraubPhaseTwo(std::vector<complex>& roots, Polynomial& p, Polynomial& K, complex& x, u64 L, f32 tol)
+int jenkinsTraubPhaseTwo(std::vector<complex>& roots, RealPoly& p, RealPoly& K, complex& x, u64 L, f32 tol)
 {
 	u32 i, j;
 
@@ -638,21 +687,23 @@ int jenkinsTraubPhaseTwo(std::vector<complex>& roots, Polynomial& p, Polynomial&
 
 	f32 deg2rad = M_PI / 180.0;
   f32 phi = 49.0 * deg2rad;
+
 	f32 radius = rootRadius(p, 1e-2);
+
 	std::cout << "root_radius" << "\n";
 	std::cout << radius << "\n";
-	Polynomial sigma(2, {});
 
-	for(i=0; i<200; i++)
+	RealPoly sigma(2, {});
+
+	for(i=0; i < 20; i++)
 	{
 		x = complex(radius, 0) * complex(cos(phi), sin(phi));
 	
 		std::cout << "root" << "\n";
 		std::cout << x.real << " + " << x.imag << "i\n";
 	
-		i32 j = fixedShiftKPoly(p, sigma, K, x, a, b, c, d, L * (i + 1));
+		i32 j = fixedShiftKPoly(p, sigma, K, x, a, b, c, d, 20 * (i + 1));
 		
-		std::cout << j << "\n";
 		std::cout << "phase2 K:\n";
 		printPoly(K);
 		
@@ -718,7 +769,7 @@ bool hasConverged(std::vector<f32>& roots, f32 tol)
 
 	return false;
 }
-void findQuadraticRoots(Polynomial& p, complex& x1, complex& x2)
+void findQuadraticRoots(RealPoly& p, complex& x1, complex& x2)
 {
 	f32 a = p[2], b = p[1], c = p[0];
 
@@ -746,7 +797,7 @@ void findQuadraticRoots(Polynomial& p, complex& x1, complex& x2)
 }
 
 
-bool linearShift(std::vector<complex>& zeros, Polynomial& p, Polynomial& K, complex& x, u64 M, u64 L, bool& qflag, bool& lflag, f32 tol)
+bool linearShift(std::vector<complex>& zeros, RealPoly& p, RealPoly& K, complex& x, u64 M, u64 L, bool& qflag, bool& lflag, f32 tol)
 {
 	if(lflag)
 	{
@@ -755,7 +806,7 @@ bool linearShift(std::vector<complex>& zeros, Polynomial& p, Polynomial& K, comp
 
 	std::vector<f32> roots;
 
-	Polynomial defl_p, defl_k;
+	RealPoly defl_p, defl_k;
 	
 	f32 p_x = 0, px = 0, kx = 0, d = 0;
 
@@ -776,8 +827,9 @@ bool linearShift(std::vector<complex>& zeros, Polynomial& p, Polynomial& K, comp
 
 		p_x = px;
 
-		defl_p = p / Polynomial(1, {-s, 1});
-		px = p.eval(s);
+		px = syntheticDivision(p, s, defl_p);
+		// defl_p = p / RealPoly(1, {-s, 1});
+		// px = p.eval(s);
 
 		if(fabs(px) <= tol)
 		{
@@ -789,9 +841,9 @@ bool linearShift(std::vector<complex>& zeros, Polynomial& p, Polynomial& K, comp
 			return true;
 		}
 	
-		defl_k = K / Polynomial(1, { -s, 1 });
-
-		kx = K.eval(s);
+		// defl_k = K / RealPoly(1, { -s, 1 });
+		kx = syntheticDivision(K, s, defl_k);
+		// kx = K.eval(s);
 		
 		K = defl_k +  defl_p * -kx / px;
 
@@ -823,12 +875,14 @@ bool linearShift(std::vector<complex>& zeros, Polynomial& p, Polynomial& K, comp
 	return quadraShift(zeros, p, K, x, M, L, qflag, lflag, tol);
 }
 
-bool quadraShift(std::vector<complex>& zeros, Polynomial& p, Polynomial& K, complex& x, u64& M, u64& L, bool& qflag, bool& lflag, f32 tol)
+bool quadraShift(std::vector<complex>& zeros, RealPoly& p, RealPoly& K, complex& x, u64& M, u64& L, bool& qflag, bool& lflag, f32 tol)
 {
 	if(qflag)
 	{
 		return false;
 	}
+
+	complex x0, x1;
 
 	f32 step = 0.01;
 	f32 a, b, c, d;
@@ -836,7 +890,7 @@ bool quadraShift(std::vector<complex>& zeros, Polynomial& p, Polynomial& K, comp
 
 	std::vector<complex> roots[2];
 	
-	Polynomial p_q, p_r, k_q, k_r, sigma(2, {});
+	RealPoly p_q, p_r, k_q, k_r, sigma(2, {});
 
 	sigma[0] = x.real * x.real + x.imag * x.imag;
 	sigma[1] = -2.0 * x.real;
@@ -851,9 +905,6 @@ bool quadraShift(std::vector<complex>& zeros, Polynomial& p, Polynomial& K, comp
 	{
 		if(hasConverged(roots[0], tol) && hasConverged(roots[1], tol))
 		{
-			// Output roots
-			// roots[0][1], roots[1][1]
-			// std::cout << "AAA\n";
 			zeros.push_back(roots[0][1]);
 			zeros.push_back(roots[1][1]);
 		
@@ -867,25 +918,26 @@ bool quadraShift(std::vector<complex>& zeros, Polynomial& p, Polynomial& K, comp
 		b = p_r[p_r.power()];
 		a = p_r[p_r.power() - 1] - b * sigma[sigma.power() - 1];
 
-		complex x0(0,0), x1(0,0);
+	
+    std::cout << "quadratic shift sigma:\n";
+		printPoly(sigma);
 
 		findQuadraticRoots(sigma, x0, x1);
-	
-		// std::cout << "quadratic roots\n";
-		// std::cout << x0.real << " + " << x0.imag << "i\n";
-		// std::cout << x1.real << " + " << x1.imag << "i\n";
-	
+
 		if(fabs(fabs(x0.real) - fabs(x1.real)) > 0.01 * fabs(x1.real))
 		{
-			// std::cout << "B\n";
+			std::cout << "applying linearShift\n";
 			return linearShift(zeros, p, K, x, M, L, qflag, lflag, tol);
 		}
 
 		px = fabs(a - x0.real * b) + fabs(x0.imag * b);
-
+	
+		std::cout << "px: " << px << "\n";
+	
 		if(!fixed_shift && fabs(sigma[0] - tmp) / sigma[0] < step && p_x > px)
 		{
 			fixed_shift = true;
+      std::cout << "apply fixed shift\n";
 			fixedShiftKPoly(p, sigma, K, x0, a, b, c, d, M);
 		}
 
@@ -893,14 +945,19 @@ bool quadraShift(std::vector<complex>& zeros, Polynomial& p, Polynomial& K, comp
 
 		d = k_r[k_r.power()];
 		c = k_r[k_r.power() - 1] - d * sigma[sigma.power() - 1];
-
-		tmp = sigma[sigma.power() - 2];
-
+	
+		std::cout << "d" << " " << "c" << "\n";
+		std::cout << d << " " << c << "\n";
+	
+		tmp = sigma[0];
 		sigma = nextSigma(p, sigma, K, a, b, c, d);
+		std::cout << "sigma\n";
+		printPoly(sigma);
 
 		K = nextKQuaraticShift(K, sigma, p_q, k_q, a, b, c, d);
 		K = K.normalized();
-
+		std::cout << "K\n";
+		printPoly(K);
 		p_x = px;
 
 		roots[0].push_back(x0);
@@ -918,20 +975,24 @@ bool quadraShift(std::vector<complex>& zeros, Polynomial& p, Polynomial& K, comp
 
 	return linearShift(zeros, p, K, x, M, L, qflag, lflag, tol);
 }
-bool jenkinsTraubPhaseThree(std::vector<complex>& roots, Polynomial& p, Polynomial& K, complex& x, u64 M, u64 L, u32 cnv, bool& quadratic_flag, bool& linear_flag, f32 tol)
+bool jenkinsTraubPhaseThree(std::vector<complex>& roots, RealPoly& p, RealPoly& K, complex& x, u64 M, u64 L, u32 cnv, bool& quadratic_flag, bool& linear_flag, f32 tol)
 {
 	/*
 	 * Stage 3: Find the root with variable shift iterations on the K-polynomial.
 	 */
+  
+	std::cout << "phase3 K:\n";
+	printPoly(K);
+	std::cout << cnv << "\n";
 
-	if(cnv == 1)
+	if(cnv == 2)
 	{
 		// quadratic
 		// std::cout << "quadratic\n";
 		return quadraShift(roots, p, K, x, M, L, quadratic_flag, linear_flag, tol);
 	}
 
-	if(cnv == 2)
+	if(cnv == 1)
 	{
 		// linear
 		// std::cout << "linear\n";
@@ -940,8 +1001,8 @@ bool jenkinsTraubPhaseThree(std::vector<complex>& roots, Polynomial& p, Polynomi
 
 	return false;
 
-	// Polynomial x, r;
-	// Polynomial R, E, K = H.normalized();
+	// RealPoly x, r;
+	// RealPoly R, E, K = H.normalized();
 
 	// s = s - p.eval(s)/K.eval(s);
 	// f32 l, s_prev;
@@ -954,7 +1015,7 @@ bool jenkinsTraubPhaseThree(std::vector<complex>& roots, Polynomial& p, Polynomi
 	// 	l = -H.eval(s)/p.eval(s);
 	// 	K = H + p*l;
 
-	// 	x = Polynomial(1, {-s,1});
+	// 	x = RealPoly(1, {-s,1});
 
 	// 	E = K/x;
 
@@ -967,9 +1028,36 @@ bool jenkinsTraubPhaseThree(std::vector<complex>& roots, Polynomial& p, Polynomi
 	// }
 }
 
-void jenkinsTraub(std::vector<complex>& roots, Polynomial& p, f32 tol)
+void findLinearRoots(RealPoly& p, complex& x)
 {
-	Polynomial K;
+	x = complex(-p[0]/p[1], 0);
+}
+
+void jenkinsTraub(std::vector<complex>& roots, RealPoly& p, f32 tol)
+{
+	if(p.power() == 0)
+	{
+		return;
+	}
+
+	if(p.power() == 1)
+	{
+		complex x;
+		findLinearRoots(p, x);
+		roots.push_back(x);
+		return;
+	}
+
+	if(p.power() == 2)
+	{
+		complex x1, x2;
+		findQuadraticRoots(p, x1, x2);
+		roots.push_back(x1);
+		roots.push_back(x2);
+		return;
+	}
+
+	RealPoly K;
 
 	complex x(0.0, 0.0);
 
@@ -996,39 +1084,47 @@ void jenkinsTraub(std::vector<complex>& roots, Polynomial& p, f32 tol)
 
 }
 
-Polynomial Polynomial::root(std::vector<complex>& roots, f32 tol)
+RealPoly RealPoly::root(std::vector<complex>& roots, f32 tol)
 {
-	Polynomial p = this->normalized();
-	printf("P:\n");
-	printPoly(p);
+	RealPoly p = this->normalized();
 	jenkinsTraub(roots, p, tol);
 	return p;
 }
 
-void Polynomial::roots(std::vector<complex>& roots, f32 tol)
+RealPoly removeZeroRoots(std::vector<complex>& roots, RealPoly& p)
 {
-	Polynomial r, q, p = Polynomial(*this);
+	i32 i = 0;
+	
+	while(p[i] == 0)
+	{
+		i++;
+		roots.push_back(complex(0,0));
+	}
+
+	RealPoly p_ = RealPoly(p.power() -  i, {});
+
+	for(i32 j = 0; j <= p.power() - i; j++)
+	{
+		p_[p.power() - j] = p[p.power() - j];
+	}
+
+	return p_;
+}
+
+std::vector<complex> polyRoots(RealPoly p, f32 tol)
+{
+	std::vector<complex> roots;
 
 	i64 n = p.power();
 
-	for(i64 i=0; i<n; i++)
+	while(roots.size() < n)
 	{
-		//TODO: remove leading zeros
-		//TODO: normalize polynomial
-		//TODO: remove zero roots
-
+		p = p.normalized();
+		p = removeZeroRoots(roots, p);
 		p = p.root(roots, tol);
-		// std::cout << "deflated:\n";
-		// printPoly(p);
-		// if(std::isnan(x))
-		// 	break;
-		// std::cout << "roots:\n";
-		// for(complex r : roots)
-		// {
-		// 	std::cout << r.real << " + " << r.imag << "i\n";
-		// }
-		std::cout << "=================================\n";
 	}
+
+	return roots;
 }
 
 }

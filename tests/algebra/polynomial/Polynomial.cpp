@@ -6,63 +6,62 @@ using namespace karu::algebra;
 
 void polynomialDivisionTests()
 {
-	Polynomial A(3, {1,2,3,4});
-	Polynomial B(2, {1,2,1});
-	Polynomial Q(3,nullptr);
-	Polynomial R(3,nullptr);	
+	RealPoly A(3, {1,2,3,4});
+	RealPoly B(2, {1,2,1});
+	RealPoly Q(3,nullptr);
+	RealPoly R(3,nullptr);	
 
 	divPoly(A, B, Q, R);
 
-	assert(Q == Polynomial(1, {-5, 4}));
-	assert(R == Polynomial(1, {6, 8}));
+	assert(Q == RealPoly(1, {-5, 4}));
+	assert(R == RealPoly(1, {6, 8}));
 
-	Q = Polynomial(0,{0});
-	R = Polynomial(0,{0});
+	Q = RealPoly(0,{0});
+	R = RealPoly(0,{0});
 	
-	Polynomial C(3, {-3,10,-5,3});
-	Polynomial D(1, {1,3});
+	RealPoly C(3, {-3,10,-5,3});
+	RealPoly D(1, {1,3});
 
 	divPoly(C, D, Q, R);
 
-	assert(Q == Polynomial(2, {4, -2, 1}));
-	assert(R == Polynomial(0, {-7}));
+	assert(Q == RealPoly(2, {4, -2, 1}));
+	assert(R == RealPoly(0, {-7}));
 }
 
 void polynomialMultiplicationTests()
 {
-	Polynomial A(3, {5,0,10,6});
-	Polynomial B(2, {1,2,4});
+	RealPoly A(3, {5,0,10,6});
+	RealPoly B(2, {1,2,4});
 
-	Polynomial R = mulPoly(A, B);
+	RealPoly R = mulPoly(A, B);
 
-	assert(R == Polynomial(5, {5, 10, 30, 26, 52, 24}));
+	assert(R == RealPoly(5, {5, 10, 30, 26, 52, 24}));
 }
 
 void polynomialAdditionTests()
 {
-	Polynomial A(3, {6,10,0,5});
-	Polynomial B(3, {6,10,0,5});
+	RealPoly A(3, {6,10,0,5});
+	RealPoly B(3, {6,10,0,5});
 
-	Polynomial C = addPoly(A,B);
+	RealPoly C = addPoly(A,B);
 
-	assert(C == Polynomial(3, {12, 20, 0, 10}));
+	assert(C == RealPoly(3, {12, 20, 0, 10}));
 }
 
 void polynomialSubtractionTests()
 {
-	Polynomial A(3, {3,10,0,5});
-	Polynomial B(3, {1,7,1,5});
+	RealPoly A(3, {3,10,0,5});
+	RealPoly B(3, {1,7,1,5});
 
-	Polynomial C = subPoly(A,B);
+	RealPoly C = subPoly(A,B);
 
-	assert(C == Polynomial(2, {2, 3, -1}));
+	assert(C == RealPoly(2, {2, 3, -1}));
 }
 
 void polynomialRootsTests()
 {
-	karu::f32 tol = 0.00009;
 	// std::vector<karu::f32> A_roots;
-	// Polynomial A(3, {3,0,-4,1});
+	// RealPoly A(3, {3,0,-4,1});
 
 	// A.roots(A_roots, tol);
 	// printPoly(A);
@@ -75,7 +74,7 @@ void polynomialRootsTests()
 
 	// std::vector<karu::f32> B_roots;
 
-	// Polynomial B(2, {-3,0,2});
+	// RealPoly B(2, {-3,0,2});
 
 	// B.roots(B_roots, tol);
 	// printPoly(B);
@@ -85,22 +84,22 @@ void polynomialRootsTests()
 	// 	assert(fabs(B.eval(root)) <= tol);
 	// }
 
-	std::vector<complex> C_roots;
 
 	// -3 + x + 3x^3 + 5x^4
-	Polynomial C(4, { -3, 1, 0, 3, 5});
 
-	std::cout << C.eval(complex(-0.07877, -0.85693)).real << "\n";
-	std::cout << C.eval(complex(-0.07877, -0.85693)).real << "\n";
-	std::cout << C.eval(0.70569) << "\n";
+	// std::cout << C.eval(complex(-0.07877, -0.85693)).real << "\n";
+	// std::cout << C.eval(complex(-0.07877, -0.85693)).real << "\n";
+	// std::cout << C.eval(0.70569) << "\n";
 
 	// std::cout << (complex(1, 3) * complex(2, 1)).real << "\n";
 	// std::cout << (complex(1, 3) * complex(2, 1)).imag << "\n";
 	// std::cout << (complex(2, 5) * complex(4, -3)).real << "\n";
 	// std::cout << (complex(2, 5) * complex(4, -3)).imag << "\n";
 
-	printPoly(C);
-	C.roots(C_roots, tol);
+	RealPoly C(4, { -3, 1, 0, 3, 5});
+
+	std::vector<complex> C_roots = polyRoots(C);
+
 	printPoly(C);
 
 	for(complex root : C_roots)
