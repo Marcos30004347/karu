@@ -7,6 +7,7 @@
 #include "bundle/BundleAdjustment.hpp"
 #include "algebra/linear/Rotation.hpp"
 #include "algebra/compute/Compute.hpp"
+#include <chrono>
 
 using namespace karu;
 using namespace karu::algebra;
@@ -70,6 +71,9 @@ int shouldAjustAlmostCompletedBundles()
 			projections.push_back(projection);
 		}
 
+		Renderer r(1000, 1000);
+		r.draw2dPoints(camera, projections);
+	
 		Camera cam(
 			1520,
 			1520,
@@ -112,9 +116,11 @@ int shouldAjustAlmostCompletedBundles()
 	{
 		it++;
 		solveNormalEquations(bundles, points, point_idx_to_camera, lambda * lambda, lambda);
-		// std::cout << "step(" << it << "): error = " << lambda << std::endl;
+		std::cout << "step(" << it << "): error = " << lambda << std::endl;
 	} while (lambda > 0.9 && it < 2000);
-	
+		
+	std::cout << "\n";
+	std::cout << "Bundle adjustment takes " << it << " iterations\n";
 	std::cout << "\n";
 
 	for(u64 j=0; j<bundles.size(); j++)
@@ -124,7 +130,7 @@ int shouldAjustAlmostCompletedBundles()
 				u64 k = bundles[j].point_idx[i];
 				Matrix r = bundles[j].projections[i] - bundles[j].camera.projection(points[k]);
 				assert(norm(r) < 0.9);
-				// std::cout << "Reprojection Error: " << norm(r) << "\n";
+				std::cout << "Reprojection Error: " << norm(r) << "\n";
 		}
 	}
 
@@ -177,9 +183,9 @@ int shouldBundleAdjustIncompletedBundles()
 		Matrix(3,1, { 0, 0, 1.5707963 }),
 	};
 
-	std::vector<Matrix> projections[2];
+	std::vector<Matrix> projections[4];
 
-	for(u64 i=0; i<2; i++)
+	for(u64 i=0; i<4; i++)
 	{
 		Camera camera(
 			1600,
@@ -198,6 +204,9 @@ int shouldBundleAdjustIncompletedBundles()
 			projections[i].push_back(projection);
 			point_idx.push_back(j);
 		}
+	
+		Renderer r(1000, 1000);
+		r.draw2dPoints(camera, projections[i]);
 	}
 
 	std::vector<Bundle> bundles;
@@ -253,7 +262,7 @@ int shouldBundleAdjustIncompletedBundles()
 		for(u64 i : bundles[j].point_idx)
 			point_idx_to_camera[i].push_back(j);
 
-	bundleAdjustment(bundles, wPoints, point_idx_to_camera, 0.000001);
+	bundleAdjustment(bundles, wPoints, point_idx_to_camera, 0.00000000001);
 
 	for(u64 j=0; j<bundles.size(); j++)
 	{
@@ -271,6 +280,13 @@ int shouldBundleAdjustIncompletedBundles()
 
 int main()
 {
-	// shouldAjustAlmostCompletedBundles();
+
+	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+	shouldAjustAlmostCompletedBundles();
+	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+	std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds> (end - begin).count() << "[ms]" << std::endl;
+	begin = std::chrono::steady_clock::now();
 	shouldBundleAdjustIncompletedBundles();
+	end = std::chrono::steady_clock::now();
+	std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds> (end - begin).count() << "[ms]" << std::endl;
 }

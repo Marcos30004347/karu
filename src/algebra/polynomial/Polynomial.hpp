@@ -5,6 +5,34 @@
 
 namespace karu::algebra {
 
+class complex 
+{
+public:
+	f32 real;
+	f32 imag;
+
+	complex(f32 r, f32 i);
+
+	f32 abs();
+
+	complex conj() const;
+
+	complex operator*(f32 other);
+	complex operator+(f32 other);
+	complex operator-(f32 other);
+	complex operator/(f32 other);
+
+	complex operator*(complex& other);
+	complex operator+(complex& other);
+	complex operator-(complex& other);
+	complex operator/(complex& other);
+
+	complex operator*(const complex& other);
+	complex operator+(const complex& other);
+	complex operator-(const complex& other);
+	complex operator/(const complex& other);
+};
+
 class Polynomial {
 public:
 	f32* p_coefficients;
@@ -20,6 +48,7 @@ public:
 
 	Polynomial& operator = (const Polynomial& other);
 	Polynomial operator/(const Polynomial& other);
+	Polynomial operator/(const f32 other);
 	Polynomial operator+(const Polynomial& other);
 	Polynomial operator*(const Polynomial& other);
 	Polynomial operator*(const f32 other);
@@ -30,11 +59,16 @@ public:
 	Polynomial cauchy();
 	Polynomial normalized();
 	Polynomial dx();
-	
+	Polynomial abs();
+	Polynomial reverse();
+	Polynomial noLeadingTerm();
+	Polynomial noConstantTerm();
+
 	f32& operator[](u64 i) const;
 	f32 eval(f32 x);
-	f32 root(f32 tol = 0.00001);
-	void roots(std::vector<f32>& roots, f32 tol = 0.00001);
+	complex eval(complex x);
+	Polynomial root(std::vector<complex>& roots, f32 tol = 0.00001);
+	void roots(std::vector<complex>& roots, f32 tol = 0.00001);
 };
 
 f32 newtonRaphson(Polynomial& p, f32 tol = 0.0001);
@@ -46,5 +80,10 @@ Polynomial mulPoly(const Polynomial& A, const Polynomial& B);
 
 void divPoly(const Polynomial p,const Polynomial& d, Polynomial& q, Polynomial& r);
 void printPoly(Polynomial& p);
+
+bool quadraShift(std::vector<complex>& xs, Polynomial& p, Polynomial& K, complex& x, u64& M, u64& L, bool& qflag, bool& lflag, f32 tol);
+bool linearShift(std::vector<complex>& xs, Polynomial& p, Polynomial& K, complex& x, u64 M, u64 L, bool& qflag, bool& lflag, f32 tol);
+
+
 
 }
