@@ -1,8 +1,6 @@
 #include "algebra/polynomial/Polynomial.hpp"
 
 #include <cmath>
-#include <random>
-#include <chrono>
 
 namespace karu::algebra {
 
@@ -516,15 +514,15 @@ RealPoly RealPoly::cauchy()
 	return p;
 }
 
-f32 randomBetweenZeroOne()
-{
-	std::mt19937_64 rng;
-	uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-	std::seed_seq ss{uint32_t(timeSeed & 0xffffffff), uint32_t(timeSeed>>32)};
-	rng.seed(ss);
-	std::uniform_real_distribution<double> unif(0, 1);
-	return unif(rng);
-}
+// f32 randomBetweenZeroOne()
+// {
+// 	std::mt19937_64 rng;
+// 	uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+// 	std::seed_seq ss{uint32_t(timeSeed & 0xffffffff), uint32_t(timeSeed>>32)};
+// 	rng.seed(ss);
+// 	std::uniform_real_distribution<double> unif(0, 1);
+// 	return unif(rng);
+// }
 
 f32 newtonRaphson(RealPoly& p, f32 x0, f32 tol, u32 max_it = 300)
 {
@@ -553,7 +551,7 @@ f32 rootRadius(RealPoly& p, f32 tol = 0.01)
 
 	p_[0] *= -1;
 
-	printPoly(p_);
+	// printPoly(p_);
 
 	return newtonRaphson(p_, 1.0, 0.01, 100);
 }
@@ -594,7 +592,7 @@ RealPoly nextKQuaraticShift(RealPoly K, RealPoly& sigma, RealPoly& p_q, RealPoly
 {
 	f32 t = (a * a + sigma[1] * a * b + sigma[0] * b * b) / (b * c - a * d);
   
-	printPoly(sigma);
+	// printPoly(sigma);
 
 	RealPoly lin(1, {});
 
@@ -623,25 +621,27 @@ int fixedShiftKPoly(RealPoly& p, RealPoly& sigma, RealPoly& K, complex& x, f32& 
 
 	complex p_x = x.conj() * -b + a;
 
-	std::cout << p_x.real << " + " << p_x.imag << "i\n";
+	// std::cout << p_x.real << " + " << p_x.imag << "i\n";
 
 	complex t_l[3] = {complex(0,0),complex(0,0),complex(0,0)};
 	f32 s_l[3] 		 = {0,0,0};
 
 	for(i32 j=0; j < max_it; j++)
 	{
-    std::cout << "*********\n";
+    // std::cout << "*********\n";
 
-		printPoly(K);
+		// printPoly(K);
+		
 		K = K.normalized();
-		printPoly(K);
+		
+		// printPoly(K);
 
 		divPoly(K, sigma, k_q, k_r);
 
 		d = k_r[k_r.power()];
 		c = k_r[k_r.power() - 1] - d * sigma[sigma.power() - 1];
 	
-    std::cout << d << " " << c << "\n";
+    // std::cout << d << " " << c << "\n";
 
 		RealPoly s = nextSigma(p, sigma, K, a, b, c, d);
 
@@ -656,11 +656,10 @@ int fixedShiftKPoly(RealPoly& p, RealPoly& sigma, RealPoly& K, complex& x, f32& 
 		t_l[2] = x - p_x / k_x;
 		s_l[2] = s[0];
 	
-		std::cout << t_l[0].real << " + " << t_l[0].imag << "i, ";
-		std::cout << t_l[1].real << " + " << t_l[1].imag << "i, ";
-		std::cout << t_l[2].real << " + " << t_l[2].imag << "i\n";
-	
-		std::cout << s_l[0] << " " << s_l[1] << " " << s_l[2] << "\n";
+		// std::cout << t_l[0].real << " + " << t_l[0].imag << "i, ";
+		// std::cout << t_l[1].real << " + " << t_l[1].imag << "i, ";
+		// std::cout << t_l[2].real << " + " << t_l[2].imag << "i\n";
+		// std::cout << s_l[0] << " " << s_l[1] << " " << s_l[2] << "\n";
 
 		if(
 			std::fabs(s_l[1] - s_l[0]) < std::fabs(s_l[0]) / 2.0 &&
@@ -690,23 +689,14 @@ int jenkinsTraubPhaseTwo(std::vector<complex>& roots, RealPoly& p, RealPoly& K, 
 
 	f32 radius = rootRadius(p, 1e-2);
 
-	std::cout << "root_radius" << "\n";
-	std::cout << radius << "\n";
-
 	RealPoly sigma(2, {});
 
-	for(i=0; i < 20; i++)
+	for(i=0; i < L; i++)
 	{
 		x = complex(radius, 0) * complex(cos(phi), sin(phi));
 	
-		std::cout << "root" << "\n";
-		std::cout << x.real << " + " << x.imag << "i\n";
-	
-		i32 j = fixedShiftKPoly(p, sigma, K, x, a, b, c, d, 20 * (i + 1));
-		
-		std::cout << "phase2 K:\n";
-		printPoly(K);
-		
+		i32 j = fixedShiftKPoly(p, sigma, K, x, a, b, c, d, L * (i + 1));
+
 		if(j != 0)
 		{
 			return j;
@@ -819,7 +809,6 @@ bool linearShift(std::vector<complex>& zeros, RealPoly& p, RealPoly& K, complex&
 	{
 		if(hasConverged(roots, tol))
 		{
-			// std::cout << "1#\n";
 			zeros.push_back(complex(roots[1], 0));
 			p = defl_p;
 			return true;
@@ -828,22 +817,16 @@ bool linearShift(std::vector<complex>& zeros, RealPoly& p, RealPoly& K, complex&
 		p_x = px;
 
 		px = syntheticDivision(p, s, defl_p);
-		// defl_p = p / RealPoly(1, {-s, 1});
-		// px = p.eval(s);
 
 		if(fabs(px) <= tol)
 		{
-			// std::cout << "2#\n";
-	
 			zeros.push_back(complex(s, 0));
 			p = defl_p;
 	
 			return true;
 		}
 	
-		// defl_k = K / RealPoly(1, { -s, 1 });
 		kx = syntheticDivision(K, s, defl_k);
-		// kx = K.eval(s);
 		
 		K = defl_k +  defl_p * -kx / px;
 
@@ -864,14 +847,12 @@ bool linearShift(std::vector<complex>& zeros, RealPoly& p, RealPoly& K, complex&
 
 		if(i >= 2 && fabs(d) < 0.001 * fabs(s) && fabs(p_x) < fabs(p_x))
 		{
-			// std::cout << "4#\n";
 			complex root(s, 0);
 			return quadraShift(zeros, p, K, root, M, L, qflag, lflag, tol);
 		}
 	}
 
 	lflag = true;
-	// std::cout << "5#\n";
 	return quadraShift(zeros, p, K, x, M, L, qflag, lflag, tol);
 }
 
@@ -917,27 +898,19 @@ bool quadraShift(std::vector<complex>& zeros, RealPoly& p, RealPoly& K, complex&
 
 		b = p_r[p_r.power()];
 		a = p_r[p_r.power() - 1] - b * sigma[sigma.power() - 1];
-
 	
-    std::cout << "quadratic shift sigma:\n";
-		printPoly(sigma);
-
 		findQuadraticRoots(sigma, x0, x1);
 
 		if(fabs(fabs(x0.real) - fabs(x1.real)) > 0.01 * fabs(x1.real))
 		{
-			std::cout << "applying linearShift\n";
 			return linearShift(zeros, p, K, x, M, L, qflag, lflag, tol);
 		}
 
 		px = fabs(a - x0.real * b) + fabs(x0.imag * b);
 	
-		std::cout << "px: " << px << "\n";
-	
 		if(!fixed_shift && fabs(sigma[0] - tmp) / sigma[0] < step && p_x > px)
 		{
 			fixed_shift = true;
-      std::cout << "apply fixed shift\n";
 			fixedShiftKPoly(p, sigma, K, x0, a, b, c, d, M);
 		}
 
@@ -946,18 +919,11 @@ bool quadraShift(std::vector<complex>& zeros, RealPoly& p, RealPoly& K, complex&
 		d = k_r[k_r.power()];
 		c = k_r[k_r.power() - 1] - d * sigma[sigma.power() - 1];
 	
-		std::cout << "d" << " " << "c" << "\n";
-		std::cout << d << " " << c << "\n";
-	
 		tmp = sigma[0];
 		sigma = nextSigma(p, sigma, K, a, b, c, d);
-		std::cout << "sigma\n";
-		printPoly(sigma);
 
 		K = nextKQuaraticShift(K, sigma, p_q, k_q, a, b, c, d);
 		K = K.normalized();
-		std::cout << "K\n";
-		printPoly(K);
 		p_x = px;
 
 		roots[0].push_back(x0);
@@ -971,7 +937,6 @@ bool quadraShift(std::vector<complex>& zeros, RealPoly& p, RealPoly& K, complex&
 	}
 
 	qflag = true;
-	// std::cout << "C\n";
 
 	return linearShift(zeros, p, K, x, M, L, qflag, lflag, tol);
 }
@@ -981,51 +946,19 @@ bool jenkinsTraubPhaseThree(std::vector<complex>& roots, RealPoly& p, RealPoly& 
 	 * Stage 3: Find the root with variable shift iterations on the K-polynomial.
 	 */
   
-	std::cout << "phase3 K:\n";
-	printPoly(K);
-	std::cout << cnv << "\n";
-
-	if(cnv == 2)
+	// quadratic
+	if(cnv == 2) 
 	{
-		// quadratic
-		// std::cout << "quadratic\n";
 		return quadraShift(roots, p, K, x, M, L, quadratic_flag, linear_flag, tol);
 	}
 
+	// linear
 	if(cnv == 1)
 	{
-		// linear
-		// std::cout << "linear\n";
 		return linearShift(roots, p, K, x, M, L, quadratic_flag, linear_flag, tol);
 	}
 
 	return false;
-
-	// RealPoly x, r;
-	// RealPoly R, E, K = H.normalized();
-
-	// s = s - p.eval(s)/K.eval(s);
-	// f32 l, s_prev;
-
-	// for(int i=0; i<1000; i++)
-	// {
-	// 	if(fabs(p.eval(s)) < tol)
-	// 		break;
-
-	// 	l = -H.eval(s)/p.eval(s);
-	// 	K = H + p*l;
-
-	// 	x = RealPoly(1, {-s,1});
-
-	// 	E = K/x;
-
-	// 	R = E.normalized();
-
-	// 	s_prev = s;
-
-	// 	s = s - p.eval(s)/R.eval(s);
-	// 	H = E;
-	// }
 }
 
 void findLinearRoots(RealPoly& p, complex& x)
@@ -1065,9 +998,6 @@ void jenkinsTraub(std::vector<complex>& roots, RealPoly& p, f32 tol)
 	u64 L = 100;
 
 	jenkinsTraubPhaseOne(roots, p, K, x, M, tol);
-
-	std::cout << "phase1 K:\n";
-	printPoly(K);
 
 	int cnv = jenkinsTraubPhaseTwo(roots, p, K, x, L, tol);
 

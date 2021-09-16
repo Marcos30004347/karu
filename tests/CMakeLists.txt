@@ -88,6 +88,11 @@ add_executable(SVDTests algebra/SVD/SVD.cpp)
 target_link_libraries(SVDTests karu)
 add_test(NAME SVDTests COMMAND SVDTests)
 
+project(QRTests)
+add_executable(QRTests algebra/SVD/QR.cpp)
+target_link_libraries(QRTests karu)
+add_test(NAME QRTests COMMAND QRTests)
+
 project(GaussianTests)
 add_executable(GaussianTests gaussian/test1.cpp)
 target_link_libraries(GaussianTests karu)
