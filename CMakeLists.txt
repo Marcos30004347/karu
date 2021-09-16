@@ -105,7 +105,8 @@ add_library(
     src/sift/kernels/kernels.cpp
     src/sift/Sift.cpp
     src/sift/Matcher.cpp
-  
+    
+    src/point-cloud/PointCloud.cpp
 
     src/image/Image.cpp
 )
