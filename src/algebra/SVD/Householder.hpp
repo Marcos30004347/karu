@@ -815,11 +815,6 @@ void householderBidiagonalization(Matrix& A, f32* diag, f32* sdiag, Matrix& u, M
 		{
 			w[j+i] = A[j+i][j];
 		}
-
-		// nw = 0;
-		// for(i=1; i<m-j; i++)
-		// 	nw = nw + (w[j+i] * w[j+i]);
-		// beta = 2 / (1 + nw);
 	
 		// w[j:m]' * u[j:m][j:k]
 		for(q = 0; q < k - j; q++)
@@ -849,12 +844,6 @@ void householderBidiagonalization(Matrix& A, f32* diag, f32* sdiag, Matrix& u, M
 		{
 			w[j+i] = A[j][j+i+1];
 		}
-
-		// nw = 0;
-		// for(i=1; i< n - (j + 1); i++)
-		// 	nw = nw + (w[j+i] * w[j+i]);
-		// beta = 2 / (1 + nw);
-		// std::cout << "betas: " << beta <<" " << g[j+1] << "\n";
 
 		for(q = 0; q < k - (j + 1); q++)
 		{

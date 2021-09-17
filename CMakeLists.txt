@@ -111,10 +111,10 @@ add_library(
     src/image/Image.cpp
 )
 
-set_property(TARGET karu PROPERTY
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED ON
-)
+# set_property(TARGET karu PROPERTY
+#     CXX_STANDARD 11
+#     CXX_STANDARD_REQUIRED ON
+# )
 
 target_include_directories(karu PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/src)
 target_include_directories(karu PUBLIC "${GLAD_DIR}/include")
