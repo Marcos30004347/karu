@@ -565,9 +565,10 @@ f32 houseRow(Matrix& A, i32 m, i32 n, i32 p, i32 j, f32* v, f32 tol)
  */
 f32 preHouseholderMatrix(f32* u, f32 beta, Matrix& A, u32 m, u32 n, u32 p, u32 k)
 {
+	f32* uA;
 	i32 i, j;	
-
-	f32* uA = new f32[n - k];
+	
+	uA = new f32[n - k];// (f32*)malloc(sizeof(f32)*(n - k));
 
 	// uA[1:n - k] = u[1:m - p]' * A[p:m][k:n]
 	for(i = 0; i < n - k; i++)
