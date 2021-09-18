@@ -26,9 +26,10 @@ MatrixData::MatrixData(const MatrixData& other)
 	this->m_data = new f32[this->m_stored_lines*this->m_stored_column];
 	this->m_stored_lines  = other.m_stored_lines;
 	this->m_stored_column  = other.m_stored_column;
-	
+
 	std::copy(other.m_data, other.m_data + (other.m_stored_lines*other.m_stored_column), this->m_data);
 }
+
 MatrixData::MatrixData(u32 lines, u32 columns, u32 block_width, u32 block_heigth, std::initializer_list<f32> data)
 {
 	m_lines = lines;
