@@ -6,9 +6,12 @@ def map():
     k = 5
     
     t = i * j * k
-    for p in range(0, t):
-
-        print('%.2f'%(math.floor((math.floor((p / k))/j))%i), '%.2f'%(math.floor((p / k))%j), '%.2f'%(p % k))
+    for idx in range(0, t):
+        print(
+            '%.2f'%(math.floor((math.floor((idx / k))/j))%i),
+            '%.2f'%(math.floor((idx / k))%j),
+            '%.2f'%(idx % k)
+        )
 
 map()
 

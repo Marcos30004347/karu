@@ -3,12 +3,16 @@ typedef float f32;
 typedef unsigned u32;
 
 #include <cmath>
+#include <assert.h>
+#include <iostream>
 
 #define min(x, y) x < y ? x : y
 #define max(x, y) x < y ? y : x
 
-struct Tensor
+class Tensor
 {
+	public:
+
 	// Tensor data
 	f32* data;
 	// Tensor rank
@@ -44,314 +48,419 @@ struct Tensor
 	u32  srows;
 	u32  scols;
 
+	Tensor(u32 rank, const u32* dims);
+	Tensor(std::initializer_list<u32> dims);
 };
 
-Tensor createTensor(u32 rank, u32* dims)
+Tensor::Tensor(u32 rank, const u32* dims)
 {
-	Tensor t;
-
-	t.rank = rank;
-	t.dims = new u32[t.rank];
-	t.stride = new u32[t.rank];
-
-	t.page_h = 16;
-	t.page_w = 16;
-
-	t.srows = ceil(t.dims[t.rank - 2]/(f32)t.page_h) * t.page_h;
-	t.scols = ceil(t.dims[t.rank - 1]/(f32)t.page_w) * t.page_w;
-
-	t.stride[0] = dims[0];
-
-	t.size = dims[0];
- 
-	for(u32 i=1; i < rank - 2; i++)
+	this->rank = rank;
+	this->dims = new u32[this->rank];
+	this->stride = new u32[this->rank];
+	
+	for(int i=0; i<this->rank; i++)
 	{
-		t.size *= dims[i];
+		this->dims[i] = dims[i];
 	}
 
-	t.size *= t.srows;
-	t.size *= t.scols;
+	this->page_h = 4;
+	this->page_w = 4;
+
+	this->srows = ceil(this->dims[this->rank - 2]/(f32)this->page_h) * this->page_h;
+	this->scols = ceil(this->dims[this->rank - 1]/(f32)this->page_w) * this->page_w;
 
 
 	if(rank >= 1)
 	{
-		t.stride[rank - 1] = t.scols;
+		this->stride[rank - 1] = 1;
 	}
 
 	if(rank >= 2)
 	{
-		t.stride[rank - 2] = t.stride[rank - 1] * t.srows;
+		this->stride[rank - 2] = this->scols;
 	}
 
-	for(u32 i=rank - 3; i >=0 ; i--)
+	if(rank >= 3)
 	{
-		t.stride[i] = t.stride[i - 1] * t.dims[i];
+		this->stride[rank - 3] = this->stride[rank - 2] * this->srows;
 	}
 
-	for(u32 i=1; i<rank - 2; i++)
+	for(int i = rank - 4; i >= 0; i--)
 	{
-		t.stride[i] += t.stride[i - 1] + t.dims[i];
+		this->stride[i] = this->stride[i - 1] * this->dims[i];
 	}
 
-	for(u32 i=0; i<rank; i++)
+	this->size = this->stride[0] * this->dims[0];
+	this->data = new f32[this->size];
+
+	for(int i=0; i<this->size; i++)
 	{
-		t.dims[i] = t.dims[i];
+		this->data[i] = 0.0;
 	}
-
-	t.data = new f32[t.size];
-
-	for(u32 i=0; i<t.size; i++)
-	{
-		t.data[i] = 0.0;
-	}
-
-
-	return t;
 }
 
+Tensor::Tensor(std::initializer_list<u32> dims)
+{
+	this->rank = dims.size();
+	this->dims = new u32[this->rank];
+	this->stride = new u32[this->rank];
+	
+	for(int i=0; i<this->rank; i++)
+	{
+		this->dims[i] = dims.begin()[i];
+	}
+
+	this->page_h = 4;
+	this->page_w = 4;
+
+	this->srows = ceil(this->dims[this->rank - 2]/(f32)this->page_h) * this->page_h;
+	this->scols = ceil(this->dims[this->rank - 1]/(f32)this->page_w) * this->page_w;
+
+
+	if(rank >= 1)
+	{
+		this->stride[rank - 1] = 1;
+	}
+
+	if(rank >= 2)
+	{
+		this->stride[rank - 2] = this->scols;
+	}
+
+	if(rank >= 3)
+	{
+		this->stride[rank - 3] = this->stride[rank - 2] * this->srows;
+	}
+
+	for(int i = rank - 4; i >= 0; i--)
+	{
+		this->stride[i] = this->stride[i - 1] * this->dims[i];
+	}
+
+	this->size = this->stride[0] * this->dims[0];
+	this->data = new f32[this->size];
+
+	for(int i=0; i<this->size; i++)
+	{
+		this->data[i] = 0.0;
+	}
+}
+
+f32 rec_get(f32* page, u32* stride, const u32* idx, u32 ph, u32 pw, u32 sr, u32 sc,  u32 rank, u32 j)
+{
+	// Block Matrix access
+	if(j == rank - 2)
+	{
+		int by = idx[rank - 2] / ph;
+		int bx = idx[rank - 1] / pw;
+		int y = idx[rank - 2] - by * ph;
+		int x = idx[rank - 1] - bx * pw;
+		int bl = sc / pw;
+		int bs = ph * pw;
+
+		return page[(by*bl*bs + bx*bs) + y * pw + x];
+	}
+
+	// Block Array access
+	if(j == rank - 1)
+	{
+		int bx = idx[rank - 1] / pw;
+		int x = idx[rank - 1] - bx * pw;
+		int bl = sc / pw;
+		int bs = ph * pw;
+
+		return page[bx*bs + x];
+	}
+
+	return rec_get(&page[idx[j] * stride[j]], stride, idx, ph, pw, sr, sc, rank, j + 1);
+}
 
 f32 get(Tensor t, u32* idx)
 {
-	u32 rank = t.rank;
-
-	f32* page = t.data;
-
-	if(rank == 1)
-	{
-		return page[idx[0]];
-	}
-
-	if(rank > 2)
-	{
-		u32 stride;
-
-		// discover how many elements to skip
-		// to get to the last two dimensions
-		// that can be seen as a matrix
-		for(u32 d = 0; d < rank - 2; d++)
-		{
-			for(u32 i = 0; i < idx[d]; i++)
-			{
-				stride += t.stride[d];
-			}
-		}
-
-		page = &t.data[stride];
-	}
-
-	u32 by = idx[rank - 2]/t.page_h;
-	u32 bx = idx[rank - 1]/t.page_w;
-
-	u32 y = idx[rank - 2] - by * t.page_h;
-	u32 x = idx[rank - 1] - bx * t.page_w;
-
-	u32 bl = t.scols / t.page_w;
-	u32 bs = t.page_h * t.page_w;
-
-	u32 stride = by*bl*bs + bx*bs;
-
-	return page[stride + y * t.page_w + x];
+	return rec_get(t.data, t.stride, idx, t.page_h, t.page_w, t.srows, t.scols, t.rank, 0);
 }
 
-f32 set(Tensor t, u32 rank, u32* idx, f32 val)
+f32 get(Tensor t, std::initializer_list<u32> idx)
 {
-	f32* page = t.data;
+	return rec_get(t.data, t.stride, idx.begin(), t.page_h, t.page_w, t.srows, t.scols, t.rank, 0);
+}
 
-	if(rank == 1)
+f32 rec_set(f32* page, f32 val, u32* stride, const u32* idx, u32 ph, u32 pw, u32 sr, u32 sc,  u32 rank, u32 j)
+{
+	// Block Matrix access
+	if(j == rank - 2)
 	{
-		return page[idx[0]];
+		int by = idx[rank - 2] / ph;
+		int bx = idx[rank - 1] / pw;
+		int y = idx[rank - 2] - by * ph;
+		int x = idx[rank - 1] - bx * pw;
+		int bl = sc / pw;
+		int bs = ph * pw;
+
+		return page[(by*bl*bs + bx*bs) + y * pw + x] = val;
 	}
 
-	if(rank > 2)
+	// Block Array access
+	if(j == rank - 1)
 	{
-		u32 stride;
+		int bx = idx[rank - 1] / pw;
+		int x = idx[rank - 1] - bx * pw;
+		int bl = sc / pw;
+		int bs = ph * pw;
 
-		// discover how many elements to skip
-		// to get to the last two dimensions
-		// that can be seen as a matrix
-		for(u32 d = 0; d < rank - 2; d++)
-		{
-			for(u32 i = 0; i < idx[d]; i++)
-			{
-				stride += t.stride[d];
-			}
-		}
-
-		page = &t.data[stride];
+		return page[bx*bs + x] = val;
 	}
 
-	u32 by = idx[rank - 2]/t.page_h;
-	u32 bx = idx[rank - 1]/t.page_w;
+	return rec_set(&page[idx[j] * stride[j]], val, stride, idx, ph, pw, sr, sc, rank, j + 1);
+}
 
-	u32 y = idx[rank - 2] - by * t.page_h;
-	u32 x = idx[rank - 1] - bx * t.page_w;
+f32 set(Tensor t, u32* idx, f32 val)
+{
+	return rec_set(t.data, val, t.stride, idx, t.page_h, t.page_w, t.srows, t.scols, t.rank, 0);
+}
 
-	u32 bl = t.scols / t.page_w;
-	u32 bs = t.page_h * t.page_w;
+f32 set(Tensor t, std::initializer_list<u32> idx, f32 val)
+{
+	return rec_set(t.data, val, t.stride, idx.begin(), t.page_h, t.page_w, t.srows, t.scols, t.rank, 0);
+}
 
-	u32 stride = by*bl*bs + bx*bs;
 
-	return page[stride + y * t.page_w + x] = val;
+// Map a global idx to n tensor indices
+void mapIdToTensorIdx(u32 idx, u32* dims, u32* t_idx, u32 n)
+{
+	int* cache = new int[n + 1];
+
+	cache[n] = idx;
+
+	// Retrieve indices of the b tensor
+	for(int i = n - 1; i >= 0; i--)
+	{
+		cache[i] = cache[i + 1] / dims[i];
+		t_idx[i] = cache[i + 1] % dims[i];
+	}
+
+	delete[] cache;
 }
 
 Tensor dot(Tensor a, Tensor b, u32 n, u32* a_idx, u32* b_idx)
 {
-	// c_[i][j][k][e][f][q] = a_[i][j][k][t] * b_[e][f][t][q]
-	// c_[i][j][k][e][f][q] = sum t a_[i][j][k][t]*b_[e][f][t][q]
-
-	bool* a_red_vars = new bool[a.rank];
-	bool* b_red_vars = new bool[b.rank];
-
-	for(int i=0; i<a.rank; i++)
+	for(int i=0; i < n; i++)
 	{
-		a_red_vars[i] = false;
+		assert(a.dims[a_idx[i]] == b.dims[b_idx[i]]);
 	}
 
-	for(int i=0; i<b.rank; i++)
+	// u[i] is strue if the i dimensions is being reduced in the A Tensor
+	bool* u = new bool[a.rank];
+	// initialize all values as false
+	for(int i=0; i < a.rank; i++)
 	{
-		b_red_vars[i] = false;
+		u[i] = false;
+	}
+	
+	// p[i] is strue if the i dimensions is being reduced in the B Tensor
+	bool* p = new bool[b.rank];
+	// initialize all values as false
+	for(int i=0; i < b.rank; i++)
+	{
+		p[i] = false;
 	}
 
-	// Step 1: get how many reduction will be needed
+
+	// aidx[i] will store the current idx of of the A Tensor in the i'th dimension
+	int* aidx = new int[a.rank];
+
+	// bidx[i] will store the current idx of of the B Tensor in the i'th dimension
+	int* bidx = new int[b.rank];
+
+	// idxs[i] will store the current idx of the i'th dimension being reduced
+	int* idxs = new int[n];
+	
+	// Helper array that is gong to hold the size
+	// of the dimensions being reduced, should
+	// be indexed by idx like dim[idx[i]], because
+	// the dimensions being reduced have the same 
+	// size in the A Tensor and in the B Tensor,
+	// they can be picked by both by a_idx and a.dims
+	// and be b_idx and b.dims
+	u32* dim = a.dims;
+	u32* idx = a_idx;
+
+
+	/**
+	/* Step 1: compute how many reductions will be needed
+	**/
 	for(int i=0; i<n; i++)
 	{
-		a_red_vars[a_idx[i]] = true;
-		b_red_vars[b_idx[i]] = true;
+		u[a_idx[i]] = true;
+		p[b_idx[i]] = true;
 	}
 
 
+	// Number of accesses in the A tensor
 	int a_ops = 1;
 	for(int i=0; i < a.rank; i++)
 	{
-		if(!a_red_vars[i])
-		{
-			a_ops *= a.dims[i];
-		}
+		a_ops *= 1*u[i] + !u[i]*a.dims[i];
 	}
 
+	// Number of accesses in the B tensor
 	int b_ops = 1;
 	for(int i=0; i < b.rank; i++)
 	{
-		if(!b_red_vars[i])
-		{
-			b_ops *= b.dims[i];
-		}
+		b_ops *= 1*p[i] + !p[i]*b.dims[i];
 	}
 
-	int ops = a_ops + b_ops;
+	// Number of writes in the C tensor
+	int ops = a_ops * b_ops;
 
-
-	// Stage 2: Setup the resulting tensor
+	/**
+	/* Stage 2: Setup the resulting tensor
+	**/
 	unsigned* c_dims = new unsigned[a.rank - n + b.rank - n];
 	
-	int q;
-
-	q = 0;
+	// Setup the C tensor dimensions
+	int q = 0;
+	
 	for(int i=0; i < a.rank; i++)
 	{
-		while(a_red_vars[i])
+		while(u[i])
 		{
 			q++;
+			i++;
 		}
-
+	
 		c_dims[i - q] = a.dims[i];
 	}
-
+	
 	q = 0;
+	
 	for(int i=0; i < b.rank; i++)
 	{
-		while(b_red_vars[i])
+		while(p[i])
 		{
 			q++;
+			i++;
 		}
 
 		c_dims[a.rank - n + i - q] = b.dims[i];
 	}
 
-	Tensor c = createTensor(a.rank - n + b.rank - n, c_dims);
+	// Create the resulting Tensor 
+	Tensor c(a.rank - n + b.rank - n, c_dims);
 
-
-	// Step 3: perform the reduction
-	// This stage can be parallelized
-	int* tmp_a = new int[a.rank + 1];
-	int* tmp_b = new int[b.rank + 1];
-
+	/**
+	/* Step 3: perform the reduction
+	**/
+	// The following loop can be parallelized
 	for(int id = 0; id < ops; id++)
 	{
-		int* a_ijk = new int[a.rank];
-		int* b_ijk = new int[b.rank];
+		u32* cidx = new u32[c.rank];
+		
+		// Convert the loop id into the C Tensor indexes
+		mapIdToTensorIdx(id, c.dims, cidx, c.rank);
+
+		for(int i=0; i<n; i++)
+		{
+			idxs[i] = 0;
+		}
 	
-		int g_id = id;
-		int tops = ops;
-		
-		tmp_b[b.rank] = g_id;
-
-		// Retrieve indices of the b tensor
-		for(int i = b.rank - 1; i >= 0; i--)
+		// TODO: REMOVE DEBUG PRINT
 		{
-			int old_i = i;
-
-			// Ignore variables that are being reduced
-			while(b_red_vars[i])
+			std::cout << "c";
+			for(int i= 0; i<c.rank; i++)
 			{
-				b_ijk[i] = -1;
-				tmp_b[i] = tmp_b[i + 1];
-				i = i - 1;
+				std::cout << "[" << cidx[i] << "]";
 			}
-		
-			tmp_b[i] = floor(tmp_b[i + 1] / b.dims[i]);
-			b_ijk[i] = tmp_b[i + 1] % b.dims[i];
+			std::cout << " = ";
 		}
 
-		// Retrieve indices of the a tensor
-		for(int i = a.rank - 1; i >= 0; i--)
+		for(;;)
 		{
-			int old_i = i;
 
-			// Ignore variables that are being reduced
-			while(a_red_vars[i])
+			int j = 0;
+			// Get the A Tensor and B Tensor indexes
+			for(int i=0; i < a.rank; i++)
 			{
-				a_ijk[i] = -1;
-				tmp_a[i] = tmp_a[i + 1];
-				i = i - 1;
+				if(u[i])
+				{
+					aidx[i] = idxs[j];
+					bidx[i] = idxs[j];
+					j = j + 1;
+				}
+				else
+				{
+					aidx[i] = cidx[i];
+					bidx[i] = cidx[i + a.rank - n];
+				}
 			}
 
-			tmp_a[i] = floor(tmp_a[i + 1] / a.dims[i]);
-			a_ijk[i] = tmp_a[i + 1] % a.dims[i];
+			// TODO: REMOVE DEBUG PRINT
+			{
+				std::cout << "a";
+				for(int i=0; i<a.rank; i++)
+				{
+					std::cout << "[" << aidx[i] << "]";
+				}
+				std::cout << " * ";
+				std::cout << "b";
+				for(int i=0; i<b.rank; i++)
+				{
+					std::cout << "[" << bidx[i] << "]";
+				}
+				std::cout << "\n";
+			}
+
+
+			// Compute the number of dimensions
+			// that where fully reduced
+			int t = 0;	
+			for(int i = 0; i < n; i ++)
+			{
+				if(idxs[i] == dim[idx[i]] - 1)
+				{
+					t += 1;
+				}
+			}
+
+			// if all dimensions where fully reduced break
+			if(t == n)
+			{
+				break;
+			}
+
+
+			// TODO: REMOVE DEBUG PRINT
+			{
+				std::cout << "		 +";
+			}
+
+			// Increase the index of the reduced dimensions
+			idxs[n - 1] += 1;
+
+			for(int i = n - 1; i >= 0; i --)
+			{
+				if(idxs[i] == dim[idx[i]])
+				{
+					idxs[i - 1] += 1;
+					idxs[i] = 0;
+				}
+			}
+
 		}
-
-		// a_ijk contain the index in every dimension
-		// that are not being reduced of a.
-		// b_ijk contain the index in every dimension
-		// that are not being reduced of b.
-		// Then c can be indexed by a[i] with i not existent in
-		// a_idx and by b[i] with i not existent in b_idx
-		// c[a_ijk[0]][a_ijk[1]]...[a_ijk[a.rank - n][b_ijk[0]][b_ijk[1]]...[b_ijk[b.rank - n]
-
-		// TODO: Reduce tensor
+	
+		// TODO: REMOVE DEBUG PRINT
+		{
+			std::cout << "\n";
+		}
+	
+		delete []cidx;
 	}
 
-	// // Iterate over tensor a variables
-	// for(int i=0; i < a.dims[0]; i++)
-	// {
-	// 	for(int j=0; j < a.dims[1]; j++)
-	// 	{
-	// 		for(int k=0; k < a.dims[2]; k++)
-	// 		{
+	delete[] u;
+	delete[] p;
+	delete[] aidx;
+	delete[] bidx;
+	delete[] idxs;
 
-	// 			// Iterate over tensor b variables
-	// 			for(int e=0; e < b.dims[0]; e++)
-	// 			{
-	// 				for(int f=0; f < b.dims[1]; f++)
-	// 				{
-	// 					for(int q=0; q < b.dims[3]; q++)
-	// 					{
-
-	// 					}
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
 	return c;
 }
